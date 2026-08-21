@@ -14,12 +14,13 @@
             <ColumnDefinition Width="124*"/>
             <ColumnDefinition Width="107*"/>
             <ColumnDefinition Width="69*"/>
-            <ColumnDefinition Width="325*"/>
+            <ColumnDefinition Width="82*"/>
+            <ColumnDefinition Width="243*"/>
             <ColumnDefinition Width="59*"/>
             <ColumnDefinition Width="0*"/>
         </Grid.ColumnDefinitions>
-        <Button x:Name="btnTEST" Content="CLICK ME!" HorizontalAlignment="Left" Margin="204,63,0,0" VerticalAlignment="Top" Height="34" Width="121" FontSize="14" Grid.Column="6"/>
-        <Label x:Name="lblTEST" Content="DEMO TEXT" HorizontalAlignment="Left" Margin="64,65,0,0" VerticalAlignment="Top" FontSize="16" Grid.Column="6"/>
+        <Button x:Name="btnTEST" Content="CLICK ME!" HorizontalAlignment="Left" Margin="122,63,0,0" VerticalAlignment="Top" Height="34" Width="121" FontSize="14" Grid.Column="7"/>
+        <Label x:Name="lblTEST" Content="DEMO TEXT" HorizontalAlignment="Left" Margin="64,65,0,0" VerticalAlignment="Top" FontSize="16" Grid.Column="6" Grid.ColumnSpan="2"/>
 
     </Grid>
 </Window>
