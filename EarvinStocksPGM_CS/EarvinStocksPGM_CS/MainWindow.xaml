@@ -1,0 +1,22 @@
+﻿<Window x:Class="EarvinStocksPGM_CS.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EarvinStocksPGM_CS"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid x:Name="frmEarvinStocks">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="101*"/>
+            <ColumnDefinition Width="15*"/>
+            <ColumnDefinition Width="124*"/>
+            <ColumnDefinition Width="501*"/>
+            <ColumnDefinition Width="59*"/>
+            <ColumnDefinition Width="0*"/>
+        </Grid.ColumnDefinitions>
+        <Button x:Name="btnTEST" Content="CLICK ME!" HorizontalAlignment="Left" Margin="380,63,0,0" VerticalAlignment="Top" Height="34" Width="121" FontSize="14" Grid.Column="3"/>
+        <Label x:Name="lblTEST" Content="DEMO TEXT" HorizontalAlignment="Left" Margin="240,65,0,0" VerticalAlignment="Top" FontSize="16" Grid.Column="3"/>
+
+    </Grid>
+</Window>
