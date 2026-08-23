@@ -68,7 +68,7 @@
             mnuStocksList.Items.AddRange(new ToolStripItem[] { toolStripMenuItem1, 選項OToolStripMenuItem, 大小VToolStripMenuItem, 說明HToolStripMenuItem });
             mnuStocksList.Location = new Point(0, 0);
             mnuStocksList.Name = "mnuStocksList";
-            mnuStocksList.Size = new Size(1143, 24);
+            mnuStocksList.Size = new Size(1184, 24);
             mnuStocksList.TabIndex = 1;
             mnuStocksList.Text = "menuStrip1";
             // 
@@ -157,6 +157,7 @@
             // 
             // pnlStocksBar
             // 
+            pnlStocksBar.BackColor = SystemColors.ActiveCaption;
             pnlStocksBar.Controls.Add(cboStocks);
             pnlStocksBar.Controls.Add(cboStocksType);
             pnlStocksBar.Controls.Add(cboStocksFrom);
@@ -173,25 +174,26 @@
             pnlStocksBar.Controls.Add(btnZoomOut);
             pnlStocksBar.Controls.Add(btnZoomIn);
             pnlStocksBar.Controls.Add(label1);
-            pnlStocksBar.Location = new Point(12, 40);
+            pnlStocksBar.Location = new Point(0, 27);
             pnlStocksBar.Name = "pnlStocksBar";
-            pnlStocksBar.Size = new Size(1099, 34);
+            pnlStocksBar.Size = new Size(1008, 35);
             pnlStocksBar.TabIndex = 2;
             pnlStocksBar.Paint += pnlStocksBar_Paint;
             // 
             // cboStocks
             // 
             cboStocks.FormattingEnabled = true;
-            cboStocks.Location = new Point(751, 11);
+            cboStocks.Location = new Point(726, 4);
             cboStocks.Name = "cboStocks";
             cboStocks.Size = new Size(121, 28);
             cboStocks.TabIndex = 15;
+            cboStocks.SelectedIndexChanged += cboStocks_SelectedIndexChanged;
             // 
             // cboStocksType
             // 
             cboStocksType.FormattingEnabled = true;
             cboStocksType.Items.AddRange(new object[] { "日線", "週線", "月線" });
-            cboStocksType.Location = new Point(600, 9);
+            cboStocksType.Location = new Point(575, 5);
             cboStocksType.Name = "cboStocksType";
             cboStocksType.Size = new Size(70, 28);
             cboStocksType.TabIndex = 14;
@@ -201,7 +203,7 @@
             // 
             cboStocksFrom.FormattingEnabled = true;
             cboStocksFrom.Items.AddRange(new object[] { "File", "Directory" });
-            cboStocksFrom.Location = new Point(504, 6);
+            cboStocksFrom.Location = new Point(486, 5);
             cboStocksFrom.Name = "cboStocksFrom";
             cboStocksFrom.Size = new Size(85, 28);
             cboStocksFrom.TabIndex = 13;
@@ -210,7 +212,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(676, 12);
+            label3.Location = new Point(651, 8);
             label3.Name = "label3";
             label3.Size = new Size(73, 20);
             label3.TabIndex = 12;
@@ -219,30 +221,32 @@
             // cboFrameNum
             // 
             cboFrameNum.FormattingEnabled = true;
-            cboFrameNum.Items.AddRange(new object[] { "1", "2", "3", "4", "5", "6", "7", "8", "9" });
-            cboFrameNum.Location = new Point(67, 6);
+            cboFrameNum.Items.AddRange(new object[] { "2", "3", "4", "5", "6", "7", "8", "9" });
+            cboFrameNum.Location = new Point(67, 5);
             cboFrameNum.Name = "cboFrameNum";
             cboFrameNum.Size = new Size(42, 28);
             cboFrameNum.TabIndex = 11;
             cboFrameNum.Text = "5";
+            cboFrameNum.SelectedIndexChanged += cboFrameNum_SelectedIndexChanged;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(437, 12);
+            label2.Location = new Point(415, 9);
             label2.Name = "label2";
             label2.Size = new Size(73, 20);
             label2.TabIndex = 10;
             label2.Text = "股票來源";
+            label2.Click += label2_Click;
             // 
             // btnBack3
             // 
             btnBack3.FlatStyle = FlatStyle.Popup;
             btnBack3.Image = Properties.Resources.BACK1;
             btnBack3.ImageAlign = ContentAlignment.TopLeft;
-            btnBack3.Location = new Point(316, 3);
+            btnBack3.Location = new Point(298, 8);
             btnBack3.Name = "btnBack3";
-            btnBack3.Size = new Size(30, 30);
+            btnBack3.Size = new Size(30, 25);
             btnBack3.TabIndex = 9;
             btnBack3.UseVisualStyleBackColor = true;
             // 
@@ -251,9 +255,9 @@
             btnBack2.FlatStyle = FlatStyle.Popup;
             btnBack2.Image = Properties.Resources.BACK2;
             btnBack2.ImageAlign = ContentAlignment.TopLeft;
-            btnBack2.Location = new Point(280, 3);
+            btnBack2.Location = new Point(271, 8);
             btnBack2.Name = "btnBack2";
-            btnBack2.Size = new Size(30, 30);
+            btnBack2.Size = new Size(30, 25);
             btnBack2.TabIndex = 8;
             btnBack2.UseVisualStyleBackColor = true;
             btnBack2.Click += btnBack2_Click;
@@ -263,9 +267,9 @@
             btnBack1.FlatStyle = FlatStyle.Popup;
             btnBack1.Image = Properties.Resources.BACK1;
             btnBack1.ImageAlign = ContentAlignment.TopLeft;
-            btnBack1.Location = new Point(254, 3);
+            btnBack1.Location = new Point(244, 8);
             btnBack1.Name = "btnBack1";
-            btnBack1.Size = new Size(30, 30);
+            btnBack1.Size = new Size(30, 25);
             btnBack1.TabIndex = 7;
             btnBack1.UseVisualStyleBackColor = true;
             // 
@@ -274,9 +278,9 @@
             btnFore1.FlatStyle = FlatStyle.Popup;
             btnFore1.Image = Properties.Resources.FORE1;
             btnFore1.ImageAlign = ContentAlignment.TopLeft;
-            btnFore1.Location = new Point(228, 3);
+            btnFore1.Location = new Point(218, 8);
             btnFore1.Name = "btnFore1";
-            btnFore1.Size = new Size(30, 30);
+            btnFore1.Size = new Size(30, 25);
             btnFore1.TabIndex = 6;
             btnFore1.UseVisualStyleBackColor = true;
             // 
@@ -285,9 +289,9 @@
             btnFore2.FlatStyle = FlatStyle.Popup;
             btnFore2.Image = Properties.Resources.FORE2;
             btnFore2.ImageAlign = ContentAlignment.TopLeft;
-            btnFore2.Location = new Point(202, 3);
+            btnFore2.Location = new Point(192, 8);
             btnFore2.Name = "btnFore2";
-            btnFore2.Size = new Size(30, 30);
+            btnFore2.Size = new Size(30, 25);
             btnFore2.TabIndex = 5;
             btnFore2.UseVisualStyleBackColor = true;
             // 
@@ -295,7 +299,7 @@
             // 
             btnFocus.BackColor = SystemColors.ActiveBorder;
             btnFocus.FlatStyle = FlatStyle.Popup;
-            btnFocus.Location = new Point(352, 4);
+            btnFocus.Location = new Point(334, 4);
             btnFocus.Name = "btnFocus";
             btnFocus.Size = new Size(75, 30);
             btnFocus.TabIndex = 4;
@@ -308,9 +312,9 @@
             btnFore3.FlatStyle = FlatStyle.Popup;
             btnFore3.Image = Properties.Resources.FORE3;
             btnFore3.ImageAlign = ContentAlignment.TopLeft;
-            btnFore3.Location = new Point(176, 3);
+            btnFore3.Location = new Point(166, 8);
             btnFore3.Name = "btnFore3";
-            btnFore3.Size = new Size(30, 30);
+            btnFore3.Size = new Size(30, 25);
             btnFore3.TabIndex = 3;
             btnFore3.UseVisualStyleBackColor = true;
             // 
@@ -318,7 +322,7 @@
             // 
             btnZoomOut.FlatStyle = FlatStyle.Popup;
             btnZoomOut.Image = Properties.Resources.ZOOMOUT;
-            btnZoomOut.Location = new Point(148, 4);
+            btnZoomOut.Location = new Point(140, 8);
             btnZoomOut.Name = "btnZoomOut";
             btnZoomOut.Size = new Size(30, 25);
             btnZoomOut.TabIndex = 2;
@@ -328,7 +332,7 @@
             // 
             btnZoomIn.FlatStyle = FlatStyle.Popup;
             btnZoomIn.Image = Properties.Resources.ZOOMIN;
-            btnZoomIn.Location = new Point(115, 3);
+            btnZoomIn.Location = new Point(115, 8);
             btnZoomIn.Name = "btnZoomIn";
             btnZoomIn.Size = new Size(30, 25);
             btnZoomIn.TabIndex = 1;
@@ -337,7 +341,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(12, 4);
+            label1.Location = new Point(4, 8);
             label1.Name = "label1";
             label1.Size = new Size(57, 20);
             label1.TabIndex = 0;
@@ -347,7 +351,7 @@
             // 
             AutoScaleDimensions = new SizeF(10F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1143, 600);
+            ClientSize = new Size(1184, 761);
             Controls.Add(pnlStocksBar);
             Controls.Add(mnuStocksList);
             Font = new Font("Microsoft JhengHei UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 136);
@@ -356,6 +360,8 @@
             Name = "frmStocksTest";
             Text = "Stocks Test Form";
             Load += frmStocksTest_Load;
+            Paint += frmStocksTest_Paint;
+            Resize += frmStocksTest_Resize;
             mnuStocksList.ResumeLayout(false);
             mnuStocksList.PerformLayout();
             pnlStocksBar.ResumeLayout(false);
