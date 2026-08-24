@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using MySqlConnector;
 
 namespace StocksTestPGM
 {
@@ -8,6 +9,8 @@ namespace StocksTestPGM
         public int frameX;
         public int frameY;
     }
+
+
 
     public partial class frmStocksTest : Form
     {
@@ -37,8 +40,25 @@ namespace StocksTestPGM
 
         private void btnFocus_Click(object sender, EventArgs e)
         {
-            MessageBox.Show($"寬度: {this.Width}, 高度: {this.Height}");
-            MessageBox.Show($"寬度: {this.ClientSize.Width}, 高度: {this.ClientSize.Height}");
+            //MessageBox.Show($"寬度: {this.Width}, 高度: {this.Height}");
+            //MessageBox.Show($"寬度: {this.ClientSize.Width}, 高度: {this.ClientSize.Height}");
+
+            string connStr =
+                "Server=localhost;Database=stocksdb;User ID=root;Password=lin32ledi;";
+
+            using var conn = new MySqlConnection(connStr);
+
+            try
+            {
+                conn.Open();
+                Console.WriteLine("連線成功");
+                MessageBox.Show("連線成功");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"連線失敗: {ex.Message}");
+                MessageBox.Show("連線失敗");
+            }
         }
 
         private void frmStocksTest_Load(object sender, EventArgs e)
@@ -115,10 +135,40 @@ namespace StocksTestPGM
                 }
             }
 
-            g.DrawRectangle(Pens.Blue, frmXTop, frmYTop, frmXWidth, frmYHeight);
-            for (int i = 1; i < frameNum; i++) {
-                g.DrawLine(Pens.Green, frameLeftPoints[i].frameX, frameLeftPoints[i].frameY, frameRightPoints[i].frameX, frameRightPoints[i].frameY);
+            FramePoints[] frameMiddlePoints = new FramePoints[frameNum + 1];
+            for (int i = 0; i < (frameNum + 1); i++)
+            {
+                frameMiddlePoints[i].frameX = frmXTop + (frmXWidth - 150);
+                if (i == 0)
+                {
+                    frameMiddlePoints[i].frameY = frmYTop;
+                }
+                else if (i == 1)
+                {
+                    frameMiddlePoints[i].frameY = frmYTop + frmYHeight / 2;
+                }
+                else if (i == frameNum)
+                {
+                    frameMiddlePoints[i].frameY = frmYTop + frmYHeight;
+                }
+                else
+                {
+                    frameMiddlePoints[i].frameY = frmYTop + (frmYHeight / 2) + (frmYHeight / 2) / (frameNum - 1) * (i - 1);
+                }
             }
+            g.DrawLine(Pens.Magenta, frameMiddlePoints[0].frameX, frameMiddlePoints[0].frameY, frameMiddlePoints[frameNum].frameX, frameMiddlePoints[frameNum].frameY);
+            //frameMiddlePoints[0].frameX = frmXTop + (frmXWidth - 150);
+            //frameMiddlePoints[0].frameY = frmYTop;
+            //frameMiddlePoints[1].frameX = frmXTop + (frmXWidth - 150);
+            //frameMiddlePoints[1].frameY = frmYTop + frmYHeight;
+            //g.DrawLine(Pens.Magenta, frameMiddlePoints[0].frameX, frameMiddlePoints[0].frameY, frameMiddlePoints[1].frameX, frameMiddlePoints[1].frameY);
+
+            g.DrawRectangle(Pens.Blue, frmXTop, frmYTop, frmXWidth, frmYHeight);
+            for (int i = 1; i < frameNum; i++)
+            {
+                g.DrawLine(Pens.Brown, frameLeftPoints[i].frameX, frameLeftPoints[i].frameY, frameRightPoints[i].frameX, frameRightPoints[i].frameY);
+            }
+            // 
         }
 
         private void cboFrameNum_SelectedIndexChanged(object sender, EventArgs e)
