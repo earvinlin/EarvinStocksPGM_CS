@@ -53,6 +53,14 @@ namespace StocksTestPGM
                 conn.Open();
                 Console.WriteLine("連線成功");
                 MessageBox.Show("連線成功");
+                string sql = "SELECT DATE, START_PRICE, HIGH_PRICE, LOW_PRICE, END_PRICE, VOLUME FROM TAIWAN_DATA_POLARIS WHERE STOCK_NO = @stock_no ORDER BY DATE ";
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@stock_no", "1101");
+                MySqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    System.Diagnostics.Debug.WriteLine($"{reader["DATE"]}, " + $"{reader["START_PRICE"]}, " + $"{reader["END_PRICE"]}");
+                }
             }
             catch (Exception ex)
             {
