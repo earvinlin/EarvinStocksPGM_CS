@@ -96,9 +96,13 @@ namespace StocksTestPGM
         private void frmStocksTest_Paint(object sender, PaintEventArgs e)
         {
             int frmXTop = 10;
-            int frmYTop = 24 + 35 + 26;
+//            int frmYTop = 24 + 35 + 40;
+            // 40 : 要示在pnlStocksBar 與 frame間要預留26個pixels顯示股票資訊
+            int frmYTop = mnuStocksList.Size.Height + pnlStocksBar.Size.Height + 40;
+            // -20 : 表示frame左右皆各內縮10個pixels
             int frmXWidth = this.ClientSize.Width - 20;
-            int frmYHeight = this.ClientSize.Height - 85 - 10;
+            // -10 : 表示frame最下面上調10個pixels
+            int frmYHeight = this.ClientSize.Height - frmYTop - 10;
 
             Graphics g = e.Graphics;
             e.Graphics.Clear(this.BackColor);
