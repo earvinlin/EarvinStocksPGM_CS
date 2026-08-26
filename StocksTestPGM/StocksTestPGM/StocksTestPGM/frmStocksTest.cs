@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using MySqlConnector;
 
+
 namespace StocksTestPGM
 {
-
     struct FramePoints
     {
         public int frameX;
@@ -14,6 +14,13 @@ namespace StocksTestPGM
 
     public partial class frmStocksTest : Form
     {
+        private int XWidthBorder = 20;
+        private int YHeightBorder = 10;
+        private int frmXTop = 10;
+        private int frmRightBorder = 150;
+
+        private Label lblStokInfo;
+
         public frmStocksTest()
         {
             InitializeComponent();
@@ -43,36 +50,48 @@ namespace StocksTestPGM
             //MessageBox.Show($"寬度: {this.Width}, 高度: {this.Height}");
             //MessageBox.Show($"寬度: {this.ClientSize.Width}, 高度: {this.ClientSize.Height}");
 
-            string connStr =
-                "Server=localhost;Database=stocksdb;User ID=root;Password=lin32ledi;";
+            //string connStr =
+            //    "Server=localhost;Database=stocksdb;User ID=root;Password=lin32ledi;";
 
-            using var conn = new MySqlConnection(connStr);
+            //using var conn = new MySqlConnection(connStr);
 
-            try
-            {
-                conn.Open();
-                Console.WriteLine("連線成功");
-                MessageBox.Show("連線成功");
-                string sql = "SELECT DATE, START_PRICE, HIGH_PRICE, LOW_PRICE, END_PRICE, VOLUME FROM TAIWAN_DATA_POLARIS WHERE STOCK_NO = @stock_no ORDER BY DATE ";
-                MySqlCommand cmd = new MySqlCommand(sql, conn);
-                cmd.Parameters.AddWithValue("@stock_no", "1101");
-                MySqlDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    System.Diagnostics.Debug.WriteLine($"{reader["DATE"]}, " + $"{reader["START_PRICE"]}, " + $"{reader["END_PRICE"]}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"連線失敗: {ex.Message}");
-                MessageBox.Show("連線失敗");
-            }
+            //try
+            //{
+            //    conn.Open();
+            //    Console.WriteLine("連線成功");
+            //    MessageBox.Show("連線成功");
+            //    string sql = "SELECT DATE, START_PRICE, HIGH_PRICE, LOW_PRICE, END_PRICE, VOLUME FROM TAIWAN_DATA_POLARIS WHERE STOCK_NO = @stock_no ORDER BY DATE ";
+            //    MySqlCommand cmd = new MySqlCommand(sql, conn);
+            //    cmd.Parameters.AddWithValue("@stock_no", "1101");
+            //    MySqlDataReader reader = cmd.ExecuteReader();
+            //    while (reader.Read())
+            //    {
+            //        System.Diagnostics.Debug.WriteLine($"{reader["DATE"]}, " + $"{reader["START_PRICE"]}, " + $"{reader["END_PRICE"]}");
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine($"連線失敗: {ex.Message}");
+            //    MessageBox.Show("連線失敗");
+            //}
+            DbHelper.TestConnectDB();
         }
 
         private void frmStocksTest_Load(object sender, EventArgs e)
         {
             pnlStocksBar.Width = this.Width;
 
+            // 新增顯示股票資訊的標籤
+            lblStokInfo = new Label()
+            {
+                Name = "lblStokInfo",
+                Text = "This is a test message!",
+                AutoSize = true,
+                //                Size = new System.Drawing.Size(200, 40),
+                Location = new Point(10, mnuStocksList.Size.Height + pnlStocksBar.Size.Height)
+
+            };
+            this.Controls.Add(lblStokInfo);
             // 若要使用名為 Home 的資源，請在專案資源中新增該影像，或改用現有資源名稱 (例如 ZOOMIN)
         }
 
@@ -95,17 +114,20 @@ namespace StocksTestPGM
 
         private void frmStocksTest_Paint(object sender, PaintEventArgs e)
         {
-            int frmXTop = 10;
-//            int frmYTop = 24 + 35 + 40;
-            // 40 : 要示在pnlStocksBar 與 frame間要預留26個pixels顯示股票資訊
-            int frmYTop = mnuStocksList.Size.Height + pnlStocksBar.Size.Height + 40;
-            // -20 : 表示frame左右皆各內縮10個pixels
-            int frmXWidth = this.ClientSize.Width - 20;
-            // -10 : 表示frame最下面上調10個pixels
-            int frmYHeight = this.ClientSize.Height - frmYTop - 10;
-
             Graphics g = e.Graphics;
             e.Graphics.Clear(this.BackColor);
+
+            //int XWidthBorder = 20;
+            //int YHeightBorder = 10;
+            //int frmXTop = 10;
+
+            // 40 : 要示在pnlStocksBar 與 frame間要預留26個pixels顯示股票資訊
+            int frmYTop = mnuStocksList.Size.Height + pnlStocksBar.Size.Height + lblStokInfo.Size.Height;
+//            int frmYTop = mnuStocksList.Size.Height + pnlStocksBar.Size.Height + 40;
+            // XWidthBorder : 表示frame左右皆各內縮 (XWidthBorder / 2) 個pixels
+            int frmXWidth = this.ClientSize.Width - XWidthBorder;
+            // YHeightBorder : 表示frame最下面上調YHeightBorder個pixels
+            int frmYHeight = this.ClientSize.Height - frmYTop - YHeightBorder;
 
             int frameNum = int.Parse(cboFrameNum.Text);
             Debug.WriteLine("frameNum= " + frameNum);
@@ -150,7 +172,7 @@ namespace StocksTestPGM
             FramePoints[] frameMiddlePoints = new FramePoints[frameNum + 1];
             for (int i = 0; i < (frameNum + 1); i++)
             {
-                frameMiddlePoints[i].frameX = frmXTop + (frmXWidth - 150);
+                frameMiddlePoints[i].frameX = frmXTop + (frmXWidth - frmRightBorder);
                 if (i == 0)
                 {
                     frameMiddlePoints[i].frameY = frmYTop;
@@ -169,18 +191,11 @@ namespace StocksTestPGM
                 }
             }
             g.DrawLine(Pens.Magenta, frameMiddlePoints[0].frameX, frameMiddlePoints[0].frameY, frameMiddlePoints[frameNum].frameX, frameMiddlePoints[frameNum].frameY);
-            //frameMiddlePoints[0].frameX = frmXTop + (frmXWidth - 150);
-            //frameMiddlePoints[0].frameY = frmYTop;
-            //frameMiddlePoints[1].frameX = frmXTop + (frmXWidth - 150);
-            //frameMiddlePoints[1].frameY = frmYTop + frmYHeight;
-            //g.DrawLine(Pens.Magenta, frameMiddlePoints[0].frameX, frameMiddlePoints[0].frameY, frameMiddlePoints[1].frameX, frameMiddlePoints[1].frameY);
-
             g.DrawRectangle(Pens.Blue, frmXTop, frmYTop, frmXWidth, frmYHeight);
             for (int i = 1; i < frameNum; i++)
             {
                 g.DrawLine(Pens.Brown, frameLeftPoints[i].frameX, frameLeftPoints[i].frameY, frameRightPoints[i].frameX, frameRightPoints[i].frameY);
             }
-            // 
         }
 
         private void cboFrameNum_SelectedIndexChanged(object sender, EventArgs e)

@@ -1,6 +1,6 @@
 namespace StocksTestPGM
 {
-    internal static class Program
+    internal static class EarvinStocksPGM
     {
         /// <summary>
         ///  The main entry point for the application.
