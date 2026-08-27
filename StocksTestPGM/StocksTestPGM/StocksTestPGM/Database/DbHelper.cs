@@ -13,7 +13,7 @@ public static class DbHelper
         public decimal HighPrice { get; set; }
         public decimal LowPrice { get; set; }
         public decimal EndPrice { get; set; }
-        public long Volume { get; set; }
+        public decimal Volume { get; set; }
     }
 
     public static MySqlConnection GetConnection()
