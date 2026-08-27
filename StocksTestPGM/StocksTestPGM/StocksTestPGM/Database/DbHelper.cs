@@ -4,7 +4,18 @@ using System;
 public static class DbHelper
 {
     private static string ConnStr = "Server=localhost;Database=stocksdb;User ID=root;Password=lin32ledi;";
-           
+    
+    public struct StockData
+    {
+        public String StockNo { get; set; }
+        public long TradeDate { get; set; }
+        public decimal StartPrice { get; set; }
+        public decimal HighPrice { get; set; }
+        public decimal LowPrice { get; set; }
+        public decimal EndPrice { get; set; }
+        public long Volume { get; set; }
+    }
+
     public static MySqlConnection GetConnection()
     {
         using var conn = new MySqlConnection(ConnStr);
