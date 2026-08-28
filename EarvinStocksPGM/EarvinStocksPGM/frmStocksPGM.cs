@@ -1,8 +1,9 @@
 using System.Diagnostics;
 using MySqlConnector;
+using StocksData = EarvinStocksPGM.DbHelper.StockData;
 
 
-namespace StocksTestPGM
+namespace EarvinStocksPGM
 {
     struct FramePoints
     {
@@ -12,7 +13,7 @@ namespace StocksTestPGM
 
 
 
-    public partial class frmStocksTest : Form
+    public partial class frmStocksPGM : Form
     {
         private int XWidthBorder = 20;
         private int YHeightBorder = 10;
@@ -21,7 +22,7 @@ namespace StocksTestPGM
 
         private Label lblStokInfo;
 
-        public frmStocksTest()
+        public frmStocksPGM()
         {
             InitializeComponent();
 
@@ -47,37 +48,15 @@ namespace StocksTestPGM
 
         private void btnFocus_Click(object sender, EventArgs e)
         {
-            //MessageBox.Show($"寬度: {this.Width}, 高度: {this.Height}");
-            //MessageBox.Show($"寬度: {this.ClientSize.Width}, 高度: {this.ClientSize.Height}");
+            StocksData[] sd = DbHelper.TestConnectDB();
+            for (int j = 0; j < sd.Length; j++)
+            {
+                System.Diagnostics.Debug.WriteLine($"{sd[j].TradeDate}, " + $"{sd[j].StartPrice}, " + $"{sd[j].EndPrice}");
+            }
 
-            //string connStr =
-            //    "Server=localhost;Database=stocksdb;User ID=root;Password=lin32ledi;";
-
-            //using var conn = new MySqlConnection(connStr);
-
-            //try
-            //{
-            //    conn.Open();
-            //    Console.WriteLine("連線成功");
-            //    MessageBox.Show("連線成功");
-            //    string sql = "SELECT DATE, START_PRICE, HIGH_PRICE, LOW_PRICE, END_PRICE, VOLUME FROM TAIWAN_DATA_POLARIS WHERE STOCK_NO = @stock_no ORDER BY DATE ";
-            //    MySqlCommand cmd = new MySqlCommand(sql, conn);
-            //    cmd.Parameters.AddWithValue("@stock_no", "1101");
-            //    MySqlDataReader reader = cmd.ExecuteReader();
-            //    while (reader.Read())
-            //    {
-            //        System.Diagnostics.Debug.WriteLine($"{reader["DATE"]}, " + $"{reader["START_PRICE"]}, " + $"{reader["END_PRICE"]}");
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine($"連線失敗: {ex.Message}");
-            //    MessageBox.Show("連線失敗");
-            //}
-            DbHelper.TestConnectDB();
         }
 
-        private void frmStocksTest_Load(object sender, EventArgs e)
+        private void frmStocksPGM_Load(object sender, EventArgs e)
         {
             pnlStocksBar.Width = this.Width;
 
@@ -100,7 +79,7 @@ namespace StocksTestPGM
 
         }
 
-        private void frmStocksTest_Resize(object sender, EventArgs e)
+        private void frmStocksPGM_Resize(object sender, EventArgs e)
         {
             pnlStocksBar.Width = this.Width;
             //            pnlStocksBar.Height = this.Height;
@@ -112,7 +91,7 @@ namespace StocksTestPGM
 
         }
 
-        private void frmStocksTest_Paint(object sender, PaintEventArgs e)
+        private void frmStocksPGM_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
             e.Graphics.Clear(this.BackColor);

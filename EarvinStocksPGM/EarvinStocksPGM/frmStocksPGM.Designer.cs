@@ -1,6 +1,6 @@
-﻿namespace StocksTestPGM
+﻿namespace EarvinStocksPGM
 {
-    partial class frmStocksTest
+    partial class frmStocksPGM
     {
         /// <summary>
         ///  Required designer variable.
@@ -242,7 +242,7 @@
             // btnBack3
             // 
             btnBack3.FlatStyle = FlatStyle.Popup;
-            btnBack3.Image = Properties.Resources.BACK1;
+            btnBack3.Image = EarvinStocksPGM.Properties.Resources.BACK3;
             btnBack3.ImageAlign = ContentAlignment.TopLeft;
             btnBack3.Location = new Point(298, 8);
             btnBack3.Name = "btnBack3";
@@ -253,7 +253,7 @@
             // btnBack2
             // 
             btnBack2.FlatStyle = FlatStyle.Popup;
-            btnBack2.Image = Properties.Resources.BACK2;
+            btnBack2.Image = EarvinStocksPGM.Properties.Resources.BACK2;
             btnBack2.ImageAlign = ContentAlignment.TopLeft;
             btnBack2.Location = new Point(271, 8);
             btnBack2.Name = "btnBack2";
@@ -265,7 +265,7 @@
             // btnBack1
             // 
             btnBack1.FlatStyle = FlatStyle.Popup;
-            btnBack1.Image = Properties.Resources.BACK1;
+            btnBack1.Image = EarvinStocksPGM.Properties.Resources.BACK1;
             btnBack1.ImageAlign = ContentAlignment.TopLeft;
             btnBack1.Location = new Point(244, 8);
             btnBack1.Name = "btnBack1";
@@ -276,7 +276,7 @@
             // btnFore1
             // 
             btnFore1.FlatStyle = FlatStyle.Popup;
-            btnFore1.Image = Properties.Resources.FORE1;
+            btnFore1.Image = EarvinStocksPGM.Properties.Resources.FORE1;
             btnFore1.ImageAlign = ContentAlignment.TopLeft;
             btnFore1.Location = new Point(218, 8);
             btnFore1.Name = "btnFore1";
@@ -287,7 +287,7 @@
             // btnFore2
             // 
             btnFore2.FlatStyle = FlatStyle.Popup;
-            btnFore2.Image = Properties.Resources.FORE2;
+            btnFore2.Image = EarvinStocksPGM.Properties.Resources.FORE2;
             btnFore2.ImageAlign = ContentAlignment.TopLeft;
             btnFore2.Location = new Point(192, 8);
             btnFore2.Name = "btnFore2";
@@ -310,7 +310,7 @@
             // btnFore3
             // 
             btnFore3.FlatStyle = FlatStyle.Popup;
-            btnFore3.Image = Properties.Resources.FORE3;
+            btnFore3.Image = EarvinStocksPGM.Properties.Resources.FORE3;
             btnFore3.ImageAlign = ContentAlignment.TopLeft;
             btnFore3.Location = new Point(166, 8);
             btnFore3.Name = "btnFore3";
@@ -321,7 +321,7 @@
             // btnZoomOut
             // 
             btnZoomOut.FlatStyle = FlatStyle.Popup;
-            btnZoomOut.Image = Properties.Resources.ZOOMOUT;
+            btnZoomOut.Image = EarvinStocksPGM.Properties.Resources.ZOOMOUT;
             btnZoomOut.Location = new Point(140, 8);
             btnZoomOut.Name = "btnZoomOut";
             btnZoomOut.Size = new Size(30, 25);
@@ -331,7 +331,7 @@
             // btnZoomIn
             // 
             btnZoomIn.FlatStyle = FlatStyle.Popup;
-            btnZoomIn.Image = Properties.Resources.ZOOMIN;
+            btnZoomIn.Image = EarvinStocksPGM.Properties.Resources.ZOOMIN;
             btnZoomIn.Location = new Point(115, 8);
             btnZoomIn.Name = "btnZoomIn";
             btnZoomIn.Size = new Size(30, 25);
@@ -347,7 +347,7 @@
             label1.TabIndex = 0;
             label1.Text = "視窗數";
             // 
-            // frmStocksTest
+            // frmStocksPGM
             // 
             AutoScaleDimensions = new SizeF(10F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -357,11 +357,11 @@
             Font = new Font("Microsoft JhengHei UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 136);
             MainMenuStrip = mnuStocksList;
             Margin = new Padding(4);
-            Name = "frmStocksTest";
+            Name = "frmStocksPGM";
             Text = "Stocks Test Form";
-            Load += frmStocksTest_Load;
-            Paint += frmStocksTest_Paint;
-            Resize += frmStocksTest_Resize;
+            Load += frmStocksPGM_Load;
+            Paint += frmStocksPGM_Paint;
+            Resize += frmStocksPGM_Resize;
             mnuStocksList.ResumeLayout(false);
             mnuStocksList.PerformLayout();
             pnlStocksBar.ResumeLayout(false);
