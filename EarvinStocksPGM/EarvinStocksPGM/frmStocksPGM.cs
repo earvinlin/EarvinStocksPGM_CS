@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using MySqlConnector;
-using StocksData = EarvinStocksPGM.DbHelper.StockData;
+
 
 
 namespace EarvinStocksPGM
@@ -48,10 +48,17 @@ namespace EarvinStocksPGM
 
         private void btnFocus_Click(object sender, EventArgs e)
         {
-            StocksData[] sd = DbHelper.TestConnectDB();
+            //            DbHelper.StockData[] sd = DbHelper.TestConnectDB();
+            DbHelper.StockData[] sd = DbHelper.TestConnectDB();
+            if (sd == null || sd.Length == 0)      
+            {    
+                MessageBox.Show("沒有資料");
+                return;
+            }
+            
             for (int j = 0; j < sd.Length; j++)
             {
-                System.Diagnostics.Debug.WriteLine($"{sd[j].TradeDate}, " + $"{sd[j].StartPrice}, " + $"{sd[j].EndPrice}");
+                Debug.WriteLine($"{sd[j].TradeDate}, {sd[j].StartPrice}, {sd[j].EndPrice}");
             }
 
         }

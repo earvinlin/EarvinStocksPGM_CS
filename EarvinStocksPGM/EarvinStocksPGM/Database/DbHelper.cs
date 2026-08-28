@@ -73,6 +73,7 @@ public static class DbHelper
         {
             Console.WriteLine($"連線失敗: {ex.Message}");
             MessageBox.Show("連線失敗");
+            return null;
         }
     }
 }
