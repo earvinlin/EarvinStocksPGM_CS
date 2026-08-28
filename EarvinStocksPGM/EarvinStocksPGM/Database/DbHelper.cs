@@ -23,7 +23,7 @@ public static class DbHelper
         return new MySqlConnection(ConnStr);
     }
 
-    public static void TestConnectDB()
+    public static StockData[] TestConnectDB()
     {
         string connStr =
     "Server=localhost;Database=stocksdb;User ID=root;Password=lin32ledi;";
@@ -59,14 +59,14 @@ public static class DbHelper
                 
                 i++;
             }
-            // print data
-            for (int j = 0; j < sd.Length; j++)
-            {
-                System.Diagnostics.Debug.WriteLine($"{sd[j].TradeDate}, " + $"{sd[j].StartPrice}, " + $"{sd[j].EndPrice}");
-            }
+            //// print data
+            //for (int j = 0; j < sd.Length; j++)
+            //{
+            //    System.Diagnostics.Debug.WriteLine($"{sd[j].TradeDate}, " + $"{sd[j].StartPrice}, " + $"{sd[j].EndPrice}");
+            //}
             System.Diagnostics.Debug.WriteLine("總筆數：" + dt.Rows.Count);
 
-
+            return sd;
 
         }
         catch (Exception ex)
