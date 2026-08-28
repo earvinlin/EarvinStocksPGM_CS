@@ -5,7 +5,7 @@ public static class DbHelper
 {
     private static string ConnStr = "Server=localhost;Database=stocksdb;User ID=root;Password=lin32ledi;";
     
-    public struct StockData
+    public class StockData
     {
         public String StockNo { get; set; }
         public long TradeDate { get; set; }

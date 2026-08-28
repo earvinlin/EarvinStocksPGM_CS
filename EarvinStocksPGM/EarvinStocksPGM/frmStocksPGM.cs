@@ -2,7 +2,7 @@ using System.Diagnostics;
 using MySqlConnector;
 
 
-namespace StocksTestPGM
+namespace EarvinStocksPGM
 {
     struct FramePoints
     {
@@ -12,7 +12,7 @@ namespace StocksTestPGM
 
 
 
-    public partial class frmStocksTest : Form
+    public partial class frmStocksPGM : Form
     {
         private int XWidthBorder = 20;
         private int YHeightBorder = 10;
@@ -21,7 +21,7 @@ namespace StocksTestPGM
 
         private Label lblStokInfo;
 
-        public frmStocksTest()
+        public frmStocksPGM()
         {
             InitializeComponent();
 
@@ -77,7 +77,7 @@ namespace StocksTestPGM
             DbHelper.TestConnectDB();
         }
 
-        private void frmStocksTest_Load(object sender, EventArgs e)
+        private void frmStocksPGM_Load(object sender, EventArgs e)
         {
             pnlStocksBar.Width = this.Width;
 
@@ -100,7 +100,7 @@ namespace StocksTestPGM
 
         }
 
-        private void frmStocksTest_Resize(object sender, EventArgs e)
+        private void frmStocksPGM_Resize(object sender, EventArgs e)
         {
             pnlStocksBar.Width = this.Width;
             //            pnlStocksBar.Height = this.Height;
@@ -112,7 +112,7 @@ namespace StocksTestPGM
 
         }
 
-        private void frmStocksTest_Paint(object sender, PaintEventArgs e)
+        private void frmStocksPGM_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
             e.Graphics.Clear(this.BackColor);

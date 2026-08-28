@@ -13,6 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="icons\ZOOMIN.png" />
+    <None Remove="icons\ZOOMOUT.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="Services\StockService.cs" />
   </ItemGroup>
 
