@@ -103,13 +103,8 @@ namespace EarvinStocksPGM
             Graphics g = e.Graphics;
             e.Graphics.Clear(this.BackColor);
 
-            //int XWidthBorder = 20;
-            //int YHeightBorder = 10;
-            //int frmXTop = 10;
-
-            // 40 : 要示在pnlStocksBar 與 frame間要預留26個pixels顯示股票資訊
+            // lblStokInfo : 顯示股票資訊
             int frmYTop = mnuStocksList.Size.Height + pnlStocksBar.Size.Height + lblStokInfo.Size.Height;
-//            int frmYTop = mnuStocksList.Size.Height + pnlStocksBar.Size.Height + 40;
             // XWidthBorder : 表示frame左右皆各內縮 (XWidthBorder / 2) 個pixels
             int frmXWidth = this.ClientSize.Width - frmXTop - (XWidthBorder / 2);
             // YHeightBorder : 表示frame最下面上調YHeightBorder個pixels
@@ -193,7 +188,7 @@ namespace EarvinStocksPGM
             //Debug.WriteLine("中: " + $"frameMiddlePoints[{frameNum}]: ({frameMiddlePoints[frameNum].frameX}, {frameMiddlePoints[frameNum].frameY})");
 
 
-            int displayCount = 30; // 顯示的資料筆數
+            float displayCount = 100; // 顯示的資料筆數
             decimal stockPriceHighest = 0;
             decimal stockProceLowest = 99999;
 
@@ -208,53 +203,60 @@ namespace EarvinStocksPGM
             }
 
 //            for (int j = 0; j < sd.Length; j++)
-            for (int j = 0; j < 30; j++)
+            for (int j = 0; j < displayCount; j++)
             {
-                if (stockPriceHighest < sd[j].EndPrice)
-                    stockPriceHighest = sd[j].EndPrice;
-                if (stockProceLowest > sd[j].EndPrice)
-                    stockProceLowest = sd[j].EndPrice;
+                if (stockPriceHighest < sd[j].HighPrice)
+                    stockPriceHighest = sd[j].HighPrice;
+                if (stockProceLowest > sd[j].LowPrice)
+                    stockProceLowest = sd[j].LowPrice;
             }
             Debug.WriteLine("最高/低價：" + $"{stockPriceHighest}, {stockProceLowest}");
 
             // X-Length : 顯示frame的X軸長度；Y-Length : 顯示frame的Y軸長度
-            int XAxisLength = frameMiddlePoints[0].frameX - frameLeftPoints[0].frameX;
-            int YAxisLength = frameLeftPoints[1].frameY - frameLeftPoints[0].frameY;
+            //int XAxisLength = frameMiddlePoints[0].frameX - frameLeftPoints[0].frameX;
+            //int YAxisLength = frameLeftPoints[1].frameY - frameLeftPoints[0].frameY;
+            float XAxisLength = frameMiddlePoints[0].frameX - frameLeftPoints[0].frameX;
+            float YAxisLength = frameLeftPoints[1].frameY - frameLeftPoints[0].frameY;
 
             Debug.WriteLine("x-length: " + XAxisLength + " ; y-length: " + YAxisLength);
 
-            float barWidth = XAxisLength / 30;
+            float barWidth = XAxisLength / displayCount;
             float barHeight = 0;
             float barXCoord = frameLeftPoints[0].frameX;
             float barYCoord = 0;
 
             float yDistance = (float)YAxisLength / (float)Math.Abs(stockPriceHighest - stockProceLowest);
+            Debug.WriteLine("yDistance= " + yDistance);
 
-            for (int i = 0; i < 30; i++)
+            for (int i = 0; i < displayCount; i++)
             {
                 if (i !=0)
                 {
                     barXCoord += barWidth;
                 }
-                //                barY = (float)frameLeftPoints[0].frameY + (float)Ylength / (float)Math.Abs(stockPriceHighest - stockProceLowest) * (float)Math.Abs(sd[i].StartPrice - sd[i].EndPrice);
-//                barYCoord = (float)frameLeftPoints[0].frameY + (YAxisLength - yDistance * (float)Math.Abs(stockPriceHighest - sd[i].StartPrice));
-                barYCoord = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(stockPriceHighest - sd[i].StartPrice));
-
-                //                barHeight = (float)YAxisLength / (float)Math.Abs(stockPriceHighest - stockProceLowest) * (float)Math.Abs(sd[i].StartPrice - sd[i].EndPrice);
+                // Y座標
+                if (sd[i].StartPrice > sd[i].EndPrice)
+                    barYCoord = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(stockPriceHighest - sd[i].StartPrice));
+                else
+                    barYCoord = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(stockPriceHighest - sd[i].EndPrice));
                 barHeight = yDistance * (float)Math.Abs(sd[i].StartPrice - sd[i].EndPrice);
 
-//                Debug.WriteLine("aaa= " + barXCoord + "\t\t," + barYCoord + "\t\t," + barWidth + "\t\t," + barHeight + "\n");
-                if (barHeight != 0)
-                    g.DrawRectangle(Pens.Black, barXCoord, barYCoord, barWidth, barHeight);
-                //
+                Debug.WriteLine("aaa: startp= " + sd[i].StartPrice + ", endP= " + sd[i].EndPrice + ", " + barXCoord + "\t\t," + barYCoord + "\t\t," + barWidth + "\t\t," + barHeight);
+                if (barHeight != 0) 
+                        g.DrawRectangle(Pens.Black, barXCoord, barYCoord, barWidth, barHeight);
+
+                // 劃線
                 float x0 = (barXCoord + barWidth / 2);
-//                float y0 = (float)frameLeftPoints[0].frameY + (YAxisLength - yDistance * (float) Math.Abs(stockPriceHighest - sd[i].HighPrice));
-                float y0 = (float) frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(stockPriceHighest - sd[i].HighPrice));
+                //                float y0 = (float)frameLeftPoints[0].frameY + (YAxisLength - yDistance * (float) Math.Abs(stockPriceHighest - sd[i].HighPrice));
+                float y0 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(stockPriceHighest - sd[i].HighPrice));
                 float x1 = (barXCoord + barWidth / 2);
-//                float y1 = (float)frameLeftPoints[0].frameY + (YAxisLength - yDistance * (float)Math.Abs(stockPriceHighest - sd[i].LowPrice));
-                float y1 = (float) frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(stockPriceHighest - sd[i].LowPrice));
-                Debug.WriteLine("date= "+ sd[i].TradeDate + ", k-bar x0: " + x0 + " ,y0: " + y0, " ,x1: " + x1 + " ,y1: " + y1);
+                //                float y1 = (float)frameLeftPoints[0].frameY + (YAxisLength - yDistance * (float)Math.Abs(stockPriceHighest - sd[i].LowPrice));
+                float y1 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(stockPriceHighest - sd[i].LowPrice));
                 g.DrawLine(Pens.Red, x0, y0, x1, y1);
+
+                Debug.WriteLine("date= " + sd[i].TradeDate + ", k-bar x0: " + x0 + " ,y0: " + y0, " ,x1-: " + x1 + " ,y1-: " + y1);
+                //                Debug.WriteLine(" ,x1: " + x1 + " ,y1: " + y1);
+
             }
 
             // Y-Length : 顯示frame的Y軸長度
