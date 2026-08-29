@@ -15,12 +15,12 @@ namespace EarvinStocksPGM
 
     public partial class frmStocksPGM : Form
     {
-        private int XWidthBorder = 20;
-        private int YHeightBorder = 10;
-        private int frmXTop = 10;
-        private int frmRightBorder = 150;
+        private int XWidthBorder = 20;      // frame左、右兩邊預留的空間
+        private int YHeightBorder = 10;     // frame最下面預留的空間
+        private int frmXTop = 30;           // frame最左上角的X座標
+        private int frmRightBorder = 150;   // frame最左上角的Y座標
 
-        private Label lblStokInfo;
+        private Label lblStokInfo;          // 動態新增label元件：顯示股票資訊用
 
         public frmStocksPGM()
         {
@@ -111,7 +111,7 @@ namespace EarvinStocksPGM
             int frmYTop = mnuStocksList.Size.Height + pnlStocksBar.Size.Height + lblStokInfo.Size.Height;
 //            int frmYTop = mnuStocksList.Size.Height + pnlStocksBar.Size.Height + 40;
             // XWidthBorder : 表示frame左右皆各內縮 (XWidthBorder / 2) 個pixels
-            int frmXWidth = this.ClientSize.Width - XWidthBorder;
+            int frmXWidth = this.ClientSize.Width - frmXTop - (XWidthBorder / 2);
             // YHeightBorder : 表示frame最下面上調YHeightBorder個pixels
             int frmYHeight = this.ClientSize.Height - frmYTop - YHeightBorder;
 
@@ -182,6 +182,81 @@ namespace EarvinStocksPGM
             {
                 g.DrawLine(Pens.Brown, frameLeftPoints[i].frameX, frameLeftPoints[i].frameY, frameRightPoints[i].frameX, frameRightPoints[i].frameY);
             }
+
+            //// 顯示frame 各個點的座標
+            //for (int i = 0; i < frameNum; i++)
+            //{
+            //    Debug.WriteLine("左: " + $"frameLeftPoints[{i}]: ({frameLeftPoints[i].frameX}, {frameLeftPoints[i].frameY})");
+            //    Debug.WriteLine("右: " + $"frameRightPoints[{i}]: ({frameRightPoints[i].frameX}, {frameRightPoints[i].frameY})");
+            //    Debug.WriteLine("中: " + $"frameMiddlePoints[{i}]: ({frameMiddlePoints[i].frameX}, {frameMiddlePoints[i].frameY})");
+            //}
+            //Debug.WriteLine("中: " + $"frameMiddlePoints[{frameNum}]: ({frameMiddlePoints[frameNum].frameX}, {frameMiddlePoints[frameNum].frameY})");
+
+
+            int displayCount = 30; // 顯示的資料筆數
+            decimal stockPriceHighest = 0;
+            decimal stockProceLowest = 99999;
+
+            //-----------------------------------------------
+            // 取得要顯示的股票資料
+            //-----------------------------------------------
+            DbHelper.StockData[] sd = DbHelper.TestConnectDB();
+            if (sd == null || sd.Length == 0)
+            {
+                MessageBox.Show("沒有資料");
+                return;
+            }
+
+//            for (int j = 0; j < sd.Length; j++)
+              for (int j = 0; j < 30; j++)
+                {
+                    if (stockPriceHighest < sd[j].EndPrice)
+                    stockPriceHighest = sd[j].EndPrice;
+                if (stockProceLowest > sd[j].EndPrice)
+                    stockProceLowest = sd[j].EndPrice;
+            }
+            Debug.WriteLine("最高/低價：" + $"{stockPriceHighest}, {stockProceLowest}");
+
+            // X-Length : 顯示frame的X軸長度；Y-Length : 顯示frame的Y軸長度
+            int Xlength = frameMiddlePoints[0].frameX - frameLeftPoints[0].frameX;
+            int Ylength = frameLeftPoints[1].frameY - frameLeftPoints[0].frameY;
+
+            Debug.WriteLine("x-length: " + Xlength + " ; y-length: " + Ylength);
+
+            float barWidth = Xlength / 30;
+            float barHeight = 0;
+            float barX = frameLeftPoints[0].frameX;
+            float barY = 0;
+
+            float yDistance = (float)Ylength / (float)Math.Abs(stockPriceHighest - stockProceLowest);
+
+            for (int i = 0; i < 30; i++)
+            {
+                if (i !=0)
+                {
+                    barX += barWidth;
+                }
+//                barY = (float)frameLeftPoints[0].frameY + (float)Ylength / (float)Math.Abs(stockPriceHighest - stockProceLowest) * (float)Math.Abs(sd[i].StartPrice - sd[i].EndPrice);
+                barY = (float)frameLeftPoints[0].frameY + yDistance * (float)Math.Abs(sd[i].StartPrice - sd[i].EndPrice);
+                barHeight = (float)Ylength / (float)Math.Abs(stockPriceHighest - stockProceLowest) * (float)Math.Abs(sd[i].StartPrice - sd[i].EndPrice);
+
+                Debug.WriteLine("aaa= " + barX + "\t\t," + barY + "\t\t," + barWidth + "\t\t," + barHeight);
+                if (barHeight != 0)
+                    g.DrawRectangle(Pens.Black, barX, barY, barWidth, barHeight);
+                //
+                float x0 = (barX + barWidth / 2);
+//                float y0 = ((float)frameLeftPoints[0].frameY + yDistance * (float)Math.Abs(stockPriceHighest - sd[i].HighPrice));
+                float y0 = (float)frameLeftPoints[0].frameY + (Ylength - yDistance * (float)Math.Abs(stockPriceHighest - sd[i].HighPrice));
+                float x1 = (barX + barWidth / 2);
+//                float y1 (float)frameLeftPoints[0].frameY= ((float)frameLeftPoints[0].frameY + yDistance * (float)Math.Abs(stockPriceHighest - sd[i].LowPrice));
+                float y1 = (float)frameLeftPoints[0].frameY + (Ylength - yDistance * (float)Math.Abs(stockPriceHighest - sd[i].LowPrice));
+                Debug.WriteLine(">>> x0: " + x0 + " ,y0: " + y0, " ,x1: " + x1 + " ,y1: " + y1);
+                g.DrawLine(Pens.Red, x0, y0, x1, y1);
+            }
+
+            // Y-Length : 顯示frame的Y軸長度
+
+            lblStokInfo.Text = "股票資訊";
         }
 
         private void cboFrameNum_SelectedIndexChanged(object sender, EventArgs e)
