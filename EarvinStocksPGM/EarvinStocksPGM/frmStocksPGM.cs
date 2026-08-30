@@ -1,5 +1,6 @@
-using System.Diagnostics;
 using MySqlConnector;
+using System.Diagnostics;
+using System.Drawing.Drawing2D;
 
 
 
@@ -113,8 +114,8 @@ namespace EarvinStocksPGM
             int frameNum = int.Parse(cboFrameNum.Text);
             Debug.WriteLine("frameNum= " + frameNum);
 
-            FramePoints[] frameLeftPoints = new FramePoints[frameNum];
-            FramePoints[] frameRightPoints = new FramePoints[frameNum];
+            FramePoints[] frameLeftPoints = new FramePoints[frameNum];  // FramePoints結構陣列，存放frame左邊各個點的座標
+            FramePoints[] frameRightPoints = new FramePoints[frameNum]; // FramePoints結構陣列，存放frame右邊各個點的座標
 
             for (int i = 0; i < frameNum; i++)
             {
@@ -131,6 +132,7 @@ namespace EarvinStocksPGM
                 {
                     frameLeftPoints[i].frameY = frmYTop + (frmYHeight / 2) + (frmYHeight / 2) / (frameNum - 1) * (i - 1);
                 }
+                g.FillEllipse(Brushes.BlueViolet, frameLeftPoints[i].frameX, frameLeftPoints[i].frameY, 5, 5);
             }
 
             for (int i = 0; i < frameNum; i++)
@@ -148,9 +150,10 @@ namespace EarvinStocksPGM
                 {
                     frameRightPoints[i].frameY = frmYTop + (frmYHeight / 2) + (frmYHeight / 2) / (frameNum - 1) * (i - 1);
                 }
+                g.FillEllipse(Brushes.BlueViolet, frameRightPoints[i].frameX, frameRightPoints[i].frameY, 5, 5);
             }
 
-            FramePoints[] frameMiddlePoints = new FramePoints[frameNum + 1];
+            FramePoints[] frameMiddlePoints = new FramePoints[frameNum + 1];    // FramePoints結構陣列，存放frame中間各個點的座標(最後1個點是frame最右下角的點)
             for (int i = 0; i < (frameNum + 1); i++)
             {
                 frameMiddlePoints[i].frameX = frmXTop + (frmXWidth - frmRightBorder);
@@ -170,13 +173,34 @@ namespace EarvinStocksPGM
                 {
                     frameMiddlePoints[i].frameY = frmYTop + (frmYHeight / 2) + (frmYHeight / 2) / (frameNum - 1) * (i - 1);
                 }
+                g.FillEllipse(Brushes.BlueViolet, frameMiddlePoints[i].frameX, frameMiddlePoints[i].frameY, 5, 5);
             }
-            g.DrawLine(Pens.Magenta, frameMiddlePoints[0].frameX, frameMiddlePoints[0].frameY, frameMiddlePoints[frameNum].frameX, frameMiddlePoints[frameNum].frameY);
             g.DrawRectangle(Pens.Blue, frmXTop, frmYTop, frmXWidth, frmYHeight);
+            g.DrawLine(Pens.Magenta, frameMiddlePoints[0].frameX, frameMiddlePoints[0].frameY, frameMiddlePoints[frameNum].frameX, frameMiddlePoints[frameNum].frameY);
             for (int i = 1; i < frameNum; i++)
             {
                 g.DrawLine(Pens.Brown, frameLeftPoints[i].frameX, frameLeftPoints[i].frameY, frameRightPoints[i].frameX, frameRightPoints[i].frameY);
             }
+            //-- 顯示上方Frame的線段 --//
+            float ww = frameLeftPoints[1].frameX - frameLeftPoints[0].frameX;
+            float hh = frameLeftPoints[1].frameY - frameLeftPoints[0].frameY;
+
+            int dashLineCounts = 20; // 虛線的段數
+            Pen pen = new Pen(Color.Green, 1);
+            pen.DashStyle = DashStyle.Dash;
+            pen.DashPattern = new float[] { 5, 3 }; // 畫 5px，空 3px
+            for (int i = 1; i < dashLineCounts; i++)
+            {
+                float x0 = frameLeftPoints[0].frameX;
+                float y0 = frameLeftPoints[0].frameY + (hh / dashLineCounts) * i;
+                float x1 = frameMiddlePoints[0].frameX;
+                float y1 = frameMiddlePoints[0].frameY + (hh / dashLineCounts) * i;
+                g.DrawLine(pen, x0, y0, x1, y1);
+            }
+            float la = frameLeftPoints[1].frameX - frameLeftPoints[0].frameX;
+            float lb = frameLeftPoints[1].frameY - frameLeftPoints[0].frameY;
+            float ra = frameRightPoints[1].frameX - frameRightPoints[0].frameX;
+            float rb = frameRightPoints[1].frameY - frameRightPoints[0].frameY;
 
             //// 顯示frame 各個點的座標
             //for (int i = 0; i < frameNum; i++)
