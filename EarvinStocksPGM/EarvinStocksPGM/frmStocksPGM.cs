@@ -132,6 +132,7 @@ namespace EarvinStocksPGM
                 {
                     frameLeftPoints[i].frameY = frmYTop + (frmYHeight / 2) + (frmYHeight / 2) / (frameNum - 1) * (i - 1);
                 }
+                // 顯示Frame最左側端點座標
                 g.FillEllipse(Brushes.BlueViolet, frameLeftPoints[i].frameX, frameLeftPoints[i].frameY, 5, 5);
             }
 
@@ -150,6 +151,7 @@ namespace EarvinStocksPGM
                 {
                     frameRightPoints[i].frameY = frmYTop + (frmYHeight / 2) + (frmYHeight / 2) / (frameNum - 1) * (i - 1);
                 }
+                // 顯示Frame最右側端點座標
                 g.FillEllipse(Brushes.BlueViolet, frameRightPoints[i].frameX, frameRightPoints[i].frameY, 5, 5);
             }
 
@@ -173,15 +175,19 @@ namespace EarvinStocksPGM
                 {
                     frameMiddlePoints[i].frameY = frmYTop + (frmYHeight / 2) + (frmYHeight / 2) / (frameNum - 1) * (i - 1);
                 }
+                // 顯示Frame內側端點座標
                 g.FillEllipse(Brushes.BlueViolet, frameMiddlePoints[i].frameX, frameMiddlePoints[i].frameY, 5, 5);
             }
+            // Frame外框
             g.DrawRectangle(Pens.Blue, frmXTop, frmYTop, frmXWidth, frmYHeight);
+            // 每個Frame的分隔線
             g.DrawLine(Pens.Magenta, frameMiddlePoints[0].frameX, frameMiddlePoints[0].frameY, frameMiddlePoints[frameNum].frameX, frameMiddlePoints[frameNum].frameY);
             for (int i = 1; i < frameNum; i++)
             {
                 g.DrawLine(Pens.Brown, frameLeftPoints[i].frameX, frameLeftPoints[i].frameY, frameRightPoints[i].frameX, frameRightPoints[i].frameY);
             }
-            //-- 顯示上方Frame的線段 --//
+
+            //-- 顯示K-Map(上方Frame)的線段 --//
             float ww = frameLeftPoints[1].frameX - frameLeftPoints[0].frameX;
             float hh = frameLeftPoints[1].frameY - frameLeftPoints[0].frameY;
 
@@ -226,7 +232,7 @@ namespace EarvinStocksPGM
                 return;
             }
 
-//            for (int j = 0; j < sd.Length; j++)
+            // 顯示畫面筆數之最高/最低價
             for (int j = 0; j < displayCount; j++)
             {
                 if (stockPriceHighest < sd[j].HighPrice)
@@ -266,10 +272,15 @@ namespace EarvinStocksPGM
                 barHeight = yDistance * (float)Math.Abs(sd[i].StartPrice - sd[i].EndPrice);
 
                 Debug.WriteLine("aaa: startp= " + sd[i].StartPrice + ", endP= " + sd[i].EndPrice + ", " + barXCoord + "\t\t," + barYCoord + "\t\t," + barWidth + "\t\t," + barHeight);
-                if (barHeight != 0) 
-                        g.DrawRectangle(Pens.Black, barXCoord, barYCoord, barWidth, barHeight);
-
-                // 劃線
+                if (barHeight != 0)
+                {
+                    g.DrawRectangle(Pens.Black, barXCoord, barYCoord, barWidth, barHeight);
+                }
+                else
+                {
+                    g.DrawLine(Pens.Red, barXCoord, barYCoord, (barXCoord + barWidth), barYCoord);
+                }
+                // 最高價 to 最低價之線段
                 float x0 = (barXCoord + barWidth / 2);
                 //                float y0 = (float)frameLeftPoints[0].frameY + (YAxisLength - yDistance * (float) Math.Abs(stockPriceHighest - sd[i].HighPrice));
                 float y0 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(stockPriceHighest - sd[i].HighPrice));
