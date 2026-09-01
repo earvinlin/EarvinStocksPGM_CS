@@ -52,18 +52,21 @@ namespace EarvinStocksPGM
 
         private void btnFocus_Click(object sender, EventArgs e)
         {
-            //            DbHelper.StockData[] sd = DbHelper.TestConnectDB();
-            DbHelper.StockData[] sd = DbHelper.TestConnectDB();
-            if (sd == null || sd.Length == 0)
-            {
-                MessageBox.Show("沒有資料");
-                return;
-            }
+            ////            DbHelper.StockData[] sd = DbHelper.TestConnectDB();
+            //DbHelper.StockData[] sd = DbHelper.TestConnectDB();
+            //if (sd == null || sd.Length == 0)
+            //{
+            //    MessageBox.Show("沒有資料");
+            //    return;
+            //}
 
-            for (int j = 0; j < sd.Length; j++)
-            {
-                Debug.WriteLine($"{sd[j].TradeDate}, {sd[j].StartPrice}, {sd[j].EndPrice}");
-            }
+            //for (int j = 0; j < sd.Length; j++)
+            //{
+            //    Debug.WriteLine($"{sd[j].TradeDate}, {sd[j].StartPrice}, {sd[j].EndPrice}");
+            //}
+            // 20260901 要將k-bar的座標記住，才有辦法在這直接用!!!
+
+
         }
 
         private void frmStocksPGM_Load(object sender, EventArgs e)
@@ -103,8 +106,8 @@ namespace EarvinStocksPGM
             this.Controls.Add(lblLowPrice);
 
             // 新增 Label 元件(預設建立12個備用)
-            Label[] lblStockYM = new Label[12];
-            for (int i = 0; i< 12; i++)
+            //Label[] lblStockYM = new Label[12];
+            for (int i = 0; i < 12; i++)
             {
                 lblStockYM[i] = new Label()
                 {
@@ -114,8 +117,9 @@ namespace EarvinStocksPGM
                     Font = new Font(this.Font.FontFamily, 8),
                 };
                 this.Controls.Add(lblStockYM[i]);
+                Debug.WriteLine("lblStockYM[" + i + "]：" + lblStockYM[i].Text);
             }
-}
+        }
 
         private void frmStocksPGM_Resize(object sender, EventArgs e)
         {
@@ -267,7 +271,7 @@ namespace EarvinStocksPGM
             float barXCoord = frameLeftPoints[0].frameX;    // 要繪製K-Bar的X座標
             float barYCoord = 0;                            // 要繪製K-Bar的Y座標
             float yDistance = YAxisLength / (float) Math.Abs(stockPriceHighest - stockProceLowest); // 取得每個價格對應的Y軸距離
-            Debug.WriteLine("yDistance= " + yDistance);
+            //Debug.WriteLine("yDistance= " + yDistance);
 
             for (int i = 0; i < displayCount; i++)
             {
@@ -339,8 +343,10 @@ namespace EarvinStocksPGM
                     g.DrawLine(pen, x0, y0, x1, y1);
                     Debug.WriteLine("date= " + sd[i].TradeDate + ", k-bar x0: " + x0 + " ,y0: " + y0, " ,x1-: " + x1 + " ,y1-: " + y1);
                     // 顯示交易日期(年月)
-                    //lblStockYM[k++].Text ="aaa";
-                    lblStockYM[0].Location = new System.Drawing.Point((int) x0, (int) y0);
+                    string strnum = sd[i].TradeDate.ToString();
+                    lblStockYM[k].Text = strnum.Substring(0,strnum.Length-2);
+                    lblStockYM[k].Location = new System.Drawing.Point((int) (x0 - (lblStockYM[k].Size.Width / 2)), (int) (y1+5));
+                    k = k + 1;
                 }
                 prevNum = nextNum;
             }
@@ -349,7 +355,7 @@ namespace EarvinStocksPGM
 
             lblStokInfo.Text = "股票資訊";
             lblHighPrice.Location = new System.Drawing.Point((int)frameLeftPoints[0].frameX - lblHighPrice.Width, (int)frameLeftPoints[0].frameY);
-            lblLowPrice.Location = new System.Drawing.Point((int) frameLeftPoints[1].frameX - lblLowPrice.Width, (int)frameLeftPoints[1].frameY- lblLowPrice.Height);
+            lblLowPrice.Location = new System.Drawing.Point((int)frameLeftPoints[1].frameX - lblLowPrice.Width, (int)frameLeftPoints[1].frameY - lblLowPrice.Height);
         }
 
         private void cboFrameNum_SelectedIndexChanged(object sender, EventArgs e)
