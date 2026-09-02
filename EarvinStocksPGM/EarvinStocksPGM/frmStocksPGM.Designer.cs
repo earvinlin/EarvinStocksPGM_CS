@@ -108,19 +108,19 @@
             // 移動查價ToolStripMenuItem
             // 
             移動查價ToolStripMenuItem.Name = "移動查價ToolStripMenuItem";
-            移動查價ToolStripMenuItem.Size = new Size(180, 22);
+            移動查價ToolStripMenuItem.Size = new Size(146, 22);
             移動查價ToolStripMenuItem.Text = "移動查價";
             // 
             // 設定指標天數ToolStripMenuItem
             // 
             設定指標天數ToolStripMenuItem.Name = "設定指標天數ToolStripMenuItem";
-            設定指標天數ToolStripMenuItem.Size = new Size(180, 22);
+            設定指標天數ToolStripMenuItem.Size = new Size(146, 22);
             設定指標天數ToolStripMenuItem.Text = "設定指標天數";
             // 
             // 列印畫面ToolStripMenuItem
             // 
             列印畫面ToolStripMenuItem.Name = "列印畫面ToolStripMenuItem";
-            列印畫面ToolStripMenuItem.Size = new Size(180, 22);
+            列印畫面ToolStripMenuItem.Size = new Size(146, 22);
             列印畫面ToolStripMenuItem.Text = "列印畫面";
             // 
             // 大小VToolStripMenuItem
@@ -133,13 +133,13 @@
             // 放大ToolStripMenuItem
             // 
             放大ToolStripMenuItem.Name = "放大ToolStripMenuItem";
-            放大ToolStripMenuItem.Size = new Size(180, 22);
+            放大ToolStripMenuItem.Size = new Size(98, 22);
             放大ToolStripMenuItem.Text = "放大";
             // 
             // 縮小ToolStripMenuItem
             // 
             縮小ToolStripMenuItem.Name = "縮小ToolStripMenuItem";
-            縮小ToolStripMenuItem.Size = new Size(180, 22);
+            縮小ToolStripMenuItem.Size = new Size(98, 22);
             縮小ToolStripMenuItem.Text = "縮小";
             // 
             // 說明HToolStripMenuItem
@@ -249,6 +249,7 @@
             btnBack3.Size = new Size(30, 25);
             btnBack3.TabIndex = 9;
             btnBack3.UseVisualStyleBackColor = true;
+            btnBack3.Click += btnBack3_Click;
             // 
             // btnBack2
             // 
@@ -272,6 +273,7 @@
             btnBack1.Size = new Size(30, 25);
             btnBack1.TabIndex = 7;
             btnBack1.UseVisualStyleBackColor = true;
+            btnBack1.Click += btnBack1_Click;
             // 
             // btnFore1
             // 
@@ -283,6 +285,7 @@
             btnFore1.Size = new Size(30, 25);
             btnFore1.TabIndex = 6;
             btnFore1.UseVisualStyleBackColor = true;
+            btnFore1.Click += btnFore1_Click;
             // 
             // btnFore2
             // 
@@ -294,6 +297,7 @@
             btnFore2.Size = new Size(30, 25);
             btnFore2.TabIndex = 5;
             btnFore2.UseVisualStyleBackColor = true;
+            btnFore2.Click += btnFore2_Click;
             // 
             // btnFocus
             // 
@@ -317,6 +321,7 @@
             btnFore3.Size = new Size(30, 25);
             btnFore3.TabIndex = 3;
             btnFore3.UseVisualStyleBackColor = true;
+            btnFore3.Click += btnFore3_Click;
             // 
             // btnZoomOut
             // 

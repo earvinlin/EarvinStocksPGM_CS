@@ -24,7 +24,8 @@ namespace EarvinStocksPGM
         private Label[] lblStockYM = new Label[12];
 
         private Boolean blnShowFocusLine = false;  // 是否顯示焦點線段
-        float displayCount = 100; // 顯示的資料筆數
+        int displayCount = 100; // 顯示的資料筆數
+        int startIndex = 0; // 顯示的資料起始索引
 
         private Point cursorPosition = new Point(); // 滑鼠游標位置
         private Point lineFocusTop = new Point();
@@ -60,10 +61,6 @@ namespace EarvinStocksPGM
         }
 
         private void label2_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void btnBack2_Click(object sender, EventArgs e)
         {
         }
 
@@ -149,8 +146,8 @@ namespace EarvinStocksPGM
             //---------------------//
             //-- 繪製 Frame 外框 --//
             //---------------------//
-            FramePoints[] frameLeftPoints = new FramePoints[frameNum+1];  // FramePoints結構陣列，存放frame左邊各個點的座標
-            FramePoints[] frameRightPoints = new FramePoints[frameNum+1]; // FramePoints結構陣列，存放frame右邊各個點的座標
+            FramePoints[] frameLeftPoints = new FramePoints[frameNum + 1];  // FramePoints結構陣列，存放frame左邊各個點的座標
+            FramePoints[] frameRightPoints = new FramePoints[frameNum + 1]; // FramePoints結構陣列，存放frame右邊各個點的座標
 
             for (int i = 0; i < (frameNum + 1); i++)
             {
@@ -248,17 +245,26 @@ namespace EarvinStocksPGM
                 MessageBox.Show("沒有資料");
                 return;
             }
+            if (startIndex > (sd.Length - displayCount))
+            {
+                startIndex = sd.Length - displayCount;
+            }
+            if (startIndex < 0)
+            {
+                startIndex = 0;
+            }
 
             // 顯示畫面筆數之最高/最低價 (因為資料庫的資料型態為 decimal，為了便於計算故宣告為 decimal)
             decimal stockPriceHighest = 0;
             decimal stockProceLowest = 99999;
 
-            for (int j = 0; j < displayCount; j++)
+            Debug.WriteLine($"sd counts = {sd.Length}, startIndex = {startIndex}");
+            for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
             {
-                if (stockPriceHighest < sd[j].HighPrice)
-                    stockPriceHighest = sd[j].HighPrice;
-                if (stockProceLowest > sd[j].LowPrice)
-                    stockProceLowest = sd[j].LowPrice;
+                if (stockPriceHighest < sd[i].HighPrice)
+                    stockPriceHighest = sd[i].HighPrice;
+                if (stockProceLowest > sd[i].LowPrice)
+                    stockProceLowest = sd[i].LowPrice;
             }
             Debug.WriteLine("最高/低價：" + $"{stockPriceHighest}, {stockProceLowest}");
 
@@ -267,14 +273,14 @@ namespace EarvinStocksPGM
             //--------------------------------------//
             float XAxisLength = frameMiddlePoints[0].frameX - frameLeftPoints[0].frameX;            // 顯示 K-Map's Frame 的X軸長度
             float YAxisLength = frameLeftPoints[1].frameY - frameLeftPoints[0].frameY;              // 顯示 K-Map's Frame 的Y軸長度
-            float barWidth = XAxisLength / displayCount;    // 要繪製K-Bar的寬度
+            float barWidth = XAxisLength / (float)displayCount;    // 要繪製K-Bar的寬度
             float barHeight = 0;                            // 要繪製K-Bar的高度
             float barXCoord = frameLeftPoints[0].frameX;    // 要繪製K-Bar的X座標
             float barYCoord = 0;                            // 要繪製K-Bar的Y座標
             float yDistance = YAxisLength / (float)Math.Abs(stockPriceHighest - stockProceLowest); // 取得每個價格對應的Y軸距離
             //Debug.WriteLine("yDistance= " + yDistance);
 
-            for (int i = 0; i < displayCount; i++)
+            for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
             {
                 // X 座標
                 if (i != 0)
@@ -324,7 +330,7 @@ namespace EarvinStocksPGM
             //-------------------------------------//
             int k = 0;
             long prevNum = 0, nextNum = 0;
-            for (int i = 0; i < displayCount; i++)
+            for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
             {
                 if (i == 0)
                 {
@@ -352,7 +358,6 @@ namespace EarvinStocksPGM
                 prevNum = nextNum;
             }
 
-
             //-- (MouseMvoe Event) ----------------------------------------------------------------------------------------
             if (blnShowFocusLine)
             {
@@ -362,12 +367,11 @@ namespace EarvinStocksPGM
                 frmBottomYCoord = frameLeftPoints[frameNum].frameY;
                 frmXAxisWidth = XAxisLength;
                 frmBarWidth = barWidth;
-                g.DrawLine(Pens.Blue, cursorPosition.X, frmTopYCoord, cursorPosition.X, frmBottomYCoord);
+                g.DrawLine(Pens.Brown, cursorPosition.X, frmTopYCoord, cursorPosition.X, frmBottomYCoord);
             }
             //-------------------------------------------------------------------------------------------------------------
 
             // Y-Length : 顯示frame的Y軸長度
-
 
             lblStokInfo.Text = "股票資訊";
             lblHighPrice.Location = new System.Drawing.Point((int)frameLeftPoints[0].frameX - lblHighPrice.Width, (int)frameLeftPoints[0].frameY);
@@ -392,7 +396,7 @@ namespace EarvinStocksPGM
                 //frmBarWidth = barWidth;
 
 
-//                cursorPosition = Cursor.Position;
+                //                cursorPosition = Cursor.Position;
 
                 cursorPosition = this.PointToClient(Cursor.Position);
                 Debug.WriteLine($"X = {cursorPosition.X}, Y = {cursorPosition.Y}");
@@ -403,12 +407,71 @@ namespace EarvinStocksPGM
 
                 using (Graphics g = this.CreateGraphics())
                 {
-                    g.DrawLine(Pens.Blue, cursorPosition.X, frmTopYCoord, cursorPosition.X, frmBottomYCoord);
+                    //if (cursorPosition.X < frmTopXCoord)
+                    //    g.DrawLine(Pens.Blue, frmTopXCoord, frmTopYCoord, frmTopXCoord, frmBottomYCoord);
+                    //else if (cursorPosition.X > (frmTopXCoord + frmXAxisWidth))
+                    //    g.DrawLine(Pens.Blue, (frmTopXCoord + frmXAxisWidth), frmTopYCoord, (frmTopXCoord + frmXAxisWidth), frmBottomYCoord);
+                    //else
+                    //    g.DrawLine(Pens.Blue, cursorPosition.X, frmTopYCoord, cursorPosition.X, frmBottomYCoord);
+                    if (cursorPosition.X <= frmTopXCoord)
+                        cursorPosition.X = (int)frmTopXCoord;
+                    else if (cursorPosition.X > (frmTopXCoord + frmXAxisWidth))
+                        cursorPosition.X = (int)(frmTopXCoord + frmXAxisWidth);
+
+                    //g.DrawLine(Pens.Brown, cursorPosition.X, frmTopYCoord, cursorPosition.X, frmBottomYCoord);
                 }
 
                 // 觸發重繪
                 this.Invalidate();
             }
+        }
+
+        private void btnBack1_Click(object sender, EventArgs e)
+        {
+            startIndex += 1;
+            Debug.WriteLine($"startIndex = {startIndex}");
+            // 觸發重繪
+            this.Invalidate();
+        }
+
+        private void btnFore1_Click(object sender, EventArgs e)
+        {
+            startIndex -= 1;
+            Debug.WriteLine($"startIndex = {startIndex}");
+            // 觸發重繪
+            this.Invalidate();
+        }
+
+        private void btnBack2_Click(object sender, EventArgs e)
+        {
+            startIndex += 5;
+            Debug.WriteLine($"startIndex = {startIndex}");
+            // 觸發重繪
+            this.Invalidate();
+        }
+
+        private void btnFore2_Click(object sender, EventArgs e)
+        {
+            startIndex -= 5;
+            Debug.WriteLine($"startIndex = {startIndex}");
+            // 觸發重繪
+            this.Invalidate();
+        }
+
+        private void btnBack3_Click(object sender, EventArgs e)
+        {
+            startIndex = int.MaxValue;
+            Debug.WriteLine($"startIndex = {startIndex}");
+            // 觸發重繪
+            this.Invalidate();
+        }
+
+        private void btnFore3_Click(object sender, EventArgs e)
+        {
+            startIndex = 0;
+            Debug.WriteLine($"startIndex = {startIndex}");
+            // 觸發重繪
+            this.Invalidate();
         }
     }
 }
