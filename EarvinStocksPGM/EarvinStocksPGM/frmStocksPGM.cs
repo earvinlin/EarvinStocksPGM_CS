@@ -280,11 +280,13 @@ namespace EarvinStocksPGM
             float yDistance = YAxisLength / (float)Math.Abs(stockPriceHighest - stockProceLowest); // 取得每個價格對應的Y軸距離
             //Debug.WriteLine("yDistance= " + yDistance);
 
-            for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
-            {
-                // X 座標
-                if (i != 0)
+//            for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
+              for (int i = startIndex; i < (startIndex + displayCount); i++)
                 {
+                    // X 座標
+//                    if (i != 0)
+                    if (i != startIndex)
+                    {
                     barXCoord += barWidth;
                 }
                 // Y 座標
@@ -330,9 +332,10 @@ namespace EarvinStocksPGM
             //-------------------------------------//
             int k = 0;
             long prevNum = 0, nextNum = 0;
-            for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
-            {
-                if (i == 0)
+//            for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
+              for (int i = startIndex; i < (startIndex + displayCount); i++)
+                {
+                    if (i == 0)
                 {
                     // 取交易日期的最後兩碼，若為 20240101，則取 01
                     prevNum = sd[i].TradeDate % 100;
@@ -359,6 +362,7 @@ namespace EarvinStocksPGM
             }
 
             //-- (MouseMvoe Event) ----------------------------------------------------------------------------------------
+            int curIndex = 0;
             if (blnShowFocusLine)
             {
                 frmTopXCoord = frameLeftPoints[0].frameX;
@@ -368,12 +372,22 @@ namespace EarvinStocksPGM
                 frmXAxisWidth = XAxisLength;
                 frmBarWidth = barWidth;
                 g.DrawLine(Pens.Brown, cursorPosition.X, frmTopYCoord, cursorPosition.X, frmBottomYCoord);
+                if (cursorPosition.X <= 0)
+                    cursorPosition.X = (int)frmTopXCoord;
+                if (cursorPosition.X >= (frmTopXCoord + frmXAxisWidth))
+                    cursorPosition.X = (int) (frmTopXCoord + frmXAxisWidth);
+
+                else if (cursorPosition.X > (frmTopXCoord + frmXAxisWidth))
+                    cursorPosition.X = (int)(frmTopXCoord + frmXAxisWidth);
+                curIndex = (int)((cursorPosition.X - frmTopXCoord) / frmBarWidth) + startIndex;
+                Debug.WriteLine("AAAA -- curIndex= " + curIndex + ", cursorPosition= " + cursorPosition.X + ", frmTopXCoord= " + frmTopXCoord + ", frmBarWidth= " + frmBarWidth);
+
             }
             //-------------------------------------------------------------------------------------------------------------
 
             // Y-Length : 顯示frame的Y軸長度
 
-            lblStokInfo.Text = "股票資訊";
+            lblStokInfo.Text = "日期：" + sd[curIndex].TradeDate + " 開 " + sd[curIndex].StartPrice + " 高 " + sd[curIndex].HighPrice + " 低 " + sd[curIndex].LowPrice + " 收 " + sd[curIndex].EndPrice ;
             lblHighPrice.Location = new System.Drawing.Point((int)frameLeftPoints[0].frameX - lblHighPrice.Width, (int)frameLeftPoints[0].frameY);
             lblLowPrice.Location = new System.Drawing.Point((int)frameLeftPoints[1].frameX - lblLowPrice.Width, (int)frameLeftPoints[1].frameY - lblLowPrice.Height);
         }
