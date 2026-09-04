@@ -332,6 +332,7 @@
             btnZoomOut.Size = new Size(30, 25);
             btnZoomOut.TabIndex = 2;
             btnZoomOut.UseVisualStyleBackColor = true;
+            btnZoomOut.Click += btnZoomOut_Click;
             // 
             // btnZoomIn
             // 
@@ -342,6 +343,7 @@
             btnZoomIn.Size = new Size(30, 25);
             btnZoomIn.TabIndex = 1;
             btnZoomIn.UseVisualStyleBackColor = true;
+            btnZoomIn.Click += btnZoomIn_Click;
             // 
             // label1
             // 
