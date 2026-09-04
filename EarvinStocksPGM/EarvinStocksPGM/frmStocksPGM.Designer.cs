@@ -183,10 +183,12 @@
             // cboStocks
             // 
             cboStocks.FormattingEnabled = true;
+            cboStocks.Items.AddRange(new object[] { "1101", "2002", "00878" });
             cboStocks.Location = new Point(726, 4);
             cboStocks.Name = "cboStocks";
             cboStocks.Size = new Size(121, 28);
             cboStocks.TabIndex = 15;
+            cboStocks.Text = "1101";
             cboStocks.SelectedIndexChanged += cboStocks_SelectedIndexChanged;
             // 
             // cboStocksType

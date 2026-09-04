@@ -39,6 +39,7 @@ namespace EarvinStocksPGM
         float frmXAxisWidth = 0;
         float frmBarWidth = 0;
 
+        DbHelper.StockData[] sd;
 
 
         public frmStocksPGM()
@@ -60,6 +61,11 @@ namespace EarvinStocksPGM
 
         private void cboStocks_SelectedIndexChanged(object sender, EventArgs e)
         {
+            startIndex = 0;
+            // 取得要顯示的股票資料
+            sd = DbHelper.TestConnectDB(cboStocks.Text);
+            // 觸發重繪
+            this.Invalidate();
         }
 
         private void label2_Click(object sender, EventArgs e)
@@ -75,6 +81,9 @@ namespace EarvinStocksPGM
         {
             pnlStocksBar.Width = this.Width;
             frameNum = int.Parse(cboFrameNum.Text);
+
+            // 取得要顯示的股票資料
+            sd = DbHelper.TestConnectDB(cboStocks.Text);
 
             // 新增顯示股票資訊的標籤
             lblStokInfo = new Label()
@@ -241,7 +250,7 @@ namespace EarvinStocksPGM
             }
 
             // 取得要顯示的股票資料
-            DbHelper.StockData[] sd = DbHelper.TestConnectDB();
+            //DbHelper.StockData[] sd = DbHelper.TestConnectDB();
             if (sd == null || sd.Length == 0)
             {
                 MessageBox.Show("沒有資料");
@@ -286,7 +295,6 @@ namespace EarvinStocksPGM
             for (int i = startIndex; i < (startIndex + displayCount); i++)
             {
                 // X 座標
-                //                    if (i != 0)
                 if (i != startIndex)
                 {
                     barXCoord += barWidth;
@@ -334,7 +342,7 @@ namespace EarvinStocksPGM
             //-------------------------------------//
             int k = 0;
             long prevNum = 0, nextNum = 0;
-            //            for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
+
             for (int i = startIndex; i < (startIndex + displayCount); i++)
             {
                 if (i == startIndex) // 20260904 <-- ERROR occur this!!!!
@@ -345,21 +353,21 @@ namespace EarvinStocksPGM
                     continue;
                 }
                 nextNum = sd[i].TradeDate % 100;
+                Debug.WriteLine("CC_i= " + i + ", startIndex= " + startIndex + ", prevNum= " + prevNum + ", nextNum= " + nextNum);
 
                 if (prevNum > nextNum)
                 {
-                    float x0 = frameLeftPoints[0].frameX + (barWidth * i);
+//                    float x0 = frameLeftPoints[0].frameX + (barWidth * i);
+                    float x0 = frameLeftPoints[0].frameX + (barWidth * (i - startIndex));
                     float y0 = frameLeftPoints[0].frameY;
                     float x1 = x0;
                     float y1 = frameLeftPoints[1].frameY;
                     g.DrawLine(pen, x0, y0, x1, y1);
-                    Debug.WriteLine("BBBdate= " + sd[i].TradeDate + ", k-bar x0: " + x0 + " ,y0: " + y0, " ,x1-: " + x1 + " ,y1-: " + y1 + " ,k: " + k + ", width= " + (lblStockYM[k].Size.Width / 2));
+                    Debug.WriteLine("i= " + i + ", BBBdate= " + sd[i].TradeDate + ", k-bar x0: " + x0 + " ,y0: " + y0, " ,x1-: " + x1 + " ,y1-: " + y1 + " ,k: " + k + ", width= " + (lblStockYM[k].Size.Width / 2));
                     // 顯示交易日期(年月) == (20260904 ERROR, WAIT TO FIX) ==
                     string strnum = sd[i].TradeDate.ToString();
                     lblStockYM[k].Text = strnum.Substring(0, strnum.Length - 2);
                     lblStockYM[k].Location = new System.Drawing.Point((int)(x0 - (lblStockYM[k].Size.Width / 2)), (int)(y1 + 5));
-                    lblStockYM[k].AutoSize = true;
-                    lblStockYM[k].PerformLayout();
                     k = k + 1;
                 }
                 prevNum = nextNum;
@@ -375,12 +383,14 @@ namespace EarvinStocksPGM
                 frmBottomYCoord = frameLeftPoints[frameNum].frameY;
                 frmXAxisWidth = XAxisLength;
                 frmBarWidth = barWidth;
+                
                 g.DrawLine(Pens.Brown, cursorPosition.X, frmTopYCoord, cursorPosition.X, frmBottomYCoord);
+                
+                // 顯示滑鼠游標所在的K-Bar的索引
                 if (cursorPosition.X <= 0)
                     cursorPosition.X = (int)frmTopXCoord;
                 if (cursorPosition.X >= (frmTopXCoord + frmXAxisWidth))
                     cursorPosition.X = (int)(frmTopXCoord + frmXAxisWidth) - 1;
-
                 else if (cursorPosition.X > (frmTopXCoord + frmXAxisWidth))
                     cursorPosition.X = (int)(frmTopXCoord + frmXAxisWidth);
                 curIndex = (int)((cursorPosition.X - frmTopXCoord) / frmBarWidth) + startIndex;
@@ -394,6 +404,8 @@ namespace EarvinStocksPGM
             lblStokInfo.Text = "日期：" + sd[curIndex].TradeDate + " 開 " + sd[curIndex].StartPrice + " 高 " + sd[curIndex].HighPrice + " 低 " + sd[curIndex].LowPrice + " 收 " + sd[curIndex].EndPrice;
             lblHighPrice.Location = new System.Drawing.Point((int)frameLeftPoints[0].frameX - lblHighPrice.Width, (int)frameLeftPoints[0].frameY);
             lblLowPrice.Location = new System.Drawing.Point((int)frameLeftPoints[1].frameX - lblLowPrice.Width, (int)frameLeftPoints[1].frameY - lblLowPrice.Height);
+            lblHighPrice.Text = stockPriceHighest.ToString("F2");
+            lblLowPrice.Text = stockProceLowest.ToString("F2");
         }
 
         private void cboFrameNum_SelectedIndexChanged(object sender, EventArgs e)
@@ -406,16 +418,6 @@ namespace EarvinStocksPGM
             // 滑鼠移動時，顯示焦點線段
             if (blnShowFocusLine)
             {
-                //frmTopXCoord = frameLeftPoints[0].frameX;
-                //frmTopYCoord = frameLeftPoints[0].frameY;
-                //frmBottomXCoord = frameLeftPoints[frameNum].frameX;
-                //frmBottomYCoord = frameLeftPoints[frameNum].frameY;
-                //frmXAxisWidth = XAxisLength;
-                //frmBarWidth = barWidth;
-
-
-                //                cursorPosition = Cursor.Position;
-
                 cursorPosition = this.PointToClient(Cursor.Position);
                 Debug.WriteLine($"X = {cursorPosition.X}, Y = {cursorPosition.Y}");
                 Debug.WriteLine($"frmTopXCoord = {frmTopXCoord}, frmTopYCoord = {frmTopYCoord}");
@@ -425,12 +427,6 @@ namespace EarvinStocksPGM
 
                 using (Graphics g = this.CreateGraphics())
                 {
-                    //if (cursorPosition.X < frmTopXCoord)
-                    //    g.DrawLine(Pens.Blue, frmTopXCoord, frmTopYCoord, frmTopXCoord, frmBottomYCoord);
-                    //else if (cursorPosition.X > (frmTopXCoord + frmXAxisWidth))
-                    //    g.DrawLine(Pens.Blue, (frmTopXCoord + frmXAxisWidth), frmTopYCoord, (frmTopXCoord + frmXAxisWidth), frmBottomYCoord);
-                    //else
-                    //    g.DrawLine(Pens.Blue, cursorPosition.X, frmTopYCoord, cursorPosition.X, frmBottomYCoord);
                     if (cursorPosition.X <= frmTopXCoord)
                         cursorPosition.X = (int)frmTopXCoord;
                     else if (cursorPosition.X > (frmTopXCoord + frmXAxisWidth))
@@ -438,7 +434,6 @@ namespace EarvinStocksPGM
 
                     //g.DrawLine(Pens.Brown, cursorPosition.X, frmTopYCoord, cursorPosition.X, frmBottomYCoord);
                 }
-
                 // 觸發重繪
                 this.Invalidate();
             }

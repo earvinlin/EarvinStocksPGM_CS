@@ -23,7 +23,7 @@ public static class DbHelper
         return new MySqlConnection(ConnStr);
     }
 
-    public static StockData[] TestConnectDB()
+    public static StockData[] TestConnectDB(String stockNo)
     {
         string connStr =
     "Server=localhost;Database=stocksdb;User ID=root;Password=lin32ledi;";
@@ -33,16 +33,11 @@ public static class DbHelper
         try
         {
             conn.Open();
-////            Console.WriteLine("連線成功");
-//            MessageBox.Show("連線成功");
+
             string sql = "SELECT DATE, START_PRICE, HIGH_PRICE, LOW_PRICE, END_PRICE, VOLUME FROM TAIWAN_DATA_POLARIS WHERE STOCK_NO = @stock_no ORDER BY DATE ";
             MySqlCommand cmd = new MySqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@stock_no", "1101");
+            cmd.Parameters.AddWithValue("@stock_no", stockNo);
             MySqlDataReader reader = cmd.ExecuteReader();
-            //while (reader.Read())
-            //{
-            //    System.Diagnostics.Debug.WriteLine($"{reader["DATE"]}, " + $"{reader["START_PRICE"]}, " + $"{reader["END_PRICE"]}");
-            //}
             DataTable dt = new DataTable();
             dt.Load(reader);
             StockData[] sd = new StockData[dt.Rows.Count];
@@ -59,15 +54,9 @@ public static class DbHelper
                 
                 i++;
             }
-            //// print data
-            //for (int j = 0; j < sd.Length; j++)
-            //{
-            //    System.Diagnostics.Debug.WriteLine($"{sd[j].TradeDate}, " + $"{sd[j].StartPrice}, " + $"{sd[j].EndPrice}");
-            //}
             System.Diagnostics.Debug.WriteLine("總筆數：" + dt.Rows.Count);
 
             return sd;
-
         }
         catch (Exception ex)
         {
