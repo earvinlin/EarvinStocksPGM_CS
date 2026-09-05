@@ -39,7 +39,7 @@ namespace EarvinStocksPGM
         float frmXAxisWidth = 0;
         float frmBarWidth = 0;
 
-        DbHelper.StockData[] sd;
+        DbHelper.StockData[] sd;    // 要顯示的股票資料
 
 
         public frmStocksPGM()
