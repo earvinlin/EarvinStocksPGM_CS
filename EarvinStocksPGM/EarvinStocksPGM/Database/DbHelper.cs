@@ -17,6 +17,7 @@ public static class DbHelper
         public decimal Volume { get; set; }
     }
 
+
     public static MySqlConnection GetConnection()
     {
         using var conn = new MySqlConnection(ConnStr);

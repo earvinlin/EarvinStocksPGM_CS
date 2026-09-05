@@ -1,3 +1,4 @@
+using EarvinStocksPGM.Models;
 using MySqlConnector;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
@@ -38,9 +39,8 @@ namespace EarvinStocksPGM
         float frmBottomYCoord = 0;
         float frmXAxisWidth = 0;
         float frmBarWidth = 0;
-
-        DbHelper.StockData[] sd;    // 要顯示的股票資料
-
+        StockData[] sd;    // 要顯示的股票資料
+        IndexData[] idx;    // 要顯示的指數資料
 
         public frmStocksPGM()
         {
@@ -50,6 +50,7 @@ namespace EarvinStocksPGM
             this.StartPosition = FormStartPosition.CenterScreen;
             pnlStocksBar.Width = this.Width;
         }
+
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
         {
             // TODO
@@ -63,7 +64,9 @@ namespace EarvinStocksPGM
         {
             startIndex = 0;
             // 取得要顯示的股票資料
-            sd = DbHelper.TestConnectDB(cboStocks.Text);
+            //sd = DbHelper.TestConnectDB(cboStocks.Text);
+            sd = StockModule.GetStockData(cboStocks.Text);
+            idx = IndexModule.GetIndexData(sd);
             // 觸發重繪
             this.Invalidate();
         }
@@ -83,7 +86,7 @@ namespace EarvinStocksPGM
             frameNum = int.Parse(cboFrameNum.Text);
 
             // 取得要顯示的股票資料
-            sd = DbHelper.TestConnectDB(cboStocks.Text);
+            sd = StockModule.GetStockData(cboStocks.Text);
 
             // 新增顯示股票資訊的標籤
             lblStokInfo = new Label()
@@ -266,8 +269,8 @@ namespace EarvinStocksPGM
             }
 
             // 顯示畫面筆數之最高/最低價 (因為資料庫的資料型態為 decimal，為了便於計算故宣告為 decimal)
-            decimal stockPriceHighest = 0;
-            decimal stockProceLowest = 99999;
+            double stockPriceHighest = 0;
+            double stockProceLowest = 99999;
 
             Debug.WriteLine($"sd counts = {sd.Length}, startIndex = {startIndex}");
             for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
@@ -289,9 +292,8 @@ namespace EarvinStocksPGM
             float barXCoord = frameLeftPoints[0].frameX;    // 要繪製K-Bar的X座標
             float barYCoord = 0;                            // 要繪製K-Bar的Y座標
             float yDistance = YAxisLength / (float)Math.Abs(stockPriceHighest - stockProceLowest); // 取得每個價格對應的Y軸距離
-                                                                                                   //Debug.WriteLine("yDistance= " + yDistance);
+            //Debug.WriteLine("yDistance= " + yDistance);
 
-            //            for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
             for (int i = startIndex; i < (startIndex + displayCount); i++)
             {
                 // X 座標
@@ -345,7 +347,7 @@ namespace EarvinStocksPGM
 
             for (int i = startIndex; i < (startIndex + displayCount); i++)
             {
-                if (i == startIndex) // 20260904 <-- ERROR occur this!!!!
+                if (i == startIndex) 
                 {
                     // 取交易日期的最後兩碼，若為 20240101，則取 01
                     prevNum = sd[i].TradeDate % 100;
@@ -357,7 +359,6 @@ namespace EarvinStocksPGM
 
                 if (prevNum > nextNum)
                 {
-//                    float x0 = frameLeftPoints[0].frameX + (barWidth * i);
                     float x0 = frameLeftPoints[0].frameX + (barWidth * (i - startIndex));
                     float y0 = frameLeftPoints[0].frameY;
                     float x1 = x0;
