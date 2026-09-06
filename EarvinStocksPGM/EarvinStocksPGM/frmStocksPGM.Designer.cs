@@ -59,6 +59,17 @@
             btnZoomOut = new Button();
             btnZoomIn = new Button();
             label1 = new Label();
+            lblMAP1 = new Label();
+            lblMAP2 = new Label();
+            lblMAP3 = new Label();
+            lblMAP4 = new Label();
+            lblMAP5 = new Label();
+            lblMAP6 = new Label();
+            lblMAV1 = new Label();
+            lblMAV2 = new Label();
+            lblMAV3 = new Label();
+            lblMAV4 = new Label();
+            lblMAV5 = new Label();
             mnuStocksList.SuspendLayout();
             pnlStocksBar.SuspendLayout();
             SuspendLayout();
@@ -356,11 +367,137 @@
             label1.TabIndex = 0;
             label1.Text = "視窗數";
             // 
+            // lblMAP1
+            // 
+            lblMAP1.AutoSize = true;
+            lblMAP1.Font = new Font("Arial Narrow", 9.75F);
+            lblMAP1.Location = new Point(1031, 80);
+            lblMAP1.Name = "lblMAP1";
+            lblMAP1.Size = new Size(36, 16);
+            lblMAP1.TabIndex = 3;
+            lblMAP1.Text = "MAP5";
+            // 
+            // lblMAP2
+            // 
+            lblMAP2.AutoSize = true;
+            lblMAP2.Font = new Font("Arial Narrow", 9.75F);
+            lblMAP2.Location = new Point(1031, 105);
+            lblMAP2.Name = "lblMAP2";
+            lblMAP2.Size = new Size(42, 16);
+            lblMAP2.TabIndex = 4;
+            lblMAP2.Text = "MAP10";
+            // 
+            // lblMAP3
+            // 
+            lblMAP3.AutoSize = true;
+            lblMAP3.Font = new Font("Arial Narrow", 9.75F);
+            lblMAP3.Location = new Point(1031, 128);
+            lblMAP3.Name = "lblMAP3";
+            lblMAP3.Size = new Size(42, 16);
+            lblMAP3.TabIndex = 5;
+            lblMAP3.Text = "MAP20";
+            // 
+            // lblMAP4
+            // 
+            lblMAP4.AutoSize = true;
+            lblMAP4.Font = new Font("Arial Narrow", 9.75F);
+            lblMAP4.Location = new Point(1031, 152);
+            lblMAP4.Name = "lblMAP4";
+            lblMAP4.Size = new Size(42, 16);
+            lblMAP4.TabIndex = 6;
+            lblMAP4.Text = "MAP60";
+            // 
+            // lblMAP5
+            // 
+            lblMAP5.AutoSize = true;
+            lblMAP5.Font = new Font("Arial Narrow", 9.75F);
+            lblMAP5.Location = new Point(1031, 175);
+            lblMAP5.Name = "lblMAP5";
+            lblMAP5.Size = new Size(48, 16);
+            lblMAP5.TabIndex = 7;
+            lblMAP5.Text = "MAP120";
+            // 
+            // lblMAP6
+            // 
+            lblMAP6.AutoSize = true;
+            lblMAP6.Font = new Font("Arial Narrow", 9.75F);
+            lblMAP6.Location = new Point(1031, 199);
+            lblMAP6.Name = "lblMAP6";
+            lblMAP6.Size = new Size(48, 16);
+            lblMAP6.TabIndex = 8;
+            lblMAP6.Text = "MAP240";
+            // 
+            // lblMAV1
+            // 
+            lblMAV1.AutoSize = true;
+            lblMAV1.Font = new Font("Arial Narrow", 9.75F);
+            lblMAV1.ForeColor = Color.Fuchsia;
+            lblMAV1.Location = new Point(1031, 228);
+            lblMAV1.Name = "lblMAV1";
+            lblMAV1.Size = new Size(36, 16);
+            lblMAV1.TabIndex = 9;
+            lblMAV1.Text = "MAV5";
+            // 
+            // lblMAV2
+            // 
+            lblMAV2.AutoSize = true;
+            lblMAV2.Font = new Font("Arial Narrow", 9.75F);
+            lblMAV2.ForeColor = Color.Fuchsia;
+            lblMAV2.Location = new Point(1031, 248);
+            lblMAV2.Name = "lblMAV2";
+            lblMAV2.Size = new Size(42, 16);
+            lblMAV2.TabIndex = 10;
+            lblMAV2.Text = "MAV10";
+            // 
+            // lblMAV3
+            // 
+            lblMAV3.AutoSize = true;
+            lblMAV3.Font = new Font("Arial Narrow", 9.75F);
+            lblMAV3.ForeColor = Color.Fuchsia;
+            lblMAV3.Location = new Point(1031, 272);
+            lblMAV3.Name = "lblMAV3";
+            lblMAV3.Size = new Size(42, 16);
+            lblMAV3.TabIndex = 11;
+            lblMAV3.Text = "MAV20";
+            // 
+            // lblMAV4
+            // 
+            lblMAV4.AutoSize = true;
+            lblMAV4.Font = new Font("Arial Narrow", 9.75F);
+            lblMAV4.ForeColor = Color.Fuchsia;
+            lblMAV4.Location = new Point(1031, 292);
+            lblMAV4.Name = "lblMAV4";
+            lblMAV4.Size = new Size(42, 16);
+            lblMAV4.TabIndex = 12;
+            lblMAV4.Text = "MAV60";
+            // 
+            // lblMAV5
+            // 
+            lblMAV5.AutoSize = true;
+            lblMAV5.Font = new Font("Arial Narrow", 9.75F);
+            lblMAV5.ForeColor = Color.Fuchsia;
+            lblMAV5.Location = new Point(1031, 312);
+            lblMAV5.Name = "lblMAV5";
+            lblMAV5.Size = new Size(48, 16);
+            lblMAV5.TabIndex = 13;
+            lblMAV5.Text = "MAV120";
+            // 
             // frmStocksPGM
             // 
             AutoScaleDimensions = new SizeF(10F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1184, 761);
+            Controls.Add(lblMAV5);
+            Controls.Add(lblMAV4);
+            Controls.Add(lblMAV3);
+            Controls.Add(lblMAV2);
+            Controls.Add(lblMAV1);
+            Controls.Add(lblMAP6);
+            Controls.Add(lblMAP5);
+            Controls.Add(lblMAP4);
+            Controls.Add(lblMAP3);
+            Controls.Add(lblMAP2);
+            Controls.Add(lblMAP1);
             Controls.Add(pnlStocksBar);
             Controls.Add(mnuStocksList);
             Font = new Font("Microsoft JhengHei UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 136);
@@ -412,5 +549,16 @@
         private ComboBox cboStocksFrom;
         private ComboBox cboStocksType;
         private ComboBox cboStocks;
+        private Label lblMAP1;
+        private Label lblMAP2;
+        private Label lblMAP3;
+        private Label lblMAP4;
+        private Label lblMAP5;
+        private Label lblMAP6;
+        private Label lblMAV1;
+        private Label lblMAV2;
+        private Label lblMAV3;
+        private Label lblMAV4;
+        private Label lblMAV5;
     }
 }
