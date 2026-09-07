@@ -281,17 +281,17 @@ namespace EarvinStocksPGM
 
             // 顯示畫面筆數之最高/最低價 (因為資料庫的資料型態為 decimal，為了便於計算故宣告為 decimal)
             double stockPriceHighest = 0;
-            double stockProceLowest = 99999;
+            double stockPriceLowest = 99999;
 
             Debug.WriteLine($"sd counts = {sd.Length}, startIndex = {startIndex}");
             for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
             {
                 if (stockPriceHighest < sd[i].HighPrice)
                     stockPriceHighest = sd[i].HighPrice;
-                if (stockProceLowest > sd[i].LowPrice)
-                    stockProceLowest = sd[i].LowPrice;
+                if (stockPriceLowest > sd[i].LowPrice)
+                    stockPriceLowest = sd[i].LowPrice;
             }
-            Debug.WriteLine("最高/低價：" + $"{stockPriceHighest}, {stockProceLowest}");
+            Debug.WriteLine("最高/低價：" + $"{stockPriceHighest}, {stockPriceLowest}");
 
             //--------------------------------------//
             //-- 顯示 K-Map (最上方 Frame) 柱狀圖 --//
@@ -302,7 +302,7 @@ namespace EarvinStocksPGM
             float barHeight = 0;                            // 要繪製K-Bar的高度
             float barXCoord = frameLeftPoints[0].frameX;    // 要繪製K-Bar的X座標
             float barYCoord = 0;                            // 要繪製K-Bar的Y座標
-            float yDistance = YAxisLength / (float)Math.Abs(stockPriceHighest - stockProceLowest); // 取得每個價格對應的Y軸距離
+            float yDistance = YAxisLength / (float)Math.Abs(stockPriceHighest - stockPriceLowest); // 取得每個價格對應的Y軸距離
             //Debug.WriteLine("yDistance= " + yDistance);
 
             for (int i = startIndex; i < (startIndex + displayCount); i++)
@@ -413,7 +413,7 @@ namespace EarvinStocksPGM
                     continue;
                 }
                 nextNum = sd[i].TradeDate % 100;
-                Debug.WriteLine("CC_i= " + i + ", startIndex= " + startIndex + ", prevNum= " + prevNum + ", nextNum= " + nextNum);
+//                Debug.WriteLine("CC_i= " + i + ", startIndex= " + startIndex + ", prevNum= " + prevNum + ", nextNum= " + nextNum);
 
                 if (prevNum > nextNum)
                 {
@@ -422,8 +422,8 @@ namespace EarvinStocksPGM
                     float x1 = x0;
                     float y1 = frameLeftPoints[1].frameY;
                     g.DrawLine(pen, x0, y0, x1, y1);
-                    Debug.WriteLine("i= " + i + ", BBBdate= " + sd[i].TradeDate + ", k-bar x0: " + x0 + " ,y0: " + y0, " ,x1-: " + x1 + " ,y1-: " + y1 + " ,k: " + k + ", width= " + (lblStockYM[k].Size.Width / 2));
-                    // 顯示交易日期(年月) == (20260904 ERROR, WAIT TO FIX) ==
+//                    Debug.WriteLine("i= " + i + ", BBBdate= " + sd[i].TradeDate + ", k-bar x0: " + x0 + " ,y0: " + y0, " ,x1-: " + x1 + " ,y1-: " + y1 + " ,k: " + k + ", width= " + (lblStockYM[k].Size.Width / 2));
+                    // 顯示交易日期(年月)
                     string strnum = sd[i].TradeDate.ToString();
                     lblStockYM[k].Text = strnum.Substring(0, strnum.Length - 2);
                     lblStockYM[k].Location = new System.Drawing.Point((int)(x0 - (lblStockYM[k].Size.Width / 2)), (int)(y1 + 5));
@@ -431,6 +431,56 @@ namespace EarvinStocksPGM
                 }
                 prevNum = nextNum;
             }
+
+            //========================================//
+            //=== 顯示「成交量」(MAP_VOLUME) START ===// DOING
+            //========================================//
+            //float XAxisLength = frameMiddlePoints[0].frameX - frameLeftPoints[0].frameX;            // 顯示 K-Map's Frame 的X軸長度
+            YAxisLength = frameLeftPoints[2].frameY - frameLeftPoints[1].frameY;              // 顯示 K-Map's Frame 的Y軸長度
+            //float barWidth = XAxisLength / (float)displayCount;    // 要繪製K-Bar的寬度
+            barHeight = 0;                            // 要繪製K-Bar的高度
+            barXCoord = frameLeftPoints[1].frameX;    // 要繪製K-Bar的X座標
+            barYCoord = 0;                            // 要繪製K-Bar的Y座標
+            stockPriceHighest = 0;
+            stockPriceLowest = 99999;
+            for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
+            {
+                if (stockPriceHighest < sd[i].Volume)
+                    stockPriceHighest = sd[i].Volume;
+                if (stockPriceLowest > sd[i].Volume)
+                    stockPriceLowest = sd[i].Volume;
+            }
+            yDistance = YAxisLength / (float)Math.Abs(stockPriceHighest - stockPriceLowest); // 取得每個價格對應的Y軸距離
+
+            Debug.WriteLine("DD_startIndex= " + startIndex + ", barXCoord= " + barXCoord + ", barYCoord= " + barYCoord);
+            Debug.WriteLine("DD_stockPriceHighest= " + stockPriceHighest + ", stockPriceLowest= " + stockPriceLowest + ", yDistance= " + yDistance);
+            for (int i = startIndex; i < (startIndex + displayCount); i++)
+            {
+                // X 座標
+                if (i != startIndex)
+                {
+                    barXCoord += barWidth;
+                }
+                // Y 座標
+                barYCoord = (float)frameLeftPoints[1].frameY + (yDistance * (float)Math.Abs(stockPriceHighest - sd[i].Volume));
+                // 計算 K-Bar 的高度
+                barHeight = yDistance * (float)Math.Abs(sd[i].Volume - stockPriceLowest);
+                // 繪製 K-Bar
+                if (sd[i].StartPrice > sd[i].EndPrice)
+                {
+                    Brush brush = new SolidBrush(Color.Green);
+                    g.FillRectangle(brush, barXCoord, barYCoord, barWidth, barHeight);
+                }
+                else
+                {
+                    Brush brush = new SolidBrush(Color.Red);
+                    g.FillRectangle(brush, barXCoord, barYCoord, barWidth, barHeight);
+                }
+                Debug.WriteLine("dd_i= " + i + ", barXCoord= " + barXCoord + ", barYCoord= " + barYCoord + ", barHeight= " + barHeight);
+            }
+            //=== 顯示「成交量」(MAP_VOLUME) END ==========================================================================//
+
+
 
             //-- (MouseMvoe Event) ----------------------------------------------------------------------------------------
             int curIndex = 0;
@@ -457,15 +507,15 @@ namespace EarvinStocksPGM
             }
             //-------------------------------------------------------------------------------------------------------------
 
-            // Y-Length : 顯示frame的Y軸長度
 
+            // Y-Length : 顯示frame的Y軸長度
             lblStokInfo.Text = "日期：" + sd[curIndex].TradeDate + " 開 " + sd[curIndex].StartPrice + " 高 " + sd[curIndex].HighPrice + " 低 " + sd[curIndex].LowPrice + " 收 " + sd[curIndex].EndPrice;
             lblHighPrice.Location = new System.Drawing.Point((int)frameLeftPoints[0].frameX - lblHighPrice.Width, (int)frameLeftPoints[0].frameY);
             lblLowPrice.Location = new System.Drawing.Point((int)frameLeftPoints[1].frameX - lblLowPrice.Width, (int)frameLeftPoints[1].frameY - lblLowPrice.Height);
             lblHighPrice.Text = stockPriceHighest.ToString("F2");
-            lblLowPrice.Text = stockProceLowest.ToString("F2");
+            lblLowPrice.Text = stockPriceLowest.ToString("F2");
 
-            // 
+            //=== 最右側的各項指標數值顯示 ===//
             lblMAP1.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1);
             lblMAP2.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height);
             lblMAP3.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 2);
@@ -489,8 +539,6 @@ namespace EarvinStocksPGM
             lblMAV3.Text = "MAV 20: " + idx[curIndex].MAV20.ToString("F2");
             lblMAV4.Text = "MAV 60: " + idx[curIndex].MAV60.ToString("F2");
             lblMAV5.Text = "MAV120: " + idx[curIndex].MAV120.ToString("F2");
-
-
         }
 
         private void cboFrameNum_SelectedIndexChanged(object sender, EventArgs e)
