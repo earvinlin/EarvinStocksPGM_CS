@@ -83,6 +83,9 @@ namespace EarvinStocksPGM
 
         private void frmStocksPGM_Load(object sender, EventArgs e)
         {
+            //this.MouseUp += frmStocksPGM_MouseUp;
+            this.ContextMenuStrip = cntMenuStrip;
+
             pnlStocksBar.Width = this.Width;
             frameNum = int.Parse(cboFrameNum.Text);
 
@@ -362,9 +365,9 @@ namespace EarvinStocksPGM
                     // MAP10
                     pen4MAP = new Pen(Color.Black, 2);
                     x2 = (barXCoord - barWidth + barWidth / 2);
-                     y2 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(stockPriceHighest - idx[i - 1].MAP10));
-                     x3 = (barXCoord + barWidth / 2);
-                     y3 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(stockPriceHighest - idx[i].MAP10));
+                    y2 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(stockPriceHighest - idx[i - 1].MAP10));
+                    x3 = (barXCoord + barWidth / 2);
+                    y3 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(stockPriceHighest - idx[i].MAP10));
                     g.DrawLine(pen4MAP, x2, y2, x3, y3);
                     // MAP20
                     pen4MAP = new Pen(Color.Orange, 2);
@@ -405,7 +408,7 @@ namespace EarvinStocksPGM
 
             for (int i = startIndex; i < (startIndex + displayCount); i++)
             {
-                if (i == startIndex) 
+                if (i == startIndex)
                 {
                     // 取交易日期的最後兩碼，若為 20240101，則取 01
                     prevNum = sd[i].TradeDate % 100;
@@ -413,7 +416,7 @@ namespace EarvinStocksPGM
                     continue;
                 }
                 nextNum = sd[i].TradeDate % 100;
-//                Debug.WriteLine("CC_i= " + i + ", startIndex= " + startIndex + ", prevNum= " + prevNum + ", nextNum= " + nextNum);
+                //                Debug.WriteLine("CC_i= " + i + ", startIndex= " + startIndex + ", prevNum= " + prevNum + ", nextNum= " + nextNum);
 
                 if (prevNum > nextNum)
                 {
@@ -422,7 +425,7 @@ namespace EarvinStocksPGM
                     float x1 = x0;
                     float y1 = frameLeftPoints[1].frameY;
                     g.DrawLine(pen, x0, y0, x1, y1);
-//                    Debug.WriteLine("i= " + i + ", BBBdate= " + sd[i].TradeDate + ", k-bar x0: " + x0 + " ,y0: " + y0, " ,x1-: " + x1 + " ,y1-: " + y1 + " ,k: " + k + ", width= " + (lblStockYM[k].Size.Width / 2));
+                    //                    Debug.WriteLine("i= " + i + ", BBBdate= " + sd[i].TradeDate + ", k-bar x0: " + x0 + " ,y0: " + y0, " ,x1-: " + x1 + " ,y1-: " + y1 + " ,k: " + k + ", width= " + (lblStockYM[k].Size.Width / 2));
                     // 顯示交易日期(年月)
                     string strnum = sd[i].TradeDate.ToString();
                     lblStockYM[k].Text = strnum.Substring(0, strnum.Length - 2);
@@ -492,9 +495,9 @@ namespace EarvinStocksPGM
                 frmBottomYCoord = frameLeftPoints[frameNum].frameY;
                 frmXAxisWidth = XAxisLength;
                 frmBarWidth = barWidth;
-                
+
                 g.DrawLine(Pens.Brown, cursorPosition.X, frmTopYCoord, cursorPosition.X, frmBottomYCoord);
-                
+
                 // 顯示滑鼠游標所在的K-Bar的索引
                 if (cursorPosition.X <= 0)
                     cursorPosition.X = (int)frmTopXCoord;
@@ -503,7 +506,7 @@ namespace EarvinStocksPGM
                 else if (cursorPosition.X > (frmTopXCoord + frmXAxisWidth))
                     cursorPosition.X = (int)(frmTopXCoord + frmXAxisWidth);
                 curIndex = (int)((cursorPosition.X - frmTopXCoord) / frmBarWidth) + startIndex;
-//                Debug.WriteLine("AAAA -- curIndex= " + curIndex + ", cursorPosition= " + cursorPosition.X + ", frmTopXCoord= " + frmTopXCoord + ", frmBarWidth= " + frmBarWidth);
+                //                Debug.WriteLine("AAAA -- curIndex= " + curIndex + ", cursorPosition= " + cursorPosition.X + ", frmTopXCoord= " + frmTopXCoord + ", frmBarWidth= " + frmBarWidth);
             }
             //-------------------------------------------------------------------------------------------------------------
 
@@ -662,7 +665,7 @@ namespace EarvinStocksPGM
             Debug.WriteLine($"BEF 少顯示10%筆數，displayCount = {displayCount}");
             displayCount = displayCount - displayCount / 10;
             if (displayCount < 10)
-                displayCount = 10;  
+                displayCount = 10;
             Debug.WriteLine($"AFT 少顯示10%筆數，displayCount = {displayCount}");
             for (int i = 0; i < STOCKYM_CNTS; i++)
             {
@@ -670,6 +673,37 @@ namespace EarvinStocksPGM
             }
             // 觸發重繪
             this.Invalidate();
+        }
+
+        private void 融資餘額ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void holdToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void VolumeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("選擇成交量!!!");
+        }
+
+        private void cntMenuStrip_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                MessageBox.Show("右鍵按下");
+            }
+        }
+
+        private void frmStocksPGM_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                MessageBox.Show("右鍵按下");
+            }
         }
     }
 }
