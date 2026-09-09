@@ -6,7 +6,7 @@ using static EarvinStocksPGM.Modules.GeneralModule;
 
 namespace EarvinStocksPGM
 {
-    struct FramePoints
+    public struct FramePoints
     {
         public float frameX; 
         public float frameY;
