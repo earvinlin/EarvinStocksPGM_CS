@@ -25,6 +25,8 @@ namespace EarvinStocksPGM
         private Label lblStokInfo;              // 動態新增label元件：顯示股票資訊用
         private Label lblHighPrice;             // 動態新增label元件：顯示股票最高價
         private Label lblLowPrice;              // 動態新增label元件：顯示股票最低價
+        private Label lblHighVolume;             // 動態新增label元件：顯示成交量最高價
+        private Label lblLowVolume;              // 動態新增label元件：顯示成交量最低價
         private Label[] lblStockYM = new Label[STOCKYM_CNTS];
 
         private Boolean blnShowFocusLine = false;  // 是否顯示焦點線段
@@ -118,7 +120,7 @@ namespace EarvinStocksPGM
                 Name = "lblHighPrice",
                 Text = "high",
                 AutoSize = true,
-                Font = new Font(this.Font.FontFamily, 8),
+                Font = new Font(this.Font.FontFamily, 6),
                 //Location = new Point(10, mnuStocksList.Size.Height + pnlStocksBar.Size.Height)
             };
             this.Controls.Add(lblHighPrice);
@@ -129,10 +131,32 @@ namespace EarvinStocksPGM
                 Name = "lblLowPrice",
                 Text = "low",
                 AutoSize = true,
-                Font = new Font(this.Font.FontFamily, 8),
+                Font = new Font(this.Font.FontFamily, 6),
                 //Location = new Point(10, mnuStocksList.Size.Height + pnlStocksBar.Size.Height)
             };
             this.Controls.Add(lblLowPrice);
+
+            // 新增顯示股票資訊的標籤
+            lblHighVolume = new Label()
+            {
+                Name = "lblHighVolume",
+                Text = "high",
+                AutoSize = true,
+                Font = new Font(this.Font.FontFamily, 5),
+                //Location = new Point(10, mnuStocksList.Size.Height + pnlStocksBar.Size.Height)
+            };
+            this.Controls.Add(lblHighVolume);
+
+            // 新增顯示股票資訊的標籤
+            lblLowVolume = new Label()
+            {
+                Name = "lblLowVolume",
+                Text = "low",
+                AutoSize = true,
+                Font = new Font(this.Font.FontFamily, 5),
+                //Location = new Point(10, mnuStocksList.Size.Height + pnlStocksBar.Size.Height)
+            };
+            this.Controls.Add(lblLowVolume);
 
             // 新增 Label 元件(預設建立 STOCKYM_CNTS 個備用)
             //Label[] lblStockYM = new Label[STOCKYM_CNTS];
@@ -292,18 +316,9 @@ namespace EarvinStocksPGM
             }
 
             // 顯示畫面筆數之最高/最低價 (因為資料庫的資料型態為 decimal，為了便於計算故宣告為 decimal)
-            double stockPriceHighest = 0;
-            double stockPriceLowest = 99999;
-
-            //Debug.WriteLine($"sd counts = {sd.Length}, startIndex = {startIndex}");
-            //for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
-            //{
-            //    if (stockPriceHighest < sd[i].HighPrice)
-            //        stockPriceHighest = sd[i].HighPrice;
-            //    if (stockPriceLowest > sd[i].LowPrice)
-            //        stockPriceLowest = sd[i].LowPrice;
-            //}
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(sd, startIndex, displayCount, 0);
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(sd, startIndex, displayCount, GeneralModule.MAP_K);
+            lblHighPrice.Text = highLowValues.highValue.ToString("F2");
+            lblLowPrice.Text = highLowValues.lowValue.ToString("F2");
             Debug.WriteLine("最高/低價：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
 
             //--------------------------------------//
@@ -455,17 +470,12 @@ namespace EarvinStocksPGM
             barHeight = 0;                            // 要繪製K-Bar的高度
             barXCoord = frameLeftPoints[1].frameX;    // 要繪製K-Bar的X座標
             barYCoord = 0;                            // 要繪製K-Bar的Y座標
-            // 20260909 NEED to modified
-            //stockPriceHighest = 0;
-            //stockPriceLowest = 99999;
-            //for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
-            //{
-            //    if (stockPriceHighest < sd[i].Volume)
-            //        stockPriceHighest = sd[i].Volume;
-            //    if (stockPriceLowest > sd[i].Volume)
-            //        stockPriceLowest = sd[i].Volume;
-            //}
-            highLowValues = GeneralModule.GetHighLowValue(sd, startIndex, displayCount, 1);
+
+            highLowValues = GeneralModule.GetHighLowValue(sd, startIndex, displayCount, GeneralModule.MAP_VOLUME);
+            lblHighVolume.Text = highLowValues.highValue.ToString();
+            lblLowVolume.Text = highLowValues.lowValue.ToString();
+            lblHighVolume.Location = new System.Drawing.Point((int)frameLeftPoints[1].frameX - lblHighVolume.Width, (int)frameLeftPoints[1].frameY);
+            lblLowVolume.Location = new System.Drawing.Point((int)frameLeftPoints[2].frameX - lblLowVolume.Width, (int)frameLeftPoints[2].frameY - lblLowVolume.Height);
             Debug.WriteLine("最高/低價(Vol.)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
 
             yDistance = YAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
@@ -530,8 +540,8 @@ namespace EarvinStocksPGM
             lblStokInfo.Text = "日期：" + sd[curIndex].TradeDate + " 開 " + sd[curIndex].StartPrice + " 高 " + sd[curIndex].HighPrice + " 低 " + sd[curIndex].LowPrice + " 收 " + sd[curIndex].EndPrice;
             lblHighPrice.Location = new System.Drawing.Point((int)frameLeftPoints[0].frameX - lblHighPrice.Width, (int)frameLeftPoints[0].frameY);
             lblLowPrice.Location = new System.Drawing.Point((int)frameLeftPoints[1].frameX - lblLowPrice.Width, (int)frameLeftPoints[1].frameY - lblLowPrice.Height);
-            lblHighPrice.Text = highLowValues.highValue.ToString("F2");
-            lblLowPrice.Text = highLowValues.lowValue.ToString("F2");
+            //lblHighPrice.Text = highLowValues.highValue.ToString("F2");
+            //lblLowPrice.Text = highLowValues.lowValue.ToString("F2");
 
             //=== 最右側的各項指標數值顯示 ===//
             lblMAP1.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1);
