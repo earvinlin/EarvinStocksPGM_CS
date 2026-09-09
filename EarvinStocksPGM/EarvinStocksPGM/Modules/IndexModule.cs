@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EarvinStocksPGM.Models
+//namespace EarvinStocksPGM.Models
+namespace EarvinStocksPGM.Modules
 {
     /**
      * IndexData index = new IndexData();
