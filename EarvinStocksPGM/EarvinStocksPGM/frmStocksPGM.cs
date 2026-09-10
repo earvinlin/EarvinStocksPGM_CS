@@ -15,6 +15,7 @@ namespace EarvinStocksPGM
 
     public partial class frmStocksPGM : Form
     {
+        private bool _initialized = false;
         static int STOCKYM_CNTS = 36;
 
         private static int frameNum = 5;               // frame數量
@@ -58,6 +59,7 @@ namespace EarvinStocksPGM
 
             this.StartPosition = FormStartPosition.CenterScreen;
             pnlStocksBar.Width = this.Width;
+            _initialized = true;
         }
 
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
@@ -178,6 +180,9 @@ namespace EarvinStocksPGM
 
         private void frmStocksPGM_Resize(object sender, EventArgs e)
         {
+            if (!_initialized)
+                return;
+
             pnlStocksBar.Width = this.Width;
             for (int i = 0; i < STOCKYM_CNTS; i++)
             {
