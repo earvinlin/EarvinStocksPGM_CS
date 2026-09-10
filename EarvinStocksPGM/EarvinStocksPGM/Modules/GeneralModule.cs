@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 //using  EarvinStocksPGM.Modules;
 
@@ -52,10 +53,37 @@ namespace EarvinStocksPGM.Modules
             return values;
         }
 
-        public static int GetSelectFrame(FramePoints[] frmLeft, FramePoints[] frmRight, int frameNum)
+        public static int GetSelectFrame(FramePoints[] frmLeft, FramePoints[] frmRight, Point cursorPos, int frameNum)
         {
             int selectFrame = 0;
 
+
+            for (int i = 0; i < frameNum; i++)
+            {
+                Debug.WriteLine("GGG--frameNum= " + frameNum + ", frmLeft[" + i + "], Y= " + frmLeft[i].frameY + ", frmLeft[" + (i+1) + "], Y= " + frmLeft[i + 1].frameY
+                    + "cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
+                if (cursorPos.Y < frmRight[i].frameY)
+                {
+                    Debug.WriteLine("GGG0--frameNum= " + frameNum + ", frmLeft[" + i + "], Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "], Y= " + frmLeft[i + 1].frameY
+                        + "cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
+                    break;
+                }
+                else if (cursorPos.Y >= frmRight[i].frameY && cursorPos.Y <= frmLeft[i + 1].frameY)
+                {
+                    Debug.WriteLine("GGG1--frameNum= " + frameNum + ", frmLeft[" + i + "], Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "], Y= " + frmLeft[i + 1].frameY
+                        + "cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
+                    selectFrame = (i+1);
+                    break;
+                }
+                else if (cursorPos.Y > frmRight[frameNum].frameY)
+                {
+                    Debug.WriteLine("GGG2--frameNum= " + frameNum + ", frmLeft[" + i + "], Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "], Y= " + frmLeft[i + 1].frameY
+                        + "cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
+                    break;
+                }
+                Debug.WriteLine("GGG3--frmLeft[" + i + "], Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "], Y= " + frmLeft[i + 1].frameY
+                    + "cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
+            }
 
             return selectFrame;
         }

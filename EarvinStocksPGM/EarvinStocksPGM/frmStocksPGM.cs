@@ -3,6 +3,7 @@ using MySqlConnector;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using static EarvinStocksPGM.Modules.GeneralModule;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace EarvinStocksPGM
 {
@@ -17,6 +18,7 @@ namespace EarvinStocksPGM
         static int STOCKYM_CNTS = 36;
 
         private static int frameNum = 5;               // frame數量
+        private static int SelectFramePos = 2;
         private float XWidthBorder = 20;        // frame左、右兩邊預留的空間
         private float YHeightBorder = 10;       // frame最下面預留的空間
         private float frmXTop = 30;             // frame最左上角的X座標
@@ -247,7 +249,7 @@ namespace EarvinStocksPGM
             }
 
             // FramePoints結構陣列，存放frame中間各個點的座標(最後1個點是frame最右下角的點)
-//            FramePoints[] frameMiddlePoints = new FramePoints[frameNum + 1];
+            //            FramePoints[] frameMiddlePoints = new FramePoints[frameNum + 1];
             frameMiddlePoints = new FramePoints[frameNum + 1];
 
             for (int i = 0; i < (frameNum + 1); i++)
@@ -330,7 +332,7 @@ namespace EarvinStocksPGM
             float barHeight = 0;                            // 要繪製K-Bar的高度
             float barXCoord = frameLeftPoints[0].frameX;    // 要繪製K-Bar的X座標
             float barYCoord = 0;                            // 要繪製K-Bar的Y座標
-//            float yDistance = YAxisLength / (float)Math.Abs(stockPriceHighest - stockPriceLowest); // 取得每個價格對應的Y軸距離
+                                                            //            float yDistance = YAxisLength / (float)Math.Abs(stockPriceHighest - stockPriceLowest); // 取得每個價格對應的Y軸距離
             float yDistance = YAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
             //Debug.WriteLine("yDistance= " + yDistance);
 
@@ -571,7 +573,7 @@ namespace EarvinStocksPGM
             //-- FOR DEBUG : Display Frame's 端點指標 --//
             for (int i = 0; i < (frameNum + 1); i++)
             {
-                Debug.WriteLine("FramePoint[" + i + "], Left.X= " + frameLeftPoints[i].frameY + ", Left.Y= " + frameLeftPoints[i].frameY 
+                Debug.WriteLine("FramePoint[" + i + "], Left.X= " + frameLeftPoints[i].frameY + ", Left.Y= " + frameLeftPoints[i].frameY
                                 + ", Right.X= " + frameRightPoints[i].frameY + ", Right.Y= " + frameRightPoints[i].frameY
                                 + ", Mid.X= " + frameMiddlePoints[i].frameY + ", Mid.Y= " + frameMiddlePoints[i].frameY);
             }
@@ -601,7 +603,6 @@ namespace EarvinStocksPGM
                     else if (cursorPosition.X > (frmTopXCoord + frmXAxisWidth))
                         cursorPosition.X = (int)(frmTopXCoord + frmXAxisWidth);
 
-                    //g.DrawLine(Pens.Brown, cursorPosition.X, frmTopYCoord, cursorPosition.X, frmBottomYCoord);
                 }
                 // 觸發重繪
                 this.Invalidate();
@@ -736,6 +737,28 @@ namespace EarvinStocksPGM
             if (e.Button == MouseButtons.Right)
             {
                 MessageBox.Show("右鍵按下");
+            }
+        }
+
+        private void frmStocksPGM_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                cursorPosition = this.PointToClient(Cursor.Position);
+
+                //using (Graphics g = this.CreateGraphics())
+                //{
+                //    if (cursorPosition.X <= frmTopXCoord)
+                //        cursorPosition.X = (int)frmTopXCoord;
+                //    else if (cursorPosition.X > (frmTopXCoord + frmXAxisWidth))
+                //        cursorPosition.X = (int)(frmTopXCoord + frmXAxisWidth);
+
+                //}
+                SelectFramePos = GetSelectFrame(frameLeftPoints, frameRightPoints, cursorPosition,  frameNum);
+                //MessageBox.Show("按下滑鼠右鍵, Frame Position= " + SelectFramePos);
+                cntMenuStrip.Show(this, e.Location);
+                // 觸發重繪
+                this.Invalidate();
             }
         }
     }
