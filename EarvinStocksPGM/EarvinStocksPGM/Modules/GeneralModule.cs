@@ -57,33 +57,60 @@ namespace EarvinStocksPGM.Modules
         {
             int selectFrame = 0;
 
+            Debug.WriteLine("GGG_INT--selectFrame= " + selectFrame);
+            //for (int i = 0; i < frameNum; i++)
+            //{
+            //    Debug.WriteLine("GGG--frameNum= " + frameNum + ", frmLeft[" + i + "].Y= " + frmLeft[i].frameY + ", frmLeft[" + (i+1) + "].Y= " + frmLeft[i + 1].frameY
+            //        + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
+            //    if (cursorPos.Y < frmRight[i].frameY)
+            //    {
+            //        Debug.WriteLine("GGG0--frameNum= " + frameNum + ", frmLeft[" + i + "].Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "].Y= " + frmLeft[i + 1].frameY
+            //            + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
+            //        break;
+            //    }
+            //    else if (cursorPos.Y >= frmRight[i].frameY && cursorPos.Y <= frmLeft[i + 1].frameY)
+            //    {
+            //        Debug.WriteLine("GGG1--frameNum= " + frameNum + ", frmLeft[" + i + "].Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "].Y= " + frmLeft[i + 1].frameY
+            //            + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
+            //        selectFrame = (i+1);
+            //        Debug.WriteLine("GGG_RETURN--selectFrame= " + selectFrame);
+            //        break;
+            //    }
+            //    else if (cursorPos.Y > frmRight[frameNum].frameY)
+            //    {
+            //        Debug.WriteLine("GGG2--frameNum= " + frameNum + ", frmLeft[" + i + "].Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "].Y= " + frmLeft[i + 1].frameY
+            //            + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
+            //        break;
+            //    }
+            //    Debug.WriteLine("GGG3--frmLeft[" + i + "].Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "].Y= " + frmLeft[i + 1].frameY
+            //        + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
+            //}
+
+            //-- FOR DEBUG : Display Frame's 端點指標 --//
+            for (int i = 0; i < (frameNum + 1); i++)
+            {
+                Debug.WriteLine("FramePoint[" + i + "], Left.X= " + frmLeft[i].frameX + ", Left.Y= " + frmLeft[i].frameY
+                                + ", Right.X= " + frmRight[i].frameX + ", Right.Y= " + frmRight[i].frameY
+                                + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
+            }
 
             for (int i = 0; i < frameNum; i++)
             {
-                Debug.WriteLine("GGG--frameNum= " + frameNum + ", frmLeft[" + i + "], Y= " + frmLeft[i].frameY + ", frmLeft[" + (i+1) + "], Y= " + frmLeft[i + 1].frameY
-                    + "cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
-                if (cursorPos.Y < frmRight[i].frameY)
+                if ((cursorPos.Y) < frmLeft[i].frameY)
                 {
-                    Debug.WriteLine("GGG0--frameNum= " + frameNum + ", frmLeft[" + i + "], Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "], Y= " + frmLeft[i + 1].frameY
-                        + "cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
                     break;
                 }
-                else if (cursorPos.Y >= frmRight[i].frameY && cursorPos.Y <= frmLeft[i + 1].frameY)
+                else if ((cursorPos.Y) >= frmLeft[i].frameY && (cursorPos.Y) <= frmLeft[i + 1].frameY)
                 {
-                    Debug.WriteLine("GGG1--frameNum= " + frameNum + ", frmLeft[" + i + "], Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "], Y= " + frmLeft[i + 1].frameY
-                        + "cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
-                    selectFrame = (i+1);
+                    selectFrame = (i + 1);
                     break;
                 }
-                else if (cursorPos.Y > frmRight[frameNum].frameY)
+                else if ((cursorPos.Y) > frmLeft[frameNum].frameY)
                 {
-                    Debug.WriteLine("GGG2--frameNum= " + frameNum + ", frmLeft[" + i + "], Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "], Y= " + frmLeft[i + 1].frameY
-                        + "cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
                     break;
                 }
-                Debug.WriteLine("GGG3--frmLeft[" + i + "], Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "], Y= " + frmLeft[i + 1].frameY
-                    + "cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
             }
+            Debug.WriteLine("GGG_FIN--selectFrame= " + selectFrame);
 
             return selectFrame;
         }

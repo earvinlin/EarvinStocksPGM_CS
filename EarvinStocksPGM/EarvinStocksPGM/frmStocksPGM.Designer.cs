@@ -775,7 +775,6 @@
             Text = "Stocks Test Form";
             Load += frmStocksPGM_Load;
             Paint += frmStocksPGM_Paint;
-            MouseDown += frmStocksPGM_MouseDown;
             MouseMove += frmStocksPGM_MouseMove;
             Resize += frmStocksPGM_Resize;
             mnuStocksList.ResumeLayout(false);
