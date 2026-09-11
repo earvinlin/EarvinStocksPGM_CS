@@ -518,7 +518,6 @@ namespace EarvinStocksPGM
             //////=== 顯示「成交量」(MAP_VOLUME) END ==========================================================================//
             if (SelectFramePos > 0)
             {
-                //Debug.WriteLine("ZZ_SelectFramePos= " + SelectFramePos);
                 Chalk_MAP_VOLUME(SelectFramePos);
             }
 
@@ -598,23 +597,19 @@ namespace EarvinStocksPGM
 
         private void frmStocksPGM_MouseMove(object sender, MouseEventArgs e)
         {
+            CursorPosition = e.Location;
+
             // 滑鼠移動時，顯示焦點線段
             if (blnShowFocusLine)
             {
-                CursorPosition = this.PointToClient(Cursor.Position);
-                //Debug.WriteLine($"X = {cursorPosition.X}, Y = {cursorPosition.Y}");
-                //Debug.WriteLine($"frmTopXCoord = {frmTopXCoord}, frmTopYCoord = {frmTopYCoord}");
-                //Debug.WriteLine($"frmBottomXCoord = {frmBottomXCoord}, frmBottomYCoord = {frmBottomYCoord}");
-
-                // 判斷 FocusLine
-                using (Graphics g = this.CreateGraphics())
-                {
-                    if (CursorPosition.X <= frmTopXCoord)
-                        CursorPosition.X = (int)frmTopXCoord;
-                    else if (CursorPosition.X > (frmTopXCoord + frmXAxisWidth))
-                        CursorPosition.X = (int)(frmTopXCoord + frmXAxisWidth);
-
-                }
+                ////// 判斷 FocusLine
+                ////using (Graphics g = this.CreateGraphics())
+                ////{
+                ////    if (CursorPosition.X <= frmTopXCoord)
+                ////        CursorPosition.X = (int)frmTopXCoord;
+                ////    else if (CursorPosition.X > (frmTopXCoord + frmXAxisWidth))
+                ////        CursorPosition.X = (int)(frmTopXCoord + frmXAxisWidth);
+                ////}
                 // 觸發重繪
                 this.Invalidate();
             }
@@ -720,10 +715,10 @@ namespace EarvinStocksPGM
             this.Invalidate();
         }
 
-        private void 融資餘額ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        //private void 融資餘額ToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
 
-        }
+        //}
 
         private void holdToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -732,25 +727,9 @@ namespace EarvinStocksPGM
 
         private void VolumeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CursorPosition = this.PointToClient(Cursor.Position);
-
-            Debug.WriteLine(this.DeviceDpi);
-            Debug.WriteLine($"MouseY={CursorPosition.Y}"); 
-            float frmYTop = mnuStocksList.Size.Height + pnlStocksBar.Size.Height + lblStokInfo.Size.Height;
-            Debug.WriteLine($"ChartY={CursorPosition.Y - frmYTop}");
-
-            for (int i = 0; i < frameNum; i++)
-            {
-                Debug.WriteLine($"Frame{i + 1} : " +$"{frameLeftPoints[i].frameY:F1} ~ " +$"{frameLeftPoints[i + 1].frameY:F1}");
-            }
-            Debug.WriteLine($"MouseY={CursorPosition.Y}");
-
-            Debug.WriteLine("目前位置 CursorPosition.X= " + CursorPosition.X + ", CursorPosition.Y= " + CursorPosition.Y);
             SelectFramePos = GetSelectFrame(frameLeftPoints, frameRightPoints, CursorPosition, frameNum);
-            Debug.WriteLine("目前位置 SelectFramePos= " + SelectFramePos);
-            MessageBox.Show("選擇成交量!!! SelectFramePos= " + SelectFramePos);
-
-            Chalk_MAP_VOLUME(SelectFramePos);
+            //Chalk_MAP_VOLUME(SelectFramePos);
+            this.Invalidate();
         }
 
         private void cntMenuStrip_MouseUp(object sender, MouseEventArgs e)
@@ -765,16 +744,14 @@ namespace EarvinStocksPGM
         {
             using (Graphics g = this.CreateGraphics())
             {
-                g.DrawLine(Pens.Green, 0, CursorPosition.Y - 79, this.ClientSize.Width, CursorPosition.Y - 79);
-                g.DrawLine(new Pen(Color.Red, 3), frameLeftPoints[3].frameX, frameLeftPoints[3].frameY, frameRightPoints[3].frameX, frameRightPoints[3].frameY);
- 
-
+                //g.DrawLine(Pens.Green, 0, CursorPosition.Y - 79, this.ClientSize.Width, CursorPosition.Y - 79);
+                //g.DrawLine(new Pen(Color.Red, 3), frameLeftPoints[3].frameX, frameLeftPoints[3].frameY, frameRightPoints[3].frameX, frameRightPoints[3].frameY);
                 //========================================//
                 //=== 顯示「成交量」(MAP_VOLUME) START ===// 
                 //========================================//
                 //float XAxisLength = frameMiddlePoints[0].frameX - frameLeftPoints[0].frameX;            // 顯示 K-Map's Frame 的X軸長度
                 float YAxisLength = frameLeftPoints[2].frameY - frameLeftPoints[1].frameY;              // 顯示 K-Map's Frame 的Y軸長度
-                                                                                                        //float barWidth = XAxisLength / (float)displayCount;    // 要繪製K-Bar的寬度
+                //float barWidth = XAxisLength / (float)displayCount;    // 要繪製K-Bar的寬度
                 float barHeight = 0;                            // 要繪製K-Bar的高度
                 float barXCoord = frameLeftPoints[1].frameX;    // 要繪製K-Bar的X座標
                 float barYCoord = 0;                            // 要繪製K-Bar的Y座標
