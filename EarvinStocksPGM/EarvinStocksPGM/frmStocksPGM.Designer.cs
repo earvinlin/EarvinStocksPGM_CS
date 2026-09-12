@@ -128,7 +128,6 @@
             toolStripMenuItem1.Name = "toolStripMenuItem1";
             toolStripMenuItem1.Size = new Size(55, 20);
             toolStripMenuItem1.Text = "K線(D)";
-            toolStripMenuItem1.Click += toolStripMenuItem1_Click;
             // 
             // 日線ToolStripMenuItem
             // 
@@ -228,7 +227,6 @@
             pnlStocksBar.Name = "pnlStocksBar";
             pnlStocksBar.Size = new Size(1008, 35);
             pnlStocksBar.TabIndex = 2;
-            pnlStocksBar.Paint += pnlStocksBar_Paint;
             // 
             // cboStocks
             // 
@@ -289,7 +287,6 @@
             label2.Size = new Size(73, 20);
             label2.TabIndex = 10;
             label2.Text = "股票來源";
-            label2.Click += label2_Click;
             // 
             // btnBack3
             // 
@@ -526,7 +523,6 @@
             cntMenuStrip.Items.AddRange(new ToolStripItem[] { k線ToolStripMenuItem, 量能指標ToolStripMenuItem, 熱門指標ToolStripMenuItem, dFTSToolStripMenuItem, 灰聚類模型ToolStripMenuItem });
             cntMenuStrip.Name = "cntMenuStrip";
             cntMenuStrip.Size = new Size(135, 114);
-            cntMenuStrip.MouseUp += cntMenuStrip_MouseUp;
             // 
             // k線ToolStripMenuItem
             // 

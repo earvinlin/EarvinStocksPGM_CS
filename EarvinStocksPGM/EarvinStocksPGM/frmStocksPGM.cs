@@ -15,16 +15,7 @@ namespace EarvinStocksPGM
 
     public partial class frmStocksPGM : Form
     {
-        private bool _initialized = false;
-        static int STOCKYM_CNTS = 36;
-
-        private static int frameNum = 5;               // frame數量
-        private static int SelectFramePos = 0;
-        private float XWidthBorder = 20;        // frame左、右兩邊預留的空間
-        private float YHeightBorder = 10;       // frame最下面預留的空間
-        private float frmXTop = 30;             // frame最左上角的X座標
-        private float frmRightBorder = 150;     // frame最左上角的Y座標
-
+        //-- 動態元件 --//
         private Label lblStokInfo;              // 動態新增label元件：顯示股票資訊用
         private Label lblHighPrice;             // 動態新增label元件：顯示股票最高價
         private Label lblLowPrice;              // 動態新增label元件：顯示股票最低價
@@ -32,25 +23,33 @@ namespace EarvinStocksPGM
         private Label lblLowVolume;              // 動態新增label元件：顯示成交量最低價
         private Label[] lblStockYM = new Label[STOCKYM_CNTS];
 
-        private Boolean blnShowFocusLine = false;  // 是否顯示焦點線段
-        int displayCount = 100; // 顯示的資料筆數
-        int startIndex = 0; // 顯示的資料起始索引
+        
+        private bool _initialized = false;
+        static int STOCKYM_CNTS = 36;
 
+        private static int FrameNum = 5;            // 要顯示的frame數量
+        private static int SelectFramePos = 0;      // 選擇的frame位置(1~FrameNum)
+        private float XWidthBorder = 20;            // frame左、右兩邊預留的空間
+        private float YHeightBorder = 10;           // frame最下面預留的空間
+        private float FrameXTop = 30;               // frame最左上角的X座標
+        private float FrameRightBorder = 150;       // frame最左上角的Y座標
+        private Boolean IsShowFocusLine = false;    // 是否顯示焦點線段
+        int DisplayCount = 100;                     // 顯示的資料筆數
+        int StartIndex = 0;                         // 顯示的資料起始索引
         private Point CursorPosition = new Point(); // 滑鼠游標位置
-        private Point lineFocusTop = new Point();
-        private Point lineFocusBottom = new Point();
-        float frmTopXCoord = 0;
-        float frmTopYCoord = 0;
-        float frmBottomXCoord = 0;
-        float frmBottomYCoord = 0;
-        float frmXAxisWidth = 0;
-        float frmBarWidth = 0;
-        StockData[] sd;    // 要顯示的股票資料
-        IndexData[] idx;    // 要顯示的指數資料
+        float FrameTopXCoord = 0;       // 視窗中Frame的最上方X座標
+        float FrameTopYCoord = 0;       // 視窗中Frame的最上方Y座標
+        float FrameBottomXCoord = 0;    // 視窗中Frame的最下方X座標
+        float FrameBottomYCoord = 0;    // 視窗中Frame的最下方Y座標
+        float FrameXAxisWidth = 0;      // Frame的X軸長度
+        float FrameBarWidth = 0;        // 儲存K-Bar的寬度
 
-        FramePoints[] frameLeftPoints = new FramePoints[frameNum + 1];      // FramePoints結構陣列，存放frame左邊各個點的座標
-        FramePoints[] frameRightPoints = new FramePoints[frameNum + 1];     // FramePoints結構陣列，存放frame右邊各個點的座標
-        FramePoints[] frameMiddlePoints = new FramePoints[frameNum + 1];    // FramePoints結構陣列，存放frame中間各個點的座標
+        FramePoints[] FrameLeftPoints = new FramePoints[FrameNum + 1];      // FramePoints結構陣列，存放frame左邊各個點的座標
+        FramePoints[] FrameRightPoints = new FramePoints[FrameNum + 1];     // FramePoints結構陣列，存放frame右邊各個點的座標
+        FramePoints[] FrameMiddlePoints = new FramePoints[FrameNum + 1];    // FramePoints結構陣列，存放frame中間各個點的座標
+
+        StockData[] StkData;    // 要顯示的股票資料
+        IndexData[] IndData;    // 要顯示的指數資料
 
         public frmStocksPGM()
         {
@@ -62,51 +61,32 @@ namespace EarvinStocksPGM
             _initialized = true;
         }
 
-        private void toolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            // TODO
-        }
-
-        private void pnlStocksBar_Paint(object sender, PaintEventArgs e)
-        {
-        }
-
         private void cboStocks_SelectedIndexChanged(object sender, EventArgs e)
         {
-            startIndex = 0;
+            StartIndex = 0;
             // 取得要顯示的股票資料
-            //sd = DbHelper.TestConnectDB(cboStocks.Text);
-            sd = StockModule.GetStockData(cboStocks.Text);
-            idx = IndexModule.GetIndexData(sd);
+            //StkData = DbHelper.TestConnectDB(cboStocks.Text);
+            StkData = StockModule.GetStockData(cboStocks.Text);
+            IndData = IndexModule.GetIndexData(StkData);
 
-            // 觸發重繪
             this.Invalidate();
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
         }
 
         private void btnFocus_Click(object sender, EventArgs e)
         {
-            blnShowFocusLine = !blnShowFocusLine;
+            IsShowFocusLine = !IsShowFocusLine;
         }
 
         private void frmStocksPGM_Load(object sender, EventArgs e)
         {
-            //this.MouseUp += frmStocksPGM_MouseUp;
             this.ContextMenuStrip = cntMenuStrip;
 
             pnlStocksBar.Width = this.Width;
-            frameNum = int.Parse(cboFrameNum.Text);
+            FrameNum = int.Parse(cboFrameNum.Text);
 
             // 取得要顯示的股票資料
-            sd = StockModule.GetStockData(cboStocks.Text);
-            idx = IndexModule.GetIndexData(sd);
-            //for (int i = 0; i < idx.Length; i++)
-            //{
-            //    Debug.WriteLine($"idx[{i}]:  IndexValue={idx[i].MAP120}");
-            //}
+            StkData = StockModule.GetStockData(cboStocks.Text);
+            IndData = IndexModule.GetIndexData(StkData);
 
             // 新增顯示股票資訊的標籤
             lblStokInfo = new Label()
@@ -125,7 +105,6 @@ namespace EarvinStocksPGM
                 Text = "high",
                 AutoSize = true,
                 Font = new Font(this.Font.FontFamily, 6),
-                //Location = new Point(10, mnuStocksList.Size.Height + pnlStocksBar.Size.Height)
             };
             this.Controls.Add(lblHighPrice);
 
@@ -136,7 +115,6 @@ namespace EarvinStocksPGM
                 Text = "low",
                 AutoSize = true,
                 Font = new Font(this.Font.FontFamily, 6),
-                //Location = new Point(10, mnuStocksList.Size.Height + pnlStocksBar.Size.Height)
             };
             this.Controls.Add(lblLowPrice);
 
@@ -147,7 +125,6 @@ namespace EarvinStocksPGM
                 Text = "high",
                 AutoSize = true,
                 Font = new Font(this.Font.FontFamily, 5),
-                //Location = new Point(10, mnuStocksList.Size.Height + pnlStocksBar.Size.Height)
             };
             this.Controls.Add(lblHighVolume);
 
@@ -158,12 +135,10 @@ namespace EarvinStocksPGM
                 Text = "low",
                 AutoSize = true,
                 Font = new Font(this.Font.FontFamily, 5),
-                //Location = new Point(10, mnuStocksList.Size.Height + pnlStocksBar.Size.Height)
             };
             this.Controls.Add(lblLowVolume);
 
             // 新增 Label 元件(預設建立 STOCKYM_CNTS 個備用)
-            //Label[] lblStockYM = new Label[STOCKYM_CNTS];
             for (int i = 0; i < STOCKYM_CNTS; i++)
             {
                 lblStockYM[i] = new Label()
@@ -174,7 +149,6 @@ namespace EarvinStocksPGM
                     Font = new Font(this.Font.FontFamily, 8),
                 };
                 this.Controls.Add(lblStockYM[i]);
-                //Debug.WriteLine("lblStockYM[" + i + "]：" + lblStockYM[i].Text);
             }
         }
 
@@ -188,142 +162,138 @@ namespace EarvinStocksPGM
             {
                 lblStockYM[i].Text = "";
             }
-            // 觸發重繪
             this.Invalidate();
         }
 
         private void frmStocksPGM_Paint(object sender, PaintEventArgs e)
         {
+            Debug.WriteLine($"PAINT SelectFramePos={SelectFramePos}");
+
             Graphics g = e.Graphics;
             e.Graphics.Clear(this.BackColor);
 
             // lblStokInfo : 顯示股票資訊
             float frmYTop = mnuStocksList.Size.Height + pnlStocksBar.Size.Height + lblStokInfo.Size.Height;
             // XWidthBorder : 表示frame左右皆各內縮 (XWidthBorder / 2) 個pixels
-            float frmXWidth = this.ClientSize.Width - frmXTop - (XWidthBorder / 2);
+            float frmXWidth = this.ClientSize.Width - FrameXTop - (XWidthBorder / 2);
             // YHeightBorder : 表示frame最下面上調YHeightBorder個pixels
             float frmYHeight = this.ClientSize.Height - frmYTop - YHeightBorder;
             // Frame 數量
-            frameNum = int.Parse(cboFrameNum.Text);
-            //Debug.WriteLine("frameNum= " + frameNum);
+            FrameNum = int.Parse(cboFrameNum.Text);
 
             //---------------------//
             //-- 繪製 Frame 外框 --//
             //---------------------//
-            //FramePoints[] frameLeftPoints = new FramePoints[frameNum + 1];  // FramePoints結構陣列，存放frame左邊各個點的座標
-            //FramePoints[] frameRightPoints = new FramePoints[frameNum + 1]; // FramePoints結構陣列，存放frame右邊各個點的座標
-            frameLeftPoints = new FramePoints[frameNum + 1];  // FramePoints結構陣列，存放frame左邊各個點的座標
-            frameRightPoints = new FramePoints[frameNum + 1]; // FramePoints結構陣列，存放frame右邊各個點的座標
+            FrameLeftPoints = new FramePoints[FrameNum + 1];  // FramePoints結構陣列，存放frame左邊各個點的座標
+            FrameRightPoints = new FramePoints[FrameNum + 1]; // FramePoints結構陣列，存放frame右邊各個點的座標
 
-            for (int i = 0; i < (frameNum + 1); i++)
+            for (int i = 0; i < (FrameNum + 1); i++)
             {
-                frameLeftPoints[i].frameX = frmXTop;
+                FrameLeftPoints[i].frameX = FrameXTop;
                 if (i == 0)
                 {
-                    frameLeftPoints[i].frameY = frmYTop;
+                    FrameLeftPoints[i].frameY = frmYTop;
                 }
                 else if (i == 1)
                 {
-                    frameLeftPoints[i].frameY = frmYTop + frmYHeight / 2;
+                    FrameLeftPoints[i].frameY = frmYTop + frmYHeight / 2;
                 }
                 else
                 {
-                    frameLeftPoints[i].frameY = frmYTop + (frmYHeight / 2) + (frmYHeight / 2) / (frameNum - 1) * (i - 1);
+                    FrameLeftPoints[i].frameY = frmYTop + (frmYHeight / 2) + (frmYHeight / 2) / (FrameNum - 1) * (i - 1);
                 }
                 // (For CHECK / DEBUG) 顯示Frame最左側端點座標
-                g.FillEllipse(Brushes.BlueViolet, frameLeftPoints[i].frameX, frameLeftPoints[i].frameY, 5, 5);
+                g.FillEllipse(Brushes.BlueViolet, FrameLeftPoints[i].frameX, FrameLeftPoints[i].frameY, 5, 5);
             }
 
-            for (int i = 0; i < (frameNum + 1); i++)
+            for (int i = 0; i < (FrameNum + 1); i++)
             {
-                frameRightPoints[i].frameX = frmXTop + frmXWidth;
+                FrameRightPoints[i].frameX = FrameXTop + frmXWidth;
                 if (i == 0)
                 {
-                    frameRightPoints[i].frameY = frmYTop;
+                    FrameRightPoints[i].frameY = frmYTop;
                 }
                 else if (i == 1)
                 {
-                    frameRightPoints[i].frameY = frmYTop + frmYHeight / 2;
+                    FrameRightPoints[i].frameY = frmYTop + frmYHeight / 2;
                 }
                 else
                 {
-                    frameRightPoints[i].frameY = frmYTop + (frmYHeight / 2) + (frmYHeight / 2) / (frameNum - 1) * (i - 1);
+                    FrameRightPoints[i].frameY = frmYTop + (frmYHeight / 2) + (frmYHeight / 2) / (FrameNum - 1) * (i - 1);
                 }
                 // (For CHECK / DEBUG) 顯示Frame最右側端點座標
-                g.FillEllipse(Brushes.BlueViolet, frameRightPoints[i].frameX, frameRightPoints[i].frameY, 5, 5);
+                g.FillEllipse(Brushes.BlueViolet, FrameRightPoints[i].frameX, FrameRightPoints[i].frameY, 5, 5);
             }
 
             // FramePoints結構陣列，存放frame中間各個點的座標(最後1個點是frame最右下角的點)
-            //            FramePoints[] frameMiddlePoints = new FramePoints[frameNum + 1];
-            frameMiddlePoints = new FramePoints[frameNum + 1];
+            FrameMiddlePoints = new FramePoints[FrameNum + 1];
 
-            for (int i = 0; i < (frameNum + 1); i++)
+            for (int i = 0; i < (FrameNum + 1); i++)
             {
-                frameMiddlePoints[i].frameX = frmXTop + (frmXWidth - frmRightBorder);
+                FrameMiddlePoints[i].frameX = FrameXTop + (frmXWidth - FrameRightBorder);
                 if (i == 0)
                 {
-                    frameMiddlePoints[i].frameY = frmYTop;
+                    FrameMiddlePoints[i].frameY = frmYTop;
                 }
                 else if (i == 1)
                 {
-                    frameMiddlePoints[i].frameY = frmYTop + frmYHeight / 2;
+                    FrameMiddlePoints[i].frameY = frmYTop + frmYHeight / 2;
                 }
-                else if (i == frameNum)
+                else if (i == FrameNum)
                 {
-                    frameMiddlePoints[i].frameY = frmYTop + frmYHeight;
+                    FrameMiddlePoints[i].frameY = frmYTop + frmYHeight;
                 }
                 else
                 {
-                    frameMiddlePoints[i].frameY = frmYTop + (frmYHeight / 2) + (frmYHeight / 2) / (frameNum - 1) * (i - 1);
+                    FrameMiddlePoints[i].frameY = frmYTop + (frmYHeight / 2) + (frmYHeight / 2) / (FrameNum - 1) * (i - 1);
                 }
                 // (For CHECK / DEBUG) 顯示Frame內側端點座標
-                g.FillEllipse(Brushes.BlueViolet, frameMiddlePoints[i].frameX, frameMiddlePoints[i].frameY, 5, 5);
+                g.FillEllipse(Brushes.BlueViolet, FrameMiddlePoints[i].frameX, FrameMiddlePoints[i].frameY, 5, 5);
             }
             // Frame外框
-            g.DrawRectangle(Pens.Blue, frmXTop, frmYTop, frmXWidth, frmYHeight);
-            // 每個Frame的分隔線
-            g.DrawLine(Pens.Magenta, frameMiddlePoints[0].frameX, frameMiddlePoints[0].frameY, frameMiddlePoints[frameNum].frameX, frameMiddlePoints[frameNum].frameY);
-            for (int i = 1; i < frameNum; i++)
+            g.DrawRectangle(Pens.Blue, FrameXTop, frmYTop, frmXWidth, frmYHeight);
+            // FrameNum
+            g.DrawLine(Pens.Magenta, FrameMiddlePoints[0].frameX, FrameMiddlePoints[0].frameY, FrameMiddlePoints[FrameNum].frameX, FrameMiddlePoints[FrameNum].frameY);
+            for (int i = 1; i < FrameNum; i++)
             {
-                g.DrawLine(Pens.Brown, frameLeftPoints[i].frameX, frameLeftPoints[i].frameY, frameRightPoints[i].frameX, frameRightPoints[i].frameY);
+                g.DrawLine(Pens.Brown, FrameLeftPoints[i].frameX, FrameLeftPoints[i].frameY, FrameRightPoints[i].frameX, FrameRightPoints[i].frameY);
             }
 
             //--------------------------------------------//
             //-- 繪製 K-Map (最上方 Frame) 的橫(虛)線段 --//
             //--------------------------------------------//
             int dashLineCounts = 5; // 虛線的段數
-            float hh = frameLeftPoints[1].frameY - frameLeftPoints[0].frameY;
+            float hh = FrameLeftPoints[1].frameY - FrameLeftPoints[0].frameY;
 
             Pen pen = new Pen(Color.Black, 1);
             pen.DashStyle = DashStyle.Dash;
             pen.DashPattern = new float[] { 4, 2 }; // 畫 4px，空 2px
             for (int i = 1; i < dashLineCounts; i++)
             {
-                float x0 = frameLeftPoints[0].frameX;
-                float y0 = frameLeftPoints[0].frameY + (hh / dashLineCounts) * i;
-                float x1 = frameMiddlePoints[0].frameX;
-                float y1 = frameMiddlePoints[0].frameY + (hh / dashLineCounts) * i;
+                float x0 = FrameLeftPoints[0].frameX;
+                float y0 = FrameLeftPoints[0].frameY + (hh / dashLineCounts) * i;
+                float x1 = FrameMiddlePoints[0].frameX;
+                float y1 = FrameMiddlePoints[0].frameY + (hh / dashLineCounts) * i;
                 g.DrawLine(pen, x0, y0, x1, y1);
             }
 
             // 取得要顯示的股票資料
-            //DbHelper.StockData[] sd = DbHelper.TestConnectDB();
-            if (sd == null || sd.Length == 0)
+            if (StkData == null || StkData.Length == 0)
             {
                 MessageBox.Show("沒有資料");
                 return;
             }
-            if (startIndex > (sd.Length - displayCount))
+            if (StartIndex > (StkData.Length - DisplayCount))
             {
-                startIndex = sd.Length - displayCount;
+                StartIndex = StkData.Length - DisplayCount;
             }
-            if (startIndex < 0)
+            if (StartIndex < 0)
             {
-                startIndex = 0;
+                StartIndex = 0;
             }
 
             // 顯示畫面筆數之最高/最低價 (因為資料庫的資料型態為 decimal，為了便於計算故宣告為 decimal)
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(sd, startIndex, displayCount, GeneralModule.MAP_K);
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, StartIndex, DisplayCount, GeneralModule.MAP_K);
             lblHighPrice.Text = highLowValues.highValue.ToString("F2");
             lblLowPrice.Text = highLowValues.lowValue.ToString("F2");
             Debug.WriteLine("最高/低價：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
@@ -331,35 +301,33 @@ namespace EarvinStocksPGM
             //--------------------------------------//
             //-- 顯示 K-Map (最上方 Frame) 柱狀圖 --//
             //--------------------------------------//
-            float XAxisLength = frameMiddlePoints[0].frameX - frameLeftPoints[0].frameX;            // 顯示 K-Map's Frame 的X軸長度
-            float YAxisLength = frameLeftPoints[1].frameY - frameLeftPoints[0].frameY;              // 顯示 K-Map's Frame 的Y軸長度
-            float barWidth = XAxisLength / (float)displayCount;    // 要繪製K-Bar的寬度
-            frmBarWidth = barWidth;
+            float XAxisLength = FrameMiddlePoints[0].frameX - FrameLeftPoints[0].frameX;            // 顯示 K-Map's Frame 的X軸長度
+            float YAxisLength = FrameLeftPoints[1].frameY - FrameLeftPoints[0].frameY;              // 顯示 K-Map's Frame 的Y軸長度
+            float barWidth = XAxisLength / (float)DisplayCount;    // 要繪製K-Bar的寬度
+            FrameBarWidth = barWidth;
             float barHeight = 0;                            // 要繪製K-Bar的高度
-            float barXCoord = frameLeftPoints[0].frameX;    // 要繪製K-Bar的X座標
+            float barXCoord = FrameLeftPoints[0].frameX;    // 要繪製K-Bar的X座標
             float barYCoord = 0;                            // 要繪製K-Bar的Y座標
-                                                            //            float yDistance = YAxisLength / (float)Math.Abs(stockPriceHighest - stockPriceLowest); // 取得每個價格對應的Y軸距離
             float yDistance = YAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
-            //Debug.WriteLine("yDistance= " + yDistance);
 
-            for (int i = startIndex; i < (startIndex + displayCount); i++)
+            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
             {
                 // X 座標
-                if (i != startIndex)
+                if (i != StartIndex)
                 {
                     barXCoord += barWidth;
                 }
                 // Y 座標
-                if (sd[i].StartPrice > sd[i].EndPrice)
-                    barYCoord = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - sd[i].StartPrice));
+                if (StkData[i].StartPrice > StkData[i].EndPrice)
+                    barYCoord = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - StkData[i].StartPrice));
                 else
-                    barYCoord = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - sd[i].EndPrice));
+                    barYCoord = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - StkData[i].EndPrice));
                 // 計算 K-Bar 的高度
-                barHeight = yDistance * (float)Math.Abs(sd[i].StartPrice - sd[i].EndPrice);
+                barHeight = yDistance * (float)Math.Abs(StkData[i].StartPrice - StkData[i].EndPrice);
                 // 繪製 K-Bar
                 if (barHeight != 0)
                 {
-                    if (sd[i].StartPrice > sd[i].EndPrice)
+                    if (StkData[i].StartPrice > StkData[i].EndPrice)
                     {
                         Brush brush = new SolidBrush(Color.Green);
                         g.FillRectangle(brush, barXCoord, barYCoord, barWidth, barHeight);
@@ -376,60 +344,59 @@ namespace EarvinStocksPGM
                 }
                 // 繪製 K-Bar 最高價 to 最低價之線段
                 float x0 = (barXCoord + barWidth / 2);
-                float y0 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - sd[i].HighPrice));
+                float y0 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - StkData[i].HighPrice));
                 float x1 = (barXCoord + barWidth / 2);
-                float y1 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - sd[i].LowPrice));
+                float y1 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - StkData[i].LowPrice));
 
-                if (sd[i].StartPrice > sd[i].EndPrice)
+                if (StkData[i].StartPrice > StkData[i].EndPrice)
                     g.DrawLine(Pens.Green, x0, y0, x1, y1);
                 else
                     g.DrawLine(Pens.Red, x0, y0, x1, y1);
-                //              Debug.WriteLine("date= " + sd[i].TradeDate + ", k-bar x0: " + x0 + " ,y0: " + y0, " ,x1-: " + x1 + " ,y1-: " + y1);
 
                 // 顯示股價均線 (MAP) 的線段
-                if (i > startIndex)
+                if (i > StartIndex)
                 {
                     Pen pen4MAP = new Pen(Color.Blue, 2);
                     // MAP5
                     float x2 = (barXCoord - barWidth + barWidth / 2);
-                    float y2 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - idx[i - 1].MAP5));
+                    float y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i - 1].MAP5));
                     float x3 = (barXCoord + barWidth / 2);
-                    float y3 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - idx[i].MAP5));
+                    float y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i].MAP5));
                     g.DrawLine(pen4MAP, x2, y2, x3, y3);
                     // MAP10
                     pen4MAP = new Pen(Color.Black, 2);
                     x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - idx[i - 1].MAP10));
+                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i - 1].MAP10));
                     x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - idx[i].MAP10));
+                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i].MAP10));
                     g.DrawLine(pen4MAP, x2, y2, x3, y3);
                     // MAP20
                     pen4MAP = new Pen(Color.Orange, 2);
                     x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - idx[i - 1].MAP20));
+                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i - 1].MAP20));
                     x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - idx[i].MAP20));
+                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i].MAP20));
                     g.DrawLine(pen4MAP, x2, y2, x3, y3);
                     // MAP60
                     pen4MAP = new Pen(Color.Green, 2);
                     x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - idx[i - 1].MAP60));
+                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i - 1].MAP60));
                     x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - idx[i].MAP60));
+                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i].MAP60));
                     g.DrawLine(pen4MAP, x2, y2, x3, y3);
                     // MAP120
                     pen4MAP = new Pen(Color.Brown, 2);
                     x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - idx[i - 1].MAP120));
+                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i - 1].MAP120));
                     x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - idx[i].MAP120));
+                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i].MAP120));
                     g.DrawLine(pen4MAP, x2, y2, x3, y3);
                     // MAP240
                     pen4MAP = new Pen(Color.Violet, 2);
                     x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - idx[i - 1].MAP240));
+                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i - 1].MAP240));
                     x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)frameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - idx[i].MAP240));
+                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i].MAP240));
                     g.DrawLine(pen4MAP, x2, y2, x3, y3);
                 }
             }
@@ -440,28 +407,26 @@ namespace EarvinStocksPGM
             int k = 0;
             long prevNum = 0, nextNum = 0;
 
-            for (int i = startIndex; i < (startIndex + displayCount); i++)
+            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
             {
-                if (i == startIndex)
+                if (i == StartIndex)
                 {
                     // 取交易日期的最後兩碼，若為 20240101，則取 01
-                    prevNum = sd[i].TradeDate % 100;
-                    nextNum = sd[i].TradeDate % 100;
+                    prevNum = StkData[i].TradeDate % 100;
+                    nextNum = StkData[i].TradeDate % 100;
                     continue;
                 }
-                nextNum = sd[i].TradeDate % 100;
-                //                Debug.WriteLine("CC_i= " + i + ", startIndex= " + startIndex + ", prevNum= " + prevNum + ", nextNum= " + nextNum);
+                nextNum = StkData[i].TradeDate % 100;
 
                 if (prevNum > nextNum)
                 {
-                    float x0 = frameLeftPoints[0].frameX + (barWidth * (i - startIndex));
-                    float y0 = frameLeftPoints[0].frameY;
+                    float x0 = FrameLeftPoints[0].frameX + (barWidth * (i - StartIndex));
+                    float y0 = FrameLeftPoints[0].frameY;
                     float x1 = x0;
-                    float y1 = frameLeftPoints[1].frameY;
+                    float y1 = FrameLeftPoints[1].frameY;
                     g.DrawLine(pen, x0, y0, x1, y1);
-                    //                    Debug.WriteLine("i= " + i + ", BBBdate= " + sd[i].TradeDate + ", k-bar x0: " + x0 + " ,y0: " + y0, " ,x1-: " + x1 + " ,y1-: " + y1 + " ,k: " + k + ", width= " + (lblStockYM[k].Size.Width / 2));
                     // 顯示交易日期(年月)
-                    string strnum = sd[i].TradeDate.ToString();
+                    string strnum = StkData[i].TradeDate.ToString();
                     lblStockYM[k].Text = strnum.Substring(0, strnum.Length - 2);
                     lblStockYM[k].Location = new System.Drawing.Point((int)(x0 - (lblStockYM[k].Size.Width / 2)), (int)(y1 + 5));
                     k = k + 1;
@@ -469,124 +434,78 @@ namespace EarvinStocksPGM
                 prevNum = nextNum;
             }
 
-            //////========================================//
-            //////=== 顯示「成交量」(MAP_VOLUME) START ===// 
-            //////========================================//
-            //////float XAxisLength = frameMiddlePoints[0].frameX - frameLeftPoints[0].frameX;            // 顯示 K-Map's Frame 的X軸長度
-            ////YAxisLength = frameLeftPoints[2].frameY - frameLeftPoints[1].frameY;              // 顯示 K-Map's Frame 的Y軸長度
-            //////float barWidth = XAxisLength / (float)displayCount;    // 要繪製K-Bar的寬度
-            ////barHeight = 0;                            // 要繪製K-Bar的高度
-            ////barXCoord = frameLeftPoints[1].frameX;    // 要繪製K-Bar的X座標
-            ////barYCoord = 0;                            // 要繪製K-Bar的Y座標
-
-            ////highLowValues = GeneralModule.GetHighLowValue(sd, startIndex, displayCount, GeneralModule.MAP_VOLUME);
-            ////lblHighVolume.Text = highLowValues.highValue.ToString();
-            ////lblLowVolume.Text = highLowValues.lowValue.ToString();
-            ////lblHighVolume.Location = new System.Drawing.Point((int)frameLeftPoints[1].frameX - lblHighVolume.Width, (int)frameLeftPoints[1].frameY);
-            ////lblLowVolume.Location = new System.Drawing.Point((int)frameLeftPoints[2].frameX - lblLowVolume.Width, (int)frameLeftPoints[2].frameY - lblLowVolume.Height);
-            ////Debug.WriteLine("最高/低價(Vol.)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
-
-            ////yDistance = YAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
-
-            //////Debug.WriteLine("DD_startIndex= " + startIndex + ", barXCoord= " + barXCoord + ", barYCoord= " + barYCoord);
-            //////Debug.WriteLine("DD_stockPriceHighest= " + stockPriceHighest + ", stockPriceLowest= " + stockPriceLowest + ", yDistance= " + yDistance);
-            ////for (int i = startIndex; i < (startIndex + displayCount); i++)
-            ////{
-            ////    // X 座標
-            ////    if (i != startIndex)
-            ////    {
-            ////        barXCoord += barWidth;
-            ////    }
-            ////    // Y 座標
-            ////    barYCoord = (float)frameLeftPoints[1].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - sd[i].Volume));
-            ////    // 計算 K-Bar 的高度
-            ////    barHeight = yDistance * (float)Math.Abs(sd[i].Volume - highLowValues.lowValue);
-            ////    // 繪製 K-Bar
-            ////    if (sd[i].StartPrice > sd[i].EndPrice)
-            ////    {
-            ////        Brush brush = new SolidBrush(Color.Green);
-            ////        g.FillRectangle(brush, barXCoord, barYCoord, barWidth, barHeight);
-            ////    }
-            ////    else
-            ////    {
-            ////        Brush brush = new SolidBrush(Color.Red);
-            ////        g.FillRectangle(brush, barXCoord, barYCoord, barWidth, barHeight);
-            ////    }
-            ////    //Debug.WriteLine("dd_i= " + i + ", barXCoord= " + barXCoord + ", barYCoord= " + barYCoord + ", barHeight= " + barHeight);
-            ////}
-            //            cntMenuStrip.Show(this, CursorPosition);
-            //////=== 顯示「成交量」(MAP_VOLUME) END ==========================================================================//
-            if (SelectFramePos > 0)
+            //=== 顯示「成交量」(MAP_VOLUME) START ===// 
+            try
             {
-                Chalk_MAP_VOLUME(SelectFramePos);
+                Chalk_MAP_VOLUME(e.Graphics, SelectFramePos);
             }
-
-
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
 
             //-- (MouseMvoe Event) ----------------------------------------------------------------------------------------
             int curIndex = 0;
-            if (blnShowFocusLine)
+            if (IsShowFocusLine)
             {
-                frmTopXCoord = frameLeftPoints[0].frameX;
-                frmTopYCoord = frameLeftPoints[0].frameY;
-                frmBottomXCoord = frameLeftPoints[frameNum].frameX;
-                frmBottomYCoord = frameLeftPoints[frameNum].frameY;
-                frmXAxisWidth = XAxisLength;
-                frmBarWidth = barWidth;
+                FrameTopXCoord = FrameLeftPoints[0].frameX;
+                FrameTopYCoord = FrameLeftPoints[0].frameY;
+                FrameBottomXCoord = FrameLeftPoints[FrameNum].frameX;
+                FrameBottomYCoord = FrameLeftPoints[FrameNum].frameY;
+                FrameXAxisWidth = XAxisLength;
+                FrameBarWidth = barWidth;
 
-                g.DrawLine(Pens.Brown, CursorPosition.X, frmTopYCoord, CursorPosition.X, frmBottomYCoord);
+                g.DrawLine(Pens.Brown, CursorPosition.X, FrameTopYCoord, CursorPosition.X, FrameBottomYCoord);
 
                 // 顯示滑鼠游標所在的K-Bar的索引
                 if (CursorPosition.X <= 0)
-                    CursorPosition.X = (int)frmTopXCoord;
-                if (CursorPosition.X >= (frmTopXCoord + frmXAxisWidth))
-                    CursorPosition.X = (int)(frmTopXCoord + frmXAxisWidth) - 1;
-                else if (CursorPosition.X > (frmTopXCoord + frmXAxisWidth))
-                    CursorPosition.X = (int)(frmTopXCoord + frmXAxisWidth);
-                curIndex = (int)((CursorPosition.X - frmTopXCoord) / frmBarWidth) + startIndex;
-                //                Debug.WriteLine("AAAA -- curIndex= " + curIndex + ", CursorPosition= " + CursorPosition.X + ", frmTopXCoord= " + frmTopXCoord + ", frmBarWidth= " + frmBarWidth);
+                    CursorPosition.X = (int)FrameTopXCoord;
+                if (CursorPosition.X >= (FrameTopXCoord + FrameXAxisWidth))
+                    CursorPosition.X = (int)(FrameTopXCoord + FrameXAxisWidth) - 1;
+                else if (CursorPosition.X > (FrameTopXCoord + FrameXAxisWidth))
+                    CursorPosition.X = (int)(FrameTopXCoord + FrameXAxisWidth);
+                curIndex = (int)((CursorPosition.X - FrameTopXCoord) / FrameBarWidth) + StartIndex;
             }
             //-------------------------------------------------------------------------------------------------------------
 
-
             // Y-Length : 顯示frame的Y軸長度
-            lblStokInfo.Text = "日期：" + sd[curIndex].TradeDate + " 開 " + sd[curIndex].StartPrice + " 高 " + sd[curIndex].HighPrice + " 低 " + sd[curIndex].LowPrice + " 收 " + sd[curIndex].EndPrice;
-            lblHighPrice.Location = new System.Drawing.Point((int)frameLeftPoints[0].frameX - lblHighPrice.Width, (int)frameLeftPoints[0].frameY);
-            lblLowPrice.Location = new System.Drawing.Point((int)frameLeftPoints[1].frameX - lblLowPrice.Width, (int)frameLeftPoints[1].frameY - lblLowPrice.Height);
+            lblStokInfo.Text = "日期：" + StkData[curIndex].TradeDate + " 開 " + StkData[curIndex].StartPrice + " 高 " + StkData[curIndex].HighPrice + " 低 " + StkData[curIndex].LowPrice + " 收 " + StkData[curIndex].EndPrice;
+            lblHighPrice.Location = new System.Drawing.Point((int)FrameLeftPoints[0].frameX - lblHighPrice.Width, (int)FrameLeftPoints[0].frameY);
+            lblLowPrice.Location = new System.Drawing.Point((int)FrameLeftPoints[1].frameX - lblLowPrice.Width, (int)FrameLeftPoints[1].frameY - lblLowPrice.Height);
             //lblHighPrice.Text = highLowValues.highValue.ToString("F2");
             //lblLowPrice.Text = highLowValues.lowValue.ToString("F2");
 
             //=== 最右側的各項指標數值顯示 ===//
-            lblMAP1.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1);
-            lblMAP2.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height);
-            lblMAP3.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 2);
-            lblMAP4.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 3);
-            lblMAP5.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 4);
-            lblMAP6.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 5);
-            lblMAP1.Text = "MAP  5: " + idx[curIndex].MAP5.ToString("F2");
-            lblMAP2.Text = "MAP 10: " + idx[curIndex].MAP10.ToString("F2");
-            lblMAP3.Text = "MAP 20: " + idx[curIndex].MAP20.ToString("F2");
-            lblMAP4.Text = "MAP 60: " + idx[curIndex].MAP60.ToString("F2");
-            lblMAP5.Text = "MAP120: " + idx[curIndex].MAP120.ToString("F2");
-            lblMAP6.Text = "MAP240: " + idx[curIndex].MAP240.ToString("F2");
+            lblMAP1.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1);
+            lblMAP2.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height);
+            lblMAP3.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 2);
+            lblMAP4.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 3);
+            lblMAP5.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 4);
+            lblMAP6.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 5);
+            lblMAP1.Text = "MAP  5: " + IndData[curIndex].MAP5.ToString("F2");
+            lblMAP2.Text = "MAP 10: " + IndData[curIndex].MAP10.ToString("F2");
+            lblMAP3.Text = "MAP 20: " + IndData[curIndex].MAP20.ToString("F2");
+            lblMAP4.Text = "MAP 60: " + IndData[curIndex].MAP60.ToString("F2");
+            lblMAP5.Text = "MAP120: " + IndData[curIndex].MAP120.ToString("F2");
+            lblMAP6.Text = "MAP240: " + IndData[curIndex].MAP240.ToString("F2");
 
-            lblMAV1.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 6);
-            lblMAV2.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 7);
-            lblMAV3.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 8);
-            lblMAV4.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 9);
-            lblMAV5.Location = new System.Drawing.Point((int)frameMiddlePoints[0].frameX + 1, (int)frameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 10);
-            lblMAV1.Text = "MAV  5: " + idx[curIndex].MAV5.ToString("F2");
-            lblMAV2.Text = "MAV 10: " + idx[curIndex].MAV10.ToString("F2");
-            lblMAV3.Text = "MAV 20: " + idx[curIndex].MAV20.ToString("F2");
-            lblMAV4.Text = "MAV 60: " + idx[curIndex].MAV60.ToString("F2");
-            lblMAV5.Text = "MAV120: " + idx[curIndex].MAV120.ToString("F2");
+            lblMAV1.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 6);
+            lblMAV2.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 7);
+            lblMAV3.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 8);
+            lblMAV4.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 9);
+            lblMAV5.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 10);
+            lblMAV1.Text = "MAV  5: " + IndData[curIndex].MAV5.ToString("F2");
+            lblMAV2.Text = "MAV 10: " + IndData[curIndex].MAV10.ToString("F2");
+            lblMAV3.Text = "MAV 20: " + IndData[curIndex].MAV20.ToString("F2");
+            lblMAV4.Text = "MAV 60: " + IndData[curIndex].MAV60.ToString("F2");
+            lblMAV5.Text = "MAV120: " + IndData[curIndex].MAV120.ToString("F2");
 
             ////-- FOR DEBUG : Display Frame's 端點指標 --//
-            //for (int i = 0; i < (frameNum + 1); i++)
+            //for (int i = 0; i < (FrameNum + 1); i++)
             //{
-            //    Debug.WriteLine("FramePoint[" + i + "], Left.X= " + frameLeftPoints[i].frameY + ", Left.Y= " + frameLeftPoints[i].frameY
-            //                    + ", Right.X= " + frameRightPoints[i].frameY + ", Right.Y= " + frameRightPoints[i].frameY
-            //                    + ", Mid.X= " + frameMiddlePoints[i].frameY + ", Mid.Y= " + frameMiddlePoints[i].frameY);
+            //    Debug.WriteLine("FramePoint[" + i + "], Left.X= " + FrameLeftPoints[i].frameY + ", Left.Y= " + FrameLeftPoints[i].frameY
+            //                    + ", Right.X= " + FrameRightPoints[i].frameY + ", Right.Y= " + FrameRightPoints[i].frameY
+            //                    + ", Mid.X= " + FrameMiddlePoints[i].frameY + ", Mid.Y= " + FrameMiddlePoints[i].frameY);
             //}
         }
 
@@ -600,201 +519,156 @@ namespace EarvinStocksPGM
             CursorPosition = e.Location;
 
             // 滑鼠移動時，顯示焦點線段
-            if (blnShowFocusLine)
+            if (IsShowFocusLine)
             {
-                ////// 判斷 FocusLine
-                ////using (Graphics g = this.CreateGraphics())
-                ////{
-                ////    if (CursorPosition.X <= frmTopXCoord)
-                ////        CursorPosition.X = (int)frmTopXCoord;
-                ////    else if (CursorPosition.X > (frmTopXCoord + frmXAxisWidth))
-                ////        CursorPosition.X = (int)(frmTopXCoord + frmXAxisWidth);
-                ////}
-                // 觸發重繪
                 this.Invalidate();
             }
         }
 
         private void btnBack1_Click(object sender, EventArgs e)
         {
-            startIndex += 1;
-            //Debug.WriteLine($"startIndex = {startIndex}");
+            StartIndex += 1;
+
             for (int i = 0; i < STOCKYM_CNTS; i++)
             {
                 lblStockYM[i].Text = "";
             }
-            // 觸發重繪
             this.Invalidate();
         }
 
         private void btnFore1_Click(object sender, EventArgs e)
         {
-            startIndex -= 1;
-            //Debug.WriteLine($"startIndex = {startIndex}");
+            StartIndex -= 1;
+
             for (int i = 0; i < STOCKYM_CNTS; i++)
             {
                 lblStockYM[i].Text = "";
             }
-            // 觸發重繪
             this.Invalidate();
         }
 
         private void btnBack2_Click(object sender, EventArgs e)
         {
-            startIndex += 5;
-            //Debug.WriteLine($"startIndex = {startIndex}");
+            StartIndex += 5;
+
             for (int i = 0; i < STOCKYM_CNTS; i++)
             {
                 lblStockYM[i].Text = "";
             }
-            // 觸發重繪
             this.Invalidate();
         }
 
         private void btnFore2_Click(object sender, EventArgs e)
         {
-            startIndex -= 5;
-            //Debug.WriteLine($"startIndex = {startIndex}");
+            StartIndex -= 5;
+
             for (int i = 0; i < STOCKYM_CNTS; i++)
             {
                 lblStockYM[i].Text = "";
             }
-            // 觸發重繪
             this.Invalidate();
         }
 
         private void btnBack3_Click(object sender, EventArgs e)
         {
-            startIndex = int.MaxValue;
-            //Debug.WriteLine($"startIndex = {startIndex}");
+            StartIndex = int.MaxValue;
+
             for (int i = 0; i < STOCKYM_CNTS; i++)
             {
                 lblStockYM[i].Text = "";
             }
-            // 觸發重繪
             this.Invalidate();
         }
 
         private void btnFore3_Click(object sender, EventArgs e)
         {
-            startIndex = 0;
-            //Debug.WriteLine($"startIndex = {startIndex}");
+            StartIndex = 0;
+
             for (int i = 0; i < STOCKYM_CNTS; i++)
             {
                 lblStockYM[i].Text = "";
             }
-            // 觸發重繪
             this.Invalidate();
         }
 
         private void btnZoomOut_Click(object sender, EventArgs e)
         {
-            //Debug.WriteLine($"BEF 多顯示10%筆數，displayCount = {displayCount}");
-            displayCount = displayCount + displayCount / 10;
-            //Debug.WriteLine($"AFT 多顯示10%筆數，displayCount = {displayCount}");
+            DisplayCount = DisplayCount + DisplayCount / 10;
+
             for (int i = 0; i < STOCKYM_CNTS; i++)
             {
                 lblStockYM[i].Text = "";
             }
-            // 觸發重繪
             this.Invalidate();
         }
 
         private void btnZoomIn_Click(object sender, EventArgs e)
         {
-            //Debug.WriteLine($"BEF 少顯示10%筆數，displayCount = {displayCount}");
-            displayCount = displayCount - displayCount / 10;
-            if (displayCount < 10)
-                displayCount = 10;
-            //Debug.WriteLine($"AFT 少顯示10%筆數，displayCount = {displayCount}");
+            DisplayCount = DisplayCount - DisplayCount / 10;
+            if (DisplayCount < 10)
+                DisplayCount = 10;
+
             for (int i = 0; i < STOCKYM_CNTS; i++)
             {
                 lblStockYM[i].Text = "";
             }
-            // 觸發重繪
             this.Invalidate();
-        }
-
-        //private void 融資餘額ToolStripMenuItem_Click(object sender, EventArgs e)
-        //{
-
-        //}
-
-        private void holdToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void VolumeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SelectFramePos = GetSelectFrame(frameLeftPoints, frameRightPoints, CursorPosition, frameNum);
+            SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
             //Chalk_MAP_VOLUME(SelectFramePos);
+            Debug.WriteLine($"CLICK SelectFramePos={SelectFramePos}");
             this.Invalidate();
         }
 
-        private void cntMenuStrip_MouseUp(object sender, MouseEventArgs e)
+        private void Chalk_MAP_VOLUME(Graphics g, int framePos)
         {
-            if (e.Button == MouseButtons.Right)
+            //========================================//
+            //=== 顯示「成交量」(MAP_VOLUME) START ===// 
+            //========================================//
+            if (framePos <= 0)
+                return;
+
+            float yAxisLength = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
+            float barHeight = 0;                            // 要繪製指標柱狀圖高度
+            float barXCoord = FrameLeftPoints[0].frameX;    // 要繪製指標柱狀圖X座標(最左邊的位置FrameLeftPoints[0]一定會存在)
+            float barYCoord = 0;                            // 要繪製指標柱狀圖Y座標
+
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, StartIndex, DisplayCount, GeneralModule.MAP_VOLUME);
+            Debug.WriteLine("最高/低價(Vol.)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+
+            lblHighVolume.Text = highLowValues.highValue.ToString();
+            lblLowVolume.Text = highLowValues.lowValue.ToString();
+            lblHighVolume.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos - 1].frameX - lblHighVolume.Width, (int)FrameLeftPoints[framePos - 1].frameY);
+            lblLowVolume.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos].frameX - lblLowVolume.Width, (int)FrameLeftPoints[framePos].frameY - lblLowVolume.Height);
+            float yDistance = yAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
+
+            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
             {
-                MessageBox.Show("右鍵按下");
-            }
-        }
-
-        private void Chalk_MAP_VOLUME(int SelectFramePos)
-        {
-            using (Graphics g = this.CreateGraphics())
-            {
-                //g.DrawLine(Pens.Green, 0, CursorPosition.Y - 79, this.ClientSize.Width, CursorPosition.Y - 79);
-                //g.DrawLine(new Pen(Color.Red, 3), frameLeftPoints[3].frameX, frameLeftPoints[3].frameY, frameRightPoints[3].frameX, frameRightPoints[3].frameY);
-                //========================================//
-                //=== 顯示「成交量」(MAP_VOLUME) START ===// 
-                //========================================//
-                //float XAxisLength = frameMiddlePoints[0].frameX - frameLeftPoints[0].frameX;            // 顯示 K-Map's Frame 的X軸長度
-                float YAxisLength = frameLeftPoints[2].frameY - frameLeftPoints[1].frameY;              // 顯示 K-Map's Frame 的Y軸長度
-                //float barWidth = XAxisLength / (float)displayCount;    // 要繪製K-Bar的寬度
-                float barHeight = 0;                            // 要繪製K-Bar的高度
-                float barXCoord = frameLeftPoints[1].frameX;    // 要繪製K-Bar的X座標
-                float barYCoord = 0;                            // 要繪製K-Bar的Y座標
-
-                HighLowValues highLowValues = GeneralModule.GetHighLowValue(sd, startIndex, displayCount, GeneralModule.MAP_VOLUME);
-                lblHighVolume.Text = highLowValues.highValue.ToString();
-                lblLowVolume.Text = highLowValues.lowValue.ToString();
-                lblHighVolume.Location = new System.Drawing.Point((int)frameLeftPoints[SelectFramePos - 1].frameX - lblHighVolume.Width, (int)frameLeftPoints[SelectFramePos - 1].frameY);
-                lblLowVolume.Location = new System.Drawing.Point((int)frameLeftPoints[SelectFramePos].frameX - lblLowVolume.Width, (int)frameLeftPoints[SelectFramePos].frameY - lblLowVolume.Height);
-                Debug.WriteLine("最高/低價(Vol.)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
-
-                float yDistance = YAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
-
-                //Debug.WriteLine("DD_startIndex= " + startIndex + ", barXCoord= " + barXCoord + ", barYCoord= " + barYCoord);
-                //Debug.WriteLine("DD_stockPriceHighest= " + stockPriceHighest + ", stockPriceLowest= " + stockPriceLowest + ", yDistance= " + yDistance);
-                for (int i = startIndex; i < (startIndex + displayCount); i++)
+                // X 座標
+                if (i != StartIndex)
                 {
-                    // X 座標
-                    if (i != startIndex)
-                    {
-                        barXCoord += frmBarWidth;
-                    }
-                    // Y 座標
-                    barYCoord = (float)frameLeftPoints[SelectFramePos - 1].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - sd[i].Volume));
-                    // 計算 K-Bar 的高度
-                    barHeight = yDistance * (float)Math.Abs(sd[i].Volume - highLowValues.lowValue);
-                    // 繪製 K-Bar
-                    if (sd[i].StartPrice > sd[i].EndPrice)
-                    {
-                        Brush brush = new SolidBrush(Color.Green);
-                        g.FillRectangle(brush, barXCoord, barYCoord, frmBarWidth, barHeight);
-                    }
-                    else
-                    {
-                        Brush brush = new SolidBrush(Color.Red);
-                        g.FillRectangle(brush, barXCoord, barYCoord, frmBarWidth, barHeight);
-                    }
-                    //Debug.WriteLine("dd_i= " + i + ", barXCoord= " + barXCoord + ", barYCoord= " + barYCoord + ", barHeight= " + barHeight);
+                    barXCoord += FrameBarWidth;
+                }
+                // Y 座標
+                barYCoord = (float)FrameLeftPoints[framePos - 1].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - StkData[i].Volume));
+                // 計算 K-Bar 的高度
+                barHeight = yDistance * (float)Math.Abs(StkData[i].Volume - highLowValues.lowValue);
+                // 繪製 K-Bar
+                if (StkData[i].StartPrice > StkData[i].EndPrice)
+                {
+                    Brush brush = new SolidBrush(Color.Green);
+                    g.FillRectangle(brush, barXCoord, barYCoord, FrameBarWidth, barHeight);
+                }
+                else
+                {
+                    Brush brush = new SolidBrush(Color.Red);
+                    g.FillRectangle(brush, barXCoord, barYCoord, FrameBarWidth, barHeight);
                 }
             }
-            //=== 顯示「成交量」(MAP_VOLUME) END ==========================================================================//
-            //// 觸發重繪
-            //this.Invalidate();
+            Debug.WriteLine("Chalk_MAP_VOLUME() END!!!!!");
         }
     }
 }
