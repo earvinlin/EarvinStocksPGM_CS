@@ -31,18 +31,19 @@ namespace EarvinStocksPGM
         private static int SelectFramePos = 0;      // 選擇的frame位置(1~FrameNum)
         private float XWidthBorder = 20;            // frame左、右兩邊預留的空間
         private float YHeightBorder = 10;           // frame最下面預留的空間
-        private float FrameXTop = 30;               // frame最左上角的X座標
+//        private float FrameXTop = 30;               // frame最左上角的X座標
+        private float FrameXTop = 40;               // frame最左上角的X座標
         private float FrameRightBorder = 150;       // frame最左上角的Y座標
         private Boolean IsShowFocusLine = false;    // 是否顯示焦點線段
         int DisplayCount = 100;                     // 顯示的資料筆數
         int StartIndex = 0;                         // 顯示的資料起始索引
         private Point CursorPosition = new Point(); // 滑鼠游標位置
-        float FrameTopXCoord = 0;       // 視窗中Frame的最上方X座標
-        float FrameTopYCoord = 0;       // 視窗中Frame的最上方Y座標
-        float FrameBottomXCoord = 0;    // 視窗中Frame的最下方X座標
-        float FrameBottomYCoord = 0;    // 視窗中Frame的最下方Y座標
-        float FrameXAxisWidth = 0;      // Frame的X軸長度
-        float FrameBarWidth = 0;        // 儲存K-Bar的寬度
+        float FrameTopXCoord = 0;                   // 視窗中Frame的最上方X座標
+        float FrameTopYCoord = 0;                   // 視窗中Frame的最上方Y座標
+        float FrameBottomXCoord = 0;                // 視窗中Frame的最下方X座標
+        float FrameBottomYCoord = 0;                // 視窗中Frame的最下方Y座標
+        float FrameXAxisWidth = 0;                  // Frame的X軸長度
+        float FrameBarWidth = 0;                    // 儲存K-Bar的寬度
 
         FramePoints[] FrameLeftPoints = new FramePoints[FrameNum + 1];      // FramePoints結構陣列，存放frame左邊各個點的座標
         FramePoints[] FrameRightPoints = new FramePoints[FrameNum + 1];     // FramePoints結構陣列，存放frame右邊各個點的座標

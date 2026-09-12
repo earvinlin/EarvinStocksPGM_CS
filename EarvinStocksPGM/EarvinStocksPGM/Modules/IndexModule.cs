@@ -22,6 +22,7 @@ namespace EarvinStocksPGM.Modules
         public double MAV20 { get; set; }
         public double MAV60 { get; set; }
         public double MAV120 { get; set; }
+        public double BIAS { get; set; }
     }
 
     public static class IndexModule
@@ -40,6 +41,7 @@ namespace EarvinStocksPGM.Modules
             double[] dblMAVValues20 = new double[sd.Length];
             double[] dblMAVValues60 = new double[sd.Length];
             double[] dblMAVValues120 = new double[sd.Length];
+            double[] dblBIAS = new double[sd.Length];
 
             dblMAPValues5 = CalculateAverage(sd, 5, true);
             dblMAPValues10 = CalculateAverage(sd, 10, true);
@@ -52,6 +54,7 @@ namespace EarvinStocksPGM.Modules
             dblMAVValues20 = CalculateAverage(sd, 20, false);
             dblMAVValues60 = CalculateAverage(sd, 60, false);
             dblMAVValues120 = CalculateAverage(sd, 120, false);
+            dblBIAS = CalculateBIAS(sd, 10);
 
             for (int i = 0; i < sd.Length; i++)
             {
@@ -67,8 +70,8 @@ namespace EarvinStocksPGM.Modules
                 idx[i].MAV20 = dblMAVValues20[i];
                 idx[i].MAV60 = dblMAVValues60[i];
                 idx[i].MAV120 = dblMAVValues120[i];
+                idx[i].BIAS = dblBIAS[i];
             }
-
             return idx;
         }
         
@@ -114,6 +117,38 @@ namespace EarvinStocksPGM.Modules
                 else
                     dblAverage = 0;
                 dblValues[i] = dblAverage;
+                i++;
+            }
+            return dblValues;
+        }
+
+        public static double[] CalculateBIAS(StockData[] sd, int intDayNo)
+        {
+            int i = 0, j = 0;
+            double dblAverage = 0;
+            double[] dblValues = new double[sd.Length];
+
+            while (i < sd.Length)
+            {
+                dblAverage = 0;
+                if (i < intDayNo)
+                {
+                    for (j = 0; j <= i; j++)
+                    {
+                        dblAverage += sd[j].EndPrice;
+                    }
+                    dblAverage = dblAverage / (i + 1);
+                }
+                else
+                {
+                    for (j = i; j > (i - intDayNo); j--)
+                    {
+                        dblAverage += sd[j].EndPrice;
+                    }
+                    dblAverage = dblAverage / intDayNo;
+                }
+                dblValues[i] = (sd[i].EndPrice - dblAverage) / dblAverage * 100;
+
                 i++;
             }
             return dblValues;
