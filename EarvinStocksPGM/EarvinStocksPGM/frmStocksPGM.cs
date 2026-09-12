@@ -437,7 +437,7 @@ namespace EarvinStocksPGM
             //=== 顯示「成交量」(MAP_VOLUME) START ===// 
             try
             {
-                Chalk_MAP_VOLUME(e.Graphics, SelectFramePos);
+                Chalk_MAP_VOLUME(e.Graphics, SelectFramePos, FrameNum);
             }
             catch (Exception ex)
             {
@@ -455,16 +455,15 @@ namespace EarvinStocksPGM
                 FrameXAxisWidth = XAxisLength;
                 FrameBarWidth = barWidth;
 
-                g.DrawLine(Pens.Brown, CursorPosition.X, FrameTopYCoord, CursorPosition.X, FrameBottomYCoord);
-
                 // 顯示滑鼠游標所在的K-Bar的索引
-                if (CursorPosition.X <= 0)
+                if (CursorPosition.X <= (int)FrameTopXCoord)
                     CursorPosition.X = (int)FrameTopXCoord;
                 if (CursorPosition.X >= (FrameTopXCoord + FrameXAxisWidth))
                     CursorPosition.X = (int)(FrameTopXCoord + FrameXAxisWidth) - 1;
                 else if (CursorPosition.X > (FrameTopXCoord + FrameXAxisWidth))
                     CursorPosition.X = (int)(FrameTopXCoord + FrameXAxisWidth);
                 curIndex = (int)((CursorPosition.X - FrameTopXCoord) / FrameBarWidth) + StartIndex;
+                g.DrawLine(Pens.Brown, CursorPosition.X, FrameTopYCoord, CursorPosition.X, FrameBottomYCoord);
             }
             //-------------------------------------------------------------------------------------------------------------
 
@@ -618,17 +617,17 @@ namespace EarvinStocksPGM
         private void VolumeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
-            //Chalk_MAP_VOLUME(SelectFramePos);
+            //Chalk_MAP_VOLUME(e.Graphics, SelectFramePos, FrameNum);
             Debug.WriteLine($"CLICK SelectFramePos={SelectFramePos}");
             this.Invalidate();
         }
 
-        private void Chalk_MAP_VOLUME(Graphics g, int framePos)
+        private void Chalk_MAP_VOLUME(Graphics g, int framePos, int frameNum)
         {
             //========================================//
             //=== 顯示「成交量」(MAP_VOLUME) START ===// 
             //========================================//
-            if (framePos <= 0)
+            if (framePos <= 0 || framePos > frameNum)
                 return;
 
             float yAxisLength = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
