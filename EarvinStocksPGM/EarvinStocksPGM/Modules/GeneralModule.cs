@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-//using  EarvinStocksPGM.Modules;
-
 
 namespace EarvinStocksPGM.Modules
 {
@@ -12,6 +10,7 @@ namespace EarvinStocksPGM.Modules
     {
         public const int MAP_K = 1;
         public const int MAP_VOLUME = 2;
+        public const int MAP_BIAS = 3;
 
         public class HighLowValues
         {
@@ -20,14 +19,14 @@ namespace EarvinStocksPGM.Modules
         }
 
 
-        public static HighLowValues GetHighLowValue(StockData[] sd, int startIndex, int displayCount, int type)
+        public static HighLowValues GetHighLowValue(StockData[] sd, IndexData[] idx, int startIndex, int displayCount, int type)
         {
             double highValue = 0;
             double lowValue = 99999;
 
             switch (type)
             {
-                case MAP_K:
+                case MAP_K :
                     for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
                     {
                         if (highValue < sd[i].HighPrice)
@@ -36,13 +35,33 @@ namespace EarvinStocksPGM.Modules
                             lowValue = sd[i].LowPrice;
                     }
                     break;
-                case MAP_VOLUME:
+                case MAP_VOLUME :
                     for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
                     {
                         if (highValue < sd[i].Volume)
                             highValue = sd[i].Volume;
                         if (lowValue > sd[i].Volume)
                             lowValue = sd[i].Volume;
+                    }
+                    break;
+                case MAP_BIAS :
+                    for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
+                    {
+                        if (highValue < idx[i].BIAS)
+                            highValue = idx[i].BIAS;
+                        if (lowValue > idx[i].BIAS)
+                            lowValue = idx[i].BIAS;
+                    }
+                    highValue = Math.Round(highValue, 2);
+                    lowValue = Math.Round(lowValue, 2);
+                    if (Math.Abs(highValue) >= Math.Abs(lowValue))
+                    {
+                        highValue = Math.Ceiling(Math.Abs(highValue));
+                        lowValue = -highValue;
+                    } else
+                    {
+                        lowValue = Math.Floor(Math.Abs(lowValue));
+                        highValue = -lowValue;
                     }
                     break;
             }
@@ -57,42 +76,14 @@ namespace EarvinStocksPGM.Modules
         {
             int selectFrame = 0;
 
-            Debug.WriteLine("GGG_INT--selectFrame= " + selectFrame);
-            //for (int i = 0; i < frameNum; i++)
+            Debug.WriteLine("GetSelectFrame()_INT--selectFrame= " + selectFrame);
+            ////-- FOR DEBUG : Display Frame's 端點指標 --//
+            //for (int i = 0; i < (frameNum + 1); i++)
             //{
-            //    Debug.WriteLine("GGG--frameNum= " + frameNum + ", frmLeft[" + i + "].Y= " + frmLeft[i].frameY + ", frmLeft[" + (i+1) + "].Y= " + frmLeft[i + 1].frameY
-            //        + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
-            //    if (cursorPos.Y < frmRight[i].frameY)
-            //    {
-            //        Debug.WriteLine("GGG0--frameNum= " + frameNum + ", frmLeft[" + i + "].Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "].Y= " + frmLeft[i + 1].frameY
-            //            + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
-            //        break;
-            //    }
-            //    else if (cursorPos.Y >= frmRight[i].frameY && cursorPos.Y <= frmLeft[i + 1].frameY)
-            //    {
-            //        Debug.WriteLine("GGG1--frameNum= " + frameNum + ", frmLeft[" + i + "].Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "].Y= " + frmLeft[i + 1].frameY
-            //            + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
-            //        selectFrame = (i+1);
-            //        Debug.WriteLine("GGG_RETURN--selectFrame= " + selectFrame);
-            //        break;
-            //    }
-            //    else if (cursorPos.Y > frmRight[frameNum].frameY)
-            //    {
-            //        Debug.WriteLine("GGG2--frameNum= " + frameNum + ", frmLeft[" + i + "].Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "].Y= " + frmLeft[i + 1].frameY
-            //            + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
-            //        break;
-            //    }
-            //    Debug.WriteLine("GGG3--frmLeft[" + i + "].Y= " + frmLeft[i].frameY + ", frmLeft[" + (i + 1) + "].Y= " + frmLeft[i + 1].frameY
-            //        + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
+            //    Debug.WriteLine("FramePoint[" + i + "], Left.X= " + frmLeft[i].frameX + ", Left.Y= " + frmLeft[i].frameY
+            //                    + ", Right.X= " + frmRight[i].frameX + ", Right.Y= " + frmRight[i].frameY
+            //                    + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
             //}
-
-            //-- FOR DEBUG : Display Frame's 端點指標 --//
-            for (int i = 0; i < (frameNum + 1); i++)
-            {
-                Debug.WriteLine("FramePoint[" + i + "], Left.X= " + frmLeft[i].frameX + ", Left.Y= " + frmLeft[i].frameY
-                                + ", Right.X= " + frmRight[i].frameX + ", Right.Y= " + frmRight[i].frameY
-                                + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
-            }
 
             for (int i = 0; i < frameNum; i++)
             {
@@ -110,10 +101,9 @@ namespace EarvinStocksPGM.Modules
                     break;
                 }
             }
-            Debug.WriteLine("GGG_FIN--selectFrame= " + selectFrame);
+            Debug.WriteLine("GetSelectFrame()_FIN--selectFrame= " + selectFrame);
 
             return selectFrame;
         }
-
     }
 }

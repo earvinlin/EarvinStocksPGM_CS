@@ -25,7 +25,7 @@ namespace EarvinStocksPGM
         private Label lblLowBias;              // 動態新增label元件：顯示乖離率最低價
         private Label[] lblStockYM = new Label[STOCKYM_CNTS];
 
-        
+
         private bool _initialized = false;
         static int STOCKYM_CNTS = 36;
 
@@ -33,7 +33,7 @@ namespace EarvinStocksPGM
         private static int SelectFramePos = 0;      // 選擇的frame位置(1~FrameNum)
         private float XWidthBorder = 20;            // frame左、右兩邊預留的空間
         private float YHeightBorder = 10;           // frame最下面預留的空間
-//        private float FrameXTop = 30;               // frame最左上角的X座標
+                                                    //        private float FrameXTop = 30;               // frame最左上角的X座標
         private float FrameXTop = 40;               // frame最左上角的X座標
         private float FrameRightBorder = 150;       // frame最左上角的Y座標
         private Boolean IsShowFocusLine = false;    // 是否顯示焦點線段
@@ -52,7 +52,7 @@ namespace EarvinStocksPGM
         FramePoints[] FrameMiddlePoints = new FramePoints[FrameNum + 1];    // FramePoints結構陣列，存放frame中間各個點的座標
 
         StockData[] StkData;    // 要顯示的股票資料
-        IndexData[] IndData;    // 要顯示的指數資料
+        IndexData[] IdxData;    // 要顯示的指數資料
 
         public frmStocksPGM()
         {
@@ -70,7 +70,7 @@ namespace EarvinStocksPGM
             // 取得要顯示的股票資料
             //StkData = DbHelper.TestConnectDB(cboStocks.Text);
             StkData = StockModule.GetStockData(cboStocks.Text);
-            IndData = IndexModule.GetIndexData(StkData);
+            IdxData = IndexModule.GetIndexData(StkData);
 
             this.Invalidate();
         }
@@ -89,7 +89,7 @@ namespace EarvinStocksPGM
 
             // 取得要顯示的股票資料
             StkData = StockModule.GetStockData(cboStocks.Text);
-            IndData = IndexModule.GetIndexData(StkData);
+            IdxData = IndexModule.GetIndexData(StkData);
 
             // 新增顯示股票資訊的標籤
             lblStokInfo = new Label()
@@ -316,7 +316,7 @@ namespace EarvinStocksPGM
             }
 
             // 顯示畫面筆數之最高/最低價 (因為資料庫的資料型態為 decimal，為了便於計算故宣告為 decimal)
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, StartIndex, DisplayCount, GeneralModule.MAP_K);
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_K);
             lblHighPrice.Text = highLowValues.highValue.ToString("F2");
             lblLowPrice.Text = highLowValues.lowValue.ToString("F2");
             Debug.WriteLine("最高/低價：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
@@ -382,44 +382,44 @@ namespace EarvinStocksPGM
                     Pen pen4MAP = new Pen(Color.Blue, 2);
                     // MAP5
                     float x2 = (barXCoord - barWidth + barWidth / 2);
-                    float y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i - 1].MAP5));
+                    float y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i - 1].MAP5));
                     float x3 = (barXCoord + barWidth / 2);
-                    float y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i].MAP5));
+                    float y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i].MAP5));
                     g.DrawLine(pen4MAP, x2, y2, x3, y3);
                     // MAP10
                     pen4MAP = new Pen(Color.Black, 2);
                     x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i - 1].MAP10));
+                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i - 1].MAP10));
                     x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i].MAP10));
+                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i].MAP10));
                     g.DrawLine(pen4MAP, x2, y2, x3, y3);
                     // MAP20
                     pen4MAP = new Pen(Color.Orange, 2);
                     x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i - 1].MAP20));
+                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i - 1].MAP20));
                     x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i].MAP20));
+                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i].MAP20));
                     g.DrawLine(pen4MAP, x2, y2, x3, y3);
                     // MAP60
                     pen4MAP = new Pen(Color.Green, 2);
                     x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i - 1].MAP60));
+                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i - 1].MAP60));
                     x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i].MAP60));
+                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i].MAP60));
                     g.DrawLine(pen4MAP, x2, y2, x3, y3);
                     // MAP120
                     pen4MAP = new Pen(Color.Brown, 2);
                     x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i - 1].MAP120));
+                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i - 1].MAP120));
                     x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i].MAP120));
+                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i].MAP120));
                     g.DrawLine(pen4MAP, x2, y2, x3, y3);
                     // MAP240
                     pen4MAP = new Pen(Color.Violet, 2);
                     x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i - 1].MAP240));
+                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i - 1].MAP240));
                     x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IndData[i].MAP240));
+                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i].MAP240));
                     g.DrawLine(pen4MAP, x2, y2, x3, y3);
                 }
             }
@@ -460,7 +460,8 @@ namespace EarvinStocksPGM
             //=== 顯示「成交量」(MAP_VOLUME) START ===// 
             try
             {
-                Chalk_MAP_VOLUME(e.Graphics, SelectFramePos, FrameNum);
+                //Chalk_MAP_VOLUME(e.Graphics, SelectFramePos, FrameNum);
+                Chalk_MAP_BIAS(e.Graphics, SelectFramePos, FrameNum);
             }
             catch (Exception ex)
             {
@@ -504,23 +505,23 @@ namespace EarvinStocksPGM
             lblMAP4.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 3);
             lblMAP5.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 4);
             lblMAP6.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 5);
-            lblMAP1.Text = "MAP  5: " + IndData[curIndex].MAP5.ToString("F2");
-            lblMAP2.Text = "MAP 10: " + IndData[curIndex].MAP10.ToString("F2");
-            lblMAP3.Text = "MAP 20: " + IndData[curIndex].MAP20.ToString("F2");
-            lblMAP4.Text = "MAP 60: " + IndData[curIndex].MAP60.ToString("F2");
-            lblMAP5.Text = "MAP120: " + IndData[curIndex].MAP120.ToString("F2");
-            lblMAP6.Text = "MAP240: " + IndData[curIndex].MAP240.ToString("F2");
+            lblMAP1.Text = "MAP  5: " + IdxData[curIndex].MAP5.ToString("F2");
+            lblMAP2.Text = "MAP 10: " + IdxData[curIndex].MAP10.ToString("F2");
+            lblMAP3.Text = "MAP 20: " + IdxData[curIndex].MAP20.ToString("F2");
+            lblMAP4.Text = "MAP 60: " + IdxData[curIndex].MAP60.ToString("F2");
+            lblMAP5.Text = "MAP120: " + IdxData[curIndex].MAP120.ToString("F2");
+            lblMAP6.Text = "MAP240: " + IdxData[curIndex].MAP240.ToString("F2");
 
             lblMAV1.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 6);
             lblMAV2.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 7);
             lblMAV3.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 8);
             lblMAV4.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 9);
             lblMAV5.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 10);
-            lblMAV1.Text = "MAV  5: " + IndData[curIndex].MAV5.ToString("F2");
-            lblMAV2.Text = "MAV 10: " + IndData[curIndex].MAV10.ToString("F2");
-            lblMAV3.Text = "MAV 20: " + IndData[curIndex].MAV20.ToString("F2");
-            lblMAV4.Text = "MAV 60: " + IndData[curIndex].MAV60.ToString("F2");
-            lblMAV5.Text = "MAV120: " + IndData[curIndex].MAV120.ToString("F2");
+            lblMAV1.Text = "MAV  5: " + IdxData[curIndex].MAV5.ToString("F2");
+            lblMAV2.Text = "MAV 10: " + IdxData[curIndex].MAV10.ToString("F2");
+            lblMAV3.Text = "MAV 20: " + IdxData[curIndex].MAV20.ToString("F2");
+            lblMAV4.Text = "MAV 60: " + IdxData[curIndex].MAV60.ToString("F2");
+            lblMAV5.Text = "MAV120: " + IdxData[curIndex].MAV120.ToString("F2");
 
             //-- FOR DEBUG : Display Frame's 端點指標 --//
             for (int i = 0; i < (FrameNum + 1); i++)
@@ -641,7 +642,15 @@ namespace EarvinStocksPGM
         {
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
             //Chalk_MAP_VOLUME(e.Graphics, SelectFramePos, FrameNum);
-            Debug.WriteLine($"CLICK SelectFramePos={SelectFramePos}");
+            Debug.WriteLine($"CLICK VolumeToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
+            this.Invalidate();
+        }
+
+        private void BIASToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
+            //Chalk_MAP_VOLUME(e.Graphics, SelectFramePos, FrameNum);
+            Debug.WriteLine($"CLICK BIASToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
             this.Invalidate();
         }
 
@@ -658,7 +667,7 @@ namespace EarvinStocksPGM
             float barXCoord = FrameLeftPoints[0].frameX;    // 要繪製指標柱狀圖X座標(最左邊的位置FrameLeftPoints[0]一定會存在)
             float barYCoord = 0;                            // 要繪製指標柱狀圖Y座標
 
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, StartIndex, DisplayCount, GeneralModule.MAP_VOLUME);
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_VOLUME);
             Debug.WriteLine("最高/低價(Vol.)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
 
             lblHighVolume.Text = highLowValues.highValue.ToString();
@@ -666,6 +675,18 @@ namespace EarvinStocksPGM
             lblHighVolume.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos - 1].frameX - lblHighVolume.Width, (int)FrameLeftPoints[framePos - 1].frameY);
             lblLowVolume.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos].frameX - lblLowVolume.Width, (int)FrameLeftPoints[framePos].frameY - lblLowVolume.Height);
             float yDistance = yAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
+
+            // 劃虛線 (劃3條)
+            using (Pen pen = new Pen(Color.Black, 1))
+            {
+                pen.DashStyle = DashStyle.Dash;
+                for (int i = 1; i <= 3; i++)
+                {
+                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yAxisLength * i / 4);
+                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yAxisLength * i / 4);
+                    g.DrawLine(pen, pl, pr);
+                }
+            }
 
             for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
             {
@@ -695,53 +716,83 @@ namespace EarvinStocksPGM
 
         /**
          * 以BIAS為中線，向上 > 0、向下 < 0
+         * g        繪圖物件
+         * framePos 目前選擇的 frame 的位置
+         * frameNum 目前 frame 的總數量
          */
         private void Chalk_MAP_BIAS(Graphics g, int framePos, int frameNum)
         {
             //========================================//
-            //=== 顯示「乖離率」(MAP_BIAS) START ===// 
+            //=== 顯示「乖離率」(MAP_BIAS) START   ===// 
             //========================================//
             if (framePos <= 0 || framePos > frameNum)
                 return;
 
-            float yAxisLength = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
-            float barHeight = 0;                            // 要繪製指標柱狀圖高度
-            float barXCoord = FrameLeftPoints[0].frameX;    // 要繪製指標柱狀圖X座標(最左邊的位置FrameLeftPoints[0]一定會存在)
-            float barYCoord = 0;                            // 要繪製指標柱狀圖Y座標
+            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;    // 儲存要繪製指標柱狀圖的X軸長度
+            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
+            float yDistance = yAxisHeight / 4;
 
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, StartIndex, DisplayCount, GeneralModule.MAP_VOLUME);
-            Debug.WriteLine("最高/低價(Vol.)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+            //float barHeight = 0;                            // 要繪製指標柱狀圖高度
+            //float barXCoord = FrameLeftPoints[0].frameX;    // 要繪製指標柱狀圖X座標(最左邊的位置FrameLeftPoints[0]一定會存在)
+            //float barYCoord = 0;                            // 要繪製指標柱狀圖Y座標
 
-            lblHighBias.Text = highLowValues.highValue.ToString();
-            lblLowBias.Text = highLowValues.lowValue.ToString();
-            lblHighBias.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos - 1].frameX - lblHighBias.Width, (int)FrameLeftPoints[framePos - 1].frameY);
-            lblLowBias.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos].frameX - lblLowBias.Width, (int)FrameLeftPoints[framePos].frameY - lblLowBias.Height);
-            float yDistance = yAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_BIAS);
+            Debug.WriteLine("最高/低價(BIAS)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
 
-            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
+            // 劃虛線 (劃3條)
+            using (Pen pen = new Pen(Color.Black, 1))
             {
-                // X 座標
-                if (i != StartIndex)
+                pen.DashStyle = DashStyle.Dash;
+                for (int i = 1; i <= 3; i++)
                 {
-                    barXCoord += FrameBarWidth;
-                }
-                // Y 座標
-                barYCoord = (float)FrameLeftPoints[framePos - 1].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - StkData[i].Volume));
-                // 計算 K-Bar 的高度
-                barHeight = yDistance * (float)Math.Abs(StkData[i].Volume - highLowValues.lowValue);
-                // 繪製 K-Bar
-                if (StkData[i].StartPrice > StkData[i].EndPrice)
-                {
-                    Brush brush = new SolidBrush(Color.Green);
-                    g.FillRectangle(brush, barXCoord, barYCoord, FrameBarWidth, barHeight);
-                }
-                else
-                {
-                    Brush brush = new SolidBrush(Color.Red);
-                    g.FillRectangle(brush, barXCoord, barYCoord, FrameBarWidth, barHeight);
+                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
+                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
+                    g.DrawLine(pen, pl, pr);
                 }
             }
-            Debug.WriteLine("Chalk_BIAS_VOLUME() END!!!!!");
+
+            PointF[] points = new PointF[DisplayCount];
+
+            float xWidth = xAxisLength / DisplayCount;
+            float yHeight = yAxisHeight / (Math.Abs((float)highLowValues.highValue) * 2f);
+            Debug.WriteLine("xWidth= " + xWidth + ", yHeight= " + yHeight);
+
+            float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
+            float ii = 0;
+            if (IdxData[StartIndex].BIAS >= 0)
+                ii = ((float)IdxData[StartIndex].BIAS + (float)highLowValues.highValue) * yHeight;
+            else
+                ii = ((float)highLowValues.highValue - Math.Abs((float)IdxData[StartIndex].BIAS)) * yHeight;
+            float yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+            points[0] = new PointF(xCoord, yCoord);
+
+            for (int i = StartIndex+1; i < (StartIndex + DisplayCount); i++)
+            {
+                //float barHeight = yHeight * (float)Math.Abs(IdxData[i].BIAS - highLowValues.lowValue);
+                xCoord += xWidth;
+                //yCoord = FrameLeftPoints[framePos].frameY + yHeight * (float)Math.Abs(highLowValues.highValue - IdxData[i].BIAS);
+                if (IdxData[i].BIAS >= 0)
+                    ii = ((float)IdxData[i].BIAS + (float)highLowValues.highValue) * yHeight;
+                else
+                    ii = ((float)highLowValues.highValue - Math.Abs((float)IdxData[i].BIAS)) * yHeight;
+                yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                points[i] = new PointF(xCoord, yCoord);
+                Debug.WriteLine("BIAS[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord);
+            }
+
+            using (Pen pen = new Pen(Color.Blue, 1))
+            {
+                g.DrawLines(pen, points);
+            }
+
+            // 顯示Frame最左側的標籤
+            ////lblHighBias.Text = highLowValues.highValue.ToString();
+            ////lblLowBias.Text = highLowValues.lowValue.ToString();
+            ////lblHighBias.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos - 1].frameX - lblHighBias.Width, (int)FrameLeftPoints[framePos - 1].frameY);
+            ////lblLowBias.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos].frameX - lblLowBias.Width, (int)FrameLeftPoints[framePos].frameY - lblLowBias.Height);
+            ////float yDistance = yAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
+
+            Debug.WriteLine("Chalk_MAP_BIAS() END!!!!!");
         }
 
     }

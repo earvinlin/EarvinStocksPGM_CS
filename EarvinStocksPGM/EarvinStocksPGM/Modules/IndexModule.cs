@@ -138,7 +138,7 @@ namespace EarvinStocksPGM.Modules
                     {
                         dblAverage += sd[j].EndPrice;
                     }
-                    dblAverage = dblAverage / (i + 1);
+                    dblAverage = Math.Round(dblAverage / (i + 1),2);
                 }
                 else
                 {
@@ -148,15 +148,15 @@ namespace EarvinStocksPGM.Modules
                     }
                     dblAverage = dblAverage / intDayNo;
                 }
-                dblValues[i] = (sd[i].EndPrice - dblAverage) / dblAverage * 100;
+                dblValues[i] = Math.Round((sd[i].EndPrice - dblAverage) / dblAverage * 100,2);
 
                 i++;
             }
-            //// DEBUG : Display the BIAS values for verification
-            //for (i = 0; i < sd.Length; i++)
-            //{
-            //    Debug.WriteLine($"BIAS[{i}] = {dblValues[i]}");
-            //}
+            // DEBUG : Display the BIAS values for verification
+            for (i = 0; i < sd.Length; i++)
+            {
+                Debug.WriteLine($"BIAS[{i}] = {Math.Round(dblValues[i], 2)}");
+            }
             return dblValues;
         }
     }
