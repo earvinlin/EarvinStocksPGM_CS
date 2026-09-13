@@ -21,6 +21,8 @@ namespace EarvinStocksPGM
         private Label lblLowPrice;              // 動態新增label元件：顯示股票最低價
         private Label lblHighVolume;             // 動態新增label元件：顯示成交量最高價
         private Label lblLowVolume;              // 動態新增label元件：顯示成交量最低價
+        private Label lblHighBias;             // 動態新增label元件：顯示乖離率最高價
+        private Label lblLowBias;              // 動態新增label元件：顯示乖離率最低價
         private Label[] lblStockYM = new Label[STOCKYM_CNTS];
 
         
@@ -133,6 +135,26 @@ namespace EarvinStocksPGM
             lblLowVolume = new Label()
             {
                 Name = "lblLowVolume",
+                Text = "low",
+                AutoSize = true,
+                Font = new Font(this.Font.FontFamily, 5),
+            };
+            this.Controls.Add(lblLowVolume);
+
+            // 新增顯示股票資訊的標籤
+            lblHighVolume = new Label()
+            {
+                Name = "lblHighBias",
+                Text = "high",
+                AutoSize = true,
+                Font = new Font(this.Font.FontFamily, 5),
+            };
+            this.Controls.Add(lblHighVolume);
+
+            // 新增顯示股票資訊的標籤
+            lblLowVolume = new Label()
+            {
+                Name = "lblLowBias",
                 Text = "low",
                 AutoSize = true,
                 Font = new Font(this.Font.FontFamily, 5),
@@ -500,13 +522,13 @@ namespace EarvinStocksPGM
             lblMAV4.Text = "MAV 60: " + IndData[curIndex].MAV60.ToString("F2");
             lblMAV5.Text = "MAV120: " + IndData[curIndex].MAV120.ToString("F2");
 
-            ////-- FOR DEBUG : Display Frame's 端點指標 --//
-            //for (int i = 0; i < (FrameNum + 1); i++)
-            //{
-            //    Debug.WriteLine("FramePoint[" + i + "], Left.X= " + FrameLeftPoints[i].frameY + ", Left.Y= " + FrameLeftPoints[i].frameY
-            //                    + ", Right.X= " + FrameRightPoints[i].frameY + ", Right.Y= " + FrameRightPoints[i].frameY
-            //                    + ", Mid.X= " + FrameMiddlePoints[i].frameY + ", Mid.Y= " + FrameMiddlePoints[i].frameY);
-            //}
+            //-- FOR DEBUG : Display Frame's 端點指標 --//
+            for (int i = 0; i < (FrameNum + 1); i++)
+            {
+                Debug.WriteLine("FramePoint[" + i + "], Left.X= " + FrameLeftPoints[i].frameY + ", Left.Y= " + FrameLeftPoints[i].frameY
+                                + ", Right.X= " + FrameRightPoints[i].frameY + ", Right.Y= " + FrameRightPoints[i].frameY
+                                + ", Mid.X= " + FrameMiddlePoints[i].frameY + ", Mid.Y= " + FrameMiddlePoints[i].frameY);
+            }
         }
 
         private void cboFrameNum_SelectedIndexChanged(object sender, EventArgs e)
@@ -670,5 +692,57 @@ namespace EarvinStocksPGM
             }
             Debug.WriteLine("Chalk_MAP_VOLUME() END!!!!!");
         }
+
+        /**
+         * 以BIAS為中線，向上 > 0、向下 < 0
+         */
+        private void Chalk_MAP_BIAS(Graphics g, int framePos, int frameNum)
+        {
+            //========================================//
+            //=== 顯示「乖離率」(MAP_BIAS) START ===// 
+            //========================================//
+            if (framePos <= 0 || framePos > frameNum)
+                return;
+
+            float yAxisLength = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
+            float barHeight = 0;                            // 要繪製指標柱狀圖高度
+            float barXCoord = FrameLeftPoints[0].frameX;    // 要繪製指標柱狀圖X座標(最左邊的位置FrameLeftPoints[0]一定會存在)
+            float barYCoord = 0;                            // 要繪製指標柱狀圖Y座標
+
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, StartIndex, DisplayCount, GeneralModule.MAP_VOLUME);
+            Debug.WriteLine("最高/低價(Vol.)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+
+            lblHighBias.Text = highLowValues.highValue.ToString();
+            lblLowBias.Text = highLowValues.lowValue.ToString();
+            lblHighBias.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos - 1].frameX - lblHighBias.Width, (int)FrameLeftPoints[framePos - 1].frameY);
+            lblLowBias.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos].frameX - lblLowBias.Width, (int)FrameLeftPoints[framePos].frameY - lblLowBias.Height);
+            float yDistance = yAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
+
+            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
+            {
+                // X 座標
+                if (i != StartIndex)
+                {
+                    barXCoord += FrameBarWidth;
+                }
+                // Y 座標
+                barYCoord = (float)FrameLeftPoints[framePos - 1].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - StkData[i].Volume));
+                // 計算 K-Bar 的高度
+                barHeight = yDistance * (float)Math.Abs(StkData[i].Volume - highLowValues.lowValue);
+                // 繪製 K-Bar
+                if (StkData[i].StartPrice > StkData[i].EndPrice)
+                {
+                    Brush brush = new SolidBrush(Color.Green);
+                    g.FillRectangle(brush, barXCoord, barYCoord, FrameBarWidth, barHeight);
+                }
+                else
+                {
+                    Brush brush = new SolidBrush(Color.Red);
+                    g.FillRectangle(brush, barXCoord, barYCoord, FrameBarWidth, barHeight);
+                }
+            }
+            Debug.WriteLine("Chalk_BIAS_VOLUME() END!!!!!");
+        }
+
     }
 }

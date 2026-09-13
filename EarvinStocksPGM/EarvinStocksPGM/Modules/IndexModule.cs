@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 //namespace EarvinStocksPGM.Models
@@ -151,7 +152,29 @@ namespace EarvinStocksPGM.Modules
 
                 i++;
             }
+            //// DEBUG : Display the BIAS values for verification
+            //for (i = 0; i < sd.Length; i++)
+            //{
+            //    Debug.WriteLine($"BIAS[{i}] = {dblValues[i]}");
+            //}
             return dblValues;
         }
     }
 }
+
+
+/**
+ 最高/低價：29.7, 20.85
+FramePoint[0], Left.X= 79, Left.Y= 79, Right.X= 79, Right.Y= 79, Mid.X= 79, Mid.Y= 79
+FramePoint[1], Left.X= 415, Left.Y= 415, Right.X= 415, Right.Y= 415, Mid.X= 415, Mid.Y= 415
+FramePoint[2], Left.X= 499, Left.Y= 499, Right.X= 499, Right.Y= 499, Mid.X= 499, Mid.Y= 499
+FramePoint[3], Left.X= 583, Left.Y= 583, Right.X= 583, Right.Y= 583, Mid.X= 583, Mid.Y= 583
+FramePoint[4], Left.X= 667, Left.Y= 667, Right.X= 667, Right.Y= 667, Mid.X= 667, Mid.Y= 667
+FramePoint[5], Left.X= 751, Left.Y= 751, Right.X= 751, Right.Y= 751, Mid.X= 751, Mid.Y= 751
+
+<1> (F00~F01)
+<2> (F00~F01)
+<3> (F00~F01)
+<4> (F00~F01)
+<5> (F00~F01)
+ */
