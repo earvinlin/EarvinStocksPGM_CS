@@ -8,6 +8,7 @@ namespace EarvinStocksPGM.Modules
 
     public static class GeneralModule
     {
+        public const int MAP_UNSELECTED = 0;
         public const int MAP_K = 1;
         public const int MAP_VOLUME = 2;
         public const int MAP_BIAS = 3;

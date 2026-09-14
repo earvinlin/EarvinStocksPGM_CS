@@ -7,6 +7,23 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace EarvinStocksPGM
 {
+    /**
+     * 記錄每個FRAME選擇顯示的資料(最多只能選9個；第1個一定是MAP_K) 
+     */
+    public class SelectShowMapOnFrames
+    {
+        public int frame01 = GeneralModule.MAP_K;
+        public int frame02 = GeneralModule.MAP_UNSELECTED;
+        public int frame03 = GeneralModule.MAP_UNSELECTED;
+        public int frame04 = GeneralModule.MAP_UNSELECTED;
+        public int frame05 = GeneralModule.MAP_UNSELECTED;
+        public int frame06 = GeneralModule.MAP_UNSELECTED;
+        public int frame07 = GeneralModule.MAP_UNSELECTED;
+        public int frame08 = GeneralModule.MAP_UNSELECTED;
+        public int frame09 = GeneralModule.MAP_UNSELECTED;
+        //public int frame10 = GeneralModule.MAP_UNSELECTED;
+    }
+
     public struct FramePoints
     {
         public float frameX; 
