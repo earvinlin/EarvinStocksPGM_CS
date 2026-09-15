@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-//namespace EarvinStocksPGM.Models
 namespace EarvinStocksPGM.Modules
 {
     /**
@@ -120,6 +119,11 @@ namespace EarvinStocksPGM.Modules
                 dblValues[i] = dblAverage;
                 i++;
             }
+            //// DEBUG : Display the dblAverage values for verification
+            //for (i = 0; i < sd.Length; i++)
+            //{
+            //    Debug.WriteLine($"dblAverage[{i}] = {Math.Round(dblValues[i], 2)}");
+            //}
             return dblValues;
         }
 
@@ -152,11 +156,11 @@ namespace EarvinStocksPGM.Modules
 
                 i++;
             }
-            // DEBUG : Display the BIAS values for verification
-            for (i = 0; i < sd.Length; i++)
-            {
-                Debug.WriteLine($"BIAS[{i}] = {Math.Round(dblValues[i], 2)}");
-            }
+            //// DEBUG : Display the BIAS values for verification
+            //for (i = 0; i < sd.Length; i++)
+            //{
+            //    Debug.WriteLine($"BIAS[{i}] = {Math.Round(dblValues[i], 2)}");
+            //}
             return dblValues;
         }
     }

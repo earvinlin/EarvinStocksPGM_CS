@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
-//namespace EarvinStocksPGM.Models
 namespace EarvinStocksPGM.Modules
 {
     public class StockData
@@ -20,17 +19,11 @@ namespace EarvinStocksPGM.Modules
 
     public static class StockModule
     {
-        //public static IndexData[] CalculateAverage()
-        //{
-        //    return new IndexData[0];
-        //}
-
         public static StockData[] GetStockData(String stockNo)
         {
             string connStr = "Server=localhost;Database=stocksdb;User ID=root;Password=lin32ledi;";
 
             using var conn = new MySqlConnection(connStr);
-
             try
             {
                 conn.Open();
@@ -66,6 +59,5 @@ namespace EarvinStocksPGM.Modules
                 return null;
             }
         }
-
     }
 }

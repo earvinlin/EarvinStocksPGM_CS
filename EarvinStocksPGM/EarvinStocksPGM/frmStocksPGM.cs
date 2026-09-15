@@ -464,7 +464,24 @@ namespace EarvinStocksPGM
             try
             {
                 //Chalk_MAP_VOLUME(e.Graphics, SelectFramePos, FrameNum);
-                Chalk_MAP_BIAS(e.Graphics, SelectFramePos, FrameNum);
+                //Chalk_MAP_BIAS(e.Graphics, SelectFramePos, FrameNum);
+                for (int i = 1; i <= FrameNum; i++)
+                {
+                   switch( GeneralModule.SelectShowMapOnFrames[i])
+                    {
+                        case GeneralModule.MAP_UNSELECTED:
+                            break;
+                        case GeneralModule.MAP_K:
+                            //Chalk_MAP_K(e.Graphics, i, FrameNum);
+                            break;
+                        case GeneralModule.MAP_VOLUME:
+                            Chalk_MAP_VOLUME(e.Graphics, i, FrameNum);
+                            break;
+                        case GeneralModule.MAP_BIAS:
+                            Chalk_MAP_BIAS(e.Graphics, i, FrameNum);
+                            break;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -645,6 +662,7 @@ namespace EarvinStocksPGM
         {
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
             //Chalk_MAP_VOLUME(e.Graphics, SelectFramePos, FrameNum);
+            SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_VOLUME;
             Debug.WriteLine($"CLICK VolumeToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
             this.Invalidate();
         }
@@ -653,7 +671,9 @@ namespace EarvinStocksPGM
         {
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
             //Chalk_MAP_BIAS(e.Graphics, SelectFramePos, FrameNum);
+            SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_BIAS;
             Debug.WriteLine($"CLICK BIASToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
+
             this.Invalidate();
         }
 
