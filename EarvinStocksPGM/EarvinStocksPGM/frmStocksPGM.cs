@@ -7,28 +7,12 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace EarvinStocksPGM
 {
-    /**
-     * 記錄每個FRAME選擇顯示的資料(最多只能選9個；第1個一定是MAP_K) 
-     */
-    public class SelectShowMapOnFrames
-    {
-        public int frame01 = GeneralModule.MAP_K;
-        public int frame02 = GeneralModule.MAP_UNSELECTED;
-        public int frame03 = GeneralModule.MAP_UNSELECTED;
-        public int frame04 = GeneralModule.MAP_UNSELECTED;
-        public int frame05 = GeneralModule.MAP_UNSELECTED;
-        public int frame06 = GeneralModule.MAP_UNSELECTED;
-        public int frame07 = GeneralModule.MAP_UNSELECTED;
-        public int frame08 = GeneralModule.MAP_UNSELECTED;
-        public int frame09 = GeneralModule.MAP_UNSELECTED;
-        //public int frame10 = GeneralModule.MAP_UNSELECTED;
-    }
 
-    public struct FramePoints
-    {
-        public float frameX; 
-        public float frameY;
-    }
+    //public struct FramePoints
+    //{
+    //    public float frameX; 
+    //    public float frameY;
+    //}
 
     public partial class frmStocksPGM : Form
     {
@@ -40,8 +24,8 @@ namespace EarvinStocksPGM
         private Label lblLowVolume;              // 動態新增label元件：顯示成交量最低價
         private Label lblHighBias;             // 動態新增label元件：顯示乖離率最高價
         private Label lblLowBias;              // 動態新增label元件：顯示乖離率最低價
-        private Label[] lblStockYM = new Label[STOCKYM_CNTS];
 
+        private Label[] lblStockYM = new Label[STOCKYM_CNTS];
 
         private bool _initialized = false;
         static int STOCKYM_CNTS = 36;
@@ -95,6 +79,8 @@ namespace EarvinStocksPGM
         private void btnFocus_Click(object sender, EventArgs e)
         {
             IsShowFocusLine = !IsShowFocusLine;
+            if (!IsShowFocusLine)
+                this.Invalidate();
         }
 
         private void frmStocksPGM_Load(object sender, EventArgs e)
@@ -666,7 +652,7 @@ namespace EarvinStocksPGM
         private void BIASToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
-            //Chalk_MAP_VOLUME(e.Graphics, SelectFramePos, FrameNum);
+            //Chalk_MAP_BIAS(e.Graphics, SelectFramePos, FrameNum);
             Debug.WriteLine($"CLICK BIASToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
             this.Invalidate();
         }
@@ -749,10 +735,6 @@ namespace EarvinStocksPGM
             float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
             float yDistance = yAxisHeight / 4;
 
-            //float barHeight = 0;                            // 要繪製指標柱狀圖高度
-            //float barXCoord = FrameLeftPoints[0].frameX;    // 要繪製指標柱狀圖X座標(最左邊的位置FrameLeftPoints[0]一定會存在)
-            //float barYCoord = 0;                            // 要繪製指標柱狀圖Y座標
-
             HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_BIAS);
             Debug.WriteLine("最高/低價(BIAS)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
 
@@ -768,33 +750,56 @@ namespace EarvinStocksPGM
                 }
             }
 
+            // Draw Index Values
             PointF[] points = new PointF[DisplayCount];
-
             float xWidth = xAxisLength / DisplayCount;
-            float yHeight = yAxisHeight / (Math.Abs((float)highLowValues.highValue) * 2f);
+            float yHeight = yAxisHeight / (Math.Abs((float) highLowValues.highValue) * 2f);
             Debug.WriteLine("xWidth= " + xWidth + ", yHeight= " + yHeight);
 
             float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
-            float ii = 0;
-            if (IdxData[StartIndex].BIAS >= 0)
-                ii = ((float)IdxData[StartIndex].BIAS + (float)highLowValues.highValue) * yHeight;
-            else
-                ii = ((float)highLowValues.highValue - Math.Abs((float)IdxData[StartIndex].BIAS)) * yHeight;
-            float yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-            points[0] = new PointF(xCoord, yCoord);
+            float yCoord = FrameLeftPoints[framePos].frameY;
+            Debug.WriteLine("Baseline -- framePos= " + framePos +
+                ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX + 
+                ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
+                ", xCoord= " + xCoord + ", yCoord= " + yCoord);
 
-            for (int i = StartIndex+1; i < (StartIndex + DisplayCount); i++)
+            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
             {
-                //float barHeight = yHeight * (float)Math.Abs(IdxData[i].BIAS - highLowValues.lowValue);
-                xCoord += xWidth;
-                //yCoord = FrameLeftPoints[framePos].frameY + yHeight * (float)Math.Abs(highLowValues.highValue - IdxData[i].BIAS);
-                if (IdxData[i].BIAS >= 0)
-                    ii = ((float)IdxData[i].BIAS + (float)highLowValues.highValue) * yHeight;
+                //Debug.WriteLine("i= " + i + ", StartIndex= " + StartIndex + ", DisplayCount= " + DisplayCount);
+                float ii = 0;
+                if (i == StartIndex)
+                {
+                    if (IdxData[StartIndex].BIAS >= 0)
+                    {
+                        ii = ((float)IdxData[StartIndex].BIAS + Math.Abs((float)highLowValues.highValue)) * yHeight;
+                    }
+                    else
+                    {
+//                        ii = ((float)highLowValues.highValue - Math.Abs((float)IdxData[StartIndex].BIAS)) * yHeight;
+                        ii = Math.Abs((float)IdxData[StartIndex].BIAS) * yHeight;
+                    }
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points[0] = new PointF(xCoord, yCoord);
+                }
                 else
-                    ii = ((float)highLowValues.highValue - Math.Abs((float)IdxData[i].BIAS)) * yHeight;
-                yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-                points[i] = new PointF(xCoord, yCoord);
-                Debug.WriteLine("BIAS[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord);
+                {
+                    xCoord += xWidth;
+                    if (IdxData[i].BIAS >= 0)
+                    {
+                        ii = ((float)IdxData[i].BIAS + Math.Abs((float)highLowValues.highValue)) * yHeight;
+                        Debug.WriteLine("BIAS[" + i + "]>0 -- ii= " + ii + ", yDist= " + (float)highLowValues.highValue * yHeight + ", IdxData[i].BIAS= " + IdxData[i].BIAS);
+                    }
+                    else
+                    {
+                        //ii = ((float)highLowValues.highValue - Math.Abs((float)IdxData[i].BIAS)) * yHeight;
+                        ii = Math.Abs((float)IdxData[i].BIAS) * yHeight;
+                        Debug.WriteLine("BIAS[" + i + "]<0 -- ii= " + ii + ", yDist= " + (float)highLowValues.highValue * yHeight + ", IdxData[i].BIAS= " + IdxData[i].BIAS);
+                    }
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points[i - StartIndex] = new PointF(xCoord, yCoord);
+                }
+                Debug.WriteLine("BIAS[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord + 
+                    ", IdxData[i].BIAS= " + IdxData[i].BIAS + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
             }
 
             using (Pen pen = new Pen(Color.Blue, 1))
