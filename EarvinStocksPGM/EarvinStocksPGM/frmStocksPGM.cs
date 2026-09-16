@@ -862,8 +862,8 @@ namespace EarvinStocksPGM
             float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
             float yDistance = yAxisHeight / 4;
 
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_BIAS);
-            Debug.WriteLine("最高/低價(BIAS)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_WMS);
+            Debug.WriteLine("最高/低價(WMS)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
 
             // 劃虛線 (劃3條)
             using (Pen pen = new Pen(Color.Black, 1))
@@ -874,6 +874,15 @@ namespace EarvinStocksPGM
                     PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
                     PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
                     g.DrawLine(pen, pl, pr);
+                    // 顯示Frame最左側的標籤
+                    Label lbl = new Label();
+                    lbl.Text = $"{(highLowValues.highValue * i / 4)}";
+                    lbl.AutoSize = true;
+//                    lbl.Location = new Point((int)(pl.X + lbl.Height / 2), (int)(pl.Y - lbl.Width));
+                    lbl.Location = new Point((int)(10), (int)(pl.Y));
+                    lbl.Font = new Font(this.Font.FontFamily, 6);
+                    Debug.WriteLine("WMS.lbl -- X= " + lbl.Location.X + ", Y= " + lbl.Location.Y);
+                    this.Controls.Add(lbl);
                 }
             }
 
@@ -920,14 +929,6 @@ namespace EarvinStocksPGM
             {
                 g.DrawLines(pen, points);
             }
-
-            // 顯示Frame最左側的標籤
-            ////lblHighBias.Text = highLowValues.highValue.ToString();
-            ////lblLowBias.Text = highLowValues.lowValue.ToString();
-            ////lblHighBias.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos - 1].frameX - lblHighBias.Width, (int)FrameLeftPoints[framePos - 1].frameY);
-            ////lblLowBias.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos].frameX - lblLowBias.Width, (int)FrameLeftPoints[framePos].frameY - lblLowBias.Height);
-            ////float yDistance = yAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
-
             Debug.WriteLine("Chalk_MAP_WMS() END!!!!!");
         }
 
