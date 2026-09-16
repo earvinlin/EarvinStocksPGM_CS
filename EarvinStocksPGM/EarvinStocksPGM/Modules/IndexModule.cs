@@ -58,7 +58,7 @@ namespace EarvinStocksPGM.Modules
             dblMAVValues60 = CalculateAverage(sd, 60, false);
             dblMAVValues120 = CalculateAverage(sd, 120, false);
             dblBIAS = CalculateBIAS(sd, 10);
-            dblBIAS = CalculateWMS(sd, 5);
+            dblWMS = CalculateWMS(sd, 5);
 
             for (int i = 0; i < sd.Length; i++)
             {

@@ -480,6 +480,9 @@ namespace EarvinStocksPGM
                         case GeneralModule.MAP_BIAS:
                             Chalk_MAP_BIAS(e.Graphics, i, FrameNum);
                             break;
+                        case GeneralModule.MAP_WMS:
+                            Chalk_MAP_WMS(e.Graphics, i, FrameNum);
+                            break;    
                     }
                 }
             }
@@ -846,5 +849,90 @@ namespace EarvinStocksPGM
 
             Debug.WriteLine("Chalk_MAP_BIAS() END!!!!!");
         }
+
+        private void Chalk_MAP_WMS(Graphics g, int framePos, int frameNum)
+        {
+            //=======================================//
+            //=== 顯示「威廉指標」(MAP_WMS) START ===// 
+            //=======================================//
+            if (framePos <= 0 || framePos > frameNum)
+                return;
+
+            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;    // 儲存要繪製指標柱狀圖的X軸長度
+            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
+            float yDistance = yAxisHeight / 4;
+
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_BIAS);
+            Debug.WriteLine("最高/低價(BIAS)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+
+            // 劃虛線 (劃3條)
+            using (Pen pen = new Pen(Color.Black, 1))
+            {
+                pen.DashStyle = DashStyle.Dash;
+                for (int i = 1; i <= 3; i++)
+                {
+                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
+                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
+                    g.DrawLine(pen, pl, pr);
+                }
+            }
+
+            // Draw Index Values
+            PointF[] points = new PointF[DisplayCount];
+            float xWidth = xAxisLength / DisplayCount;
+            float yHeight = yAxisHeight / 100f;
+            Debug.WriteLine("WMS -- xWidth= " + xWidth + ", yHeight= " + yHeight);
+
+            float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
+            float yCoord = FrameLeftPoints[framePos].frameY;
+            //Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
+            //    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
+            //    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
+            //    ", xCoord= " + xCoord + ", yCoord= " + yCoord);
+
+            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
+            {
+                //Debug.WriteLine("i= " + i + ", StartIndex= " + StartIndex + ", DisplayCount= " + DisplayCount);
+                float ii = 0;
+                if (i == StartIndex)
+                {
+                    ii = yHeight * ((float) IdxData[i].WMS);
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points[0] = new PointF(xCoord, yCoord);
+                }
+                else
+                {
+                    xCoord += xWidth;
+                    ii = yHeight * ((float) IdxData[i].WMS);
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points[i - StartIndex] = new PointF(xCoord, yCoord);
+                }
+                //Debug.WriteLine("WMS[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
+                //    ", IdxData[i].WMS= " + IdxData[i].WMS + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
+                Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
+                    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
+                    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
+                ", xCoord= " + xCoord + ", yCoord= " + yCoord);
+
+            }
+
+            using (Pen pen = new Pen(Color.Blue, 1))
+            {
+                g.DrawLines(pen, points);
+            }
+
+            // 顯示Frame最左側的標籤
+            ////lblHighBias.Text = highLowValues.highValue.ToString();
+            ////lblLowBias.Text = highLowValues.lowValue.ToString();
+            ////lblHighBias.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos - 1].frameX - lblHighBias.Width, (int)FrameLeftPoints[framePos - 1].frameY);
+            ////lblLowBias.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos].frameX - lblLowBias.Width, (int)FrameLeftPoints[framePos].frameY - lblLowBias.Height);
+            ////float yDistance = yAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
+
+            Debug.WriteLine("Chalk_MAP_WMS() END!!!!!");
+        }
+
+        //-- Write Next Here --//
+        
+
     }
 }
