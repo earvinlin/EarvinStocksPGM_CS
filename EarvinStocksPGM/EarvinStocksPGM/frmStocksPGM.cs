@@ -467,7 +467,7 @@ namespace EarvinStocksPGM
                 //Chalk_MAP_BIAS(e.Graphics, SelectFramePos, FrameNum);
                 for (int i = 1; i <= FrameNum; i++)
                 {
-                   switch( GeneralModule.SelectShowMapOnFrames[i])
+                    switch (GeneralModule.SelectShowMapOnFrames[i])
                     {
                         case GeneralModule.MAP_UNSELECTED:
                             break;
@@ -677,6 +677,16 @@ namespace EarvinStocksPGM
             this.Invalidate();
         }
 
+        private void WMSToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
+            //Chalk_MAP_BIAS(e.Graphics, SelectFramePos, FrameNum);
+            SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_WMS;
+            Debug.WriteLine($"CLICK BIASToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
+
+            this.Invalidate();
+        }
+
         private void Chalk_MAP_VOLUME(Graphics g, int framePos, int frameNum)
         {
             //========================================//
@@ -773,13 +783,13 @@ namespace EarvinStocksPGM
             // Draw Index Values
             PointF[] points = new PointF[DisplayCount];
             float xWidth = xAxisLength / DisplayCount;
-            float yHeight = yAxisHeight / (Math.Abs((float) highLowValues.highValue) * 2f);
+            float yHeight = yAxisHeight / (Math.Abs((float)highLowValues.highValue) * 2f);
             Debug.WriteLine("xWidth= " + xWidth + ", yHeight= " + yHeight);
 
             float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
             float yCoord = FrameLeftPoints[framePos].frameY;
             Debug.WriteLine("Baseline -- framePos= " + framePos +
-                ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX + 
+                ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
                 ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
                 ", xCoord= " + xCoord + ", yCoord= " + yCoord);
 
@@ -795,7 +805,7 @@ namespace EarvinStocksPGM
                     }
                     else
                     {
-//                        ii = ((float)highLowValues.highValue - Math.Abs((float)IdxData[StartIndex].BIAS)) * yHeight;
+                        //                        ii = ((float)highLowValues.highValue - Math.Abs((float)IdxData[StartIndex].BIAS)) * yHeight;
                         ii = Math.Abs((float)IdxData[StartIndex].BIAS) * yHeight;
                     }
                     yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
@@ -818,7 +828,7 @@ namespace EarvinStocksPGM
                     yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
                     points[i - StartIndex] = new PointF(xCoord, yCoord);
                 }
-                Debug.WriteLine("BIAS[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord + 
+                Debug.WriteLine("BIAS[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
                     ", IdxData[i].BIAS= " + IdxData[i].BIAS + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
             }
 
@@ -836,6 +846,5 @@ namespace EarvinStocksPGM
 
             Debug.WriteLine("Chalk_MAP_BIAS() END!!!!!");
         }
-
     }
 }

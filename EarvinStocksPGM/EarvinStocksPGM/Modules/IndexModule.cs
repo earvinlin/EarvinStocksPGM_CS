@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace EarvinStocksPGM.Modules
 {
@@ -23,6 +24,7 @@ namespace EarvinStocksPGM.Modules
         public double MAV60 { get; set; }
         public double MAV120 { get; set; }
         public double BIAS { get; set; }
+        public double WMS { get; set; }
     }
 
     public static class IndexModule
@@ -42,6 +44,7 @@ namespace EarvinStocksPGM.Modules
             double[] dblMAVValues60 = new double[sd.Length];
             double[] dblMAVValues120 = new double[sd.Length];
             double[] dblBIAS = new double[sd.Length];
+            double[] dblWMS = new double[sd.Length];
 
             dblMAPValues5 = CalculateAverage(sd, 5, true);
             dblMAPValues10 = CalculateAverage(sd, 10, true);
@@ -55,6 +58,7 @@ namespace EarvinStocksPGM.Modules
             dblMAVValues60 = CalculateAverage(sd, 60, false);
             dblMAVValues120 = CalculateAverage(sd, 120, false);
             dblBIAS = CalculateBIAS(sd, 10);
+            dblBIAS = CalculateWMS(sd, 5);
 
             for (int i = 0; i < sd.Length; i++)
             {
@@ -71,6 +75,7 @@ namespace EarvinStocksPGM.Modules
                 idx[i].MAV60 = dblMAVValues60[i];
                 idx[i].MAV120 = dblMAVValues120[i];
                 idx[i].BIAS = dblBIAS[i];
+                idx[i].WMS = dblWMS[i];
             }
             return idx;
         }
@@ -163,6 +168,63 @@ namespace EarvinStocksPGM.Modules
             //}
             return dblValues;
         }
+
+        public static double[] CalculateWMS(StockData[] sd, int intDayNo)
+        {
+            int i = 0;
+            double dblMax = -1, dblMin = 999999;
+            double dblAverage = 0;
+            double[] dblValues = new double[sd.Length];
+
+            while (i < sd.Length)
+            {
+                dblMax = -1;
+                dblMin = 99999999;
+                if (i < intDayNo) 
+                {
+                    for (int j = 0; j <= i; j++)
+                    {
+                        if (dblMax < sd[j].HighPrice)
+                            dblMax = sd[j].HighPrice;
+                        if (dblMin > sd[j].LowPrice)
+                            dblMin = sd[j].LowPrice;
+                    }
+                }
+                else
+                {
+                    for (int j = i; j > (i - intDayNo); j--)
+                    {
+                        if (dblMax < sd[j].HighPrice)
+                            dblMax = sd[j].HighPrice;
+                        if (dblMin > sd[j].LowPrice)
+                            dblMin = sd[j].LowPrice;
+                    }
+                }
+                if (dblMax != dblMin)
+                {
+                    //Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", EndPrice= " + sd[i].EndPrice  + 
+                    //    ", dblMax = " + dblMax + ", dblMin= " + dblMin);
+                    dblAverage = (dblMax - sd[i].EndPrice) / (dblMax - dblMin) * 100;
+                }
+                else
+                {
+                    dblAverage = 50;
+                }
+                dblValues[i] = 100 - dblAverage;
+
+                i++;
+            }
+            // DEBUG : Display the WMS values for verification
+            for (i = 0; i < sd.Length; i++)
+            {
+//                Debug.WriteLine($"WMS[{i}] = {Math.Round(dblValues[i], 2)}");
+                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", WMS= " + Math.Round(dblValues[i], 2));
+            }
+            return dblValues;
+        }
+
+        //--- Write Here ---//
+
     }
 }
 
