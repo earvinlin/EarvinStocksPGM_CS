@@ -80,26 +80,32 @@ namespace EarvinStocksPGM.Modules
                     }
                     highValue = Math.Round(highValue, 2);
                     lowValue = Math.Round(lowValue, 2);
-                    if (Math.Abs(highValue) >= Math.Abs(lowValue))
+
+                    if (highValue >= 0 && lowValue >= 0)
                     {
                         highValue = Math.Ceiling(Math.Abs(highValue));
                         lowValue = -highValue;
-                    } else
-                    {
-                        lowValue = Math.Floor(Math.Abs(lowValue));
-                        highValue = -lowValue;
-                    }
-
-                    //--
-                    if (highValue >= 0 && lowValue >= 0)
-                    {
-                        lowValue = -highValue;
                     } 
-                    else if ( highValue < 0 && lowValue < 0)
+                    else if (highValue >= 0 && lowValue < 0)
                     {
-                        highValue = -lowValue;
+                        if (Math.Abs(highValue) >= Math.Abs(lowValue))
+                        {
+                            highValue = Math.Ceiling(Math.Abs(highValue));
+                            lowValue = -highValue;
+                        }
+                        else
+                        {
+                            highValue = Math.Ceiling(Math.Abs(lowValue));
+                            lowValue = -highValue;
+                        }
                     }
-
+                    else 
+                    {
+                        //lowValue = Math.Floor(Math.Abs(lowValue));
+                        //highValue = -lowValue;
+                        highValue = Math.Ceiling(Math.Abs(lowValue));
+                        lowValue = -highValue;
+                    }
                     break;
                 case MAP_WMS:
                     highValue = 100;
