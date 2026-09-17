@@ -161,11 +161,11 @@ namespace EarvinStocksPGM.Modules
 
                 i++;
             }
-            //// DEBUG : Display the BIAS values for verification
-            //for (i = 0; i < sd.Length; i++)
-            //{
-            //    Debug.WriteLine($"BIAS[{i}] = {Math.Round(dblValues[i], 2)}");
-            //}
+            // DEBUG : Display the BIAS values for verification
+            for (i = 0; i < sd.Length; i++)
+            {
+                Debug.WriteLine($"BIAS[{i}] = {Math.Round(dblValues[i], 2)}");
+            }
             return dblValues;
         }
 
@@ -214,12 +214,12 @@ namespace EarvinStocksPGM.Modules
 
                 i++;
             }
-            // DEBUG : Display the WMS values for verification
-            for (i = 0; i < sd.Length; i++)
-            {
-//                Debug.WriteLine($"WMS[{i}] = {Math.Round(dblValues[i], 2)}");
-                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", WMS= " + Math.Round(dblValues[i], 2));
-            }
+//            // DEBUG : Display the WMS values for verification
+//            for (i = 0; i < sd.Length; i++)
+//            {
+////                Debug.WriteLine($"WMS[{i}] = {Math.Round(dblValues[i], 2)}");
+//                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", WMS= " + Math.Round(dblValues[i], 2));
+//            }
             return dblValues;
         }
 

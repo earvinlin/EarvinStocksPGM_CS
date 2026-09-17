@@ -89,6 +89,17 @@ namespace EarvinStocksPGM.Modules
                         lowValue = Math.Floor(Math.Abs(lowValue));
                         highValue = -lowValue;
                     }
+
+                    //--
+                    if (highValue >= 0 && lowValue >= 0)
+                    {
+                        lowValue = -highValue;
+                    } 
+                    else if ( highValue < 0 && lowValue < 0)
+                    {
+                        highValue = -lowValue;
+                    }
+
                     break;
                 case MAP_WMS:
                     highValue = 100;

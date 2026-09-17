@@ -775,11 +775,15 @@ namespace EarvinStocksPGM
             using (Pen pen = new Pen(Color.Black, 1))
             {
                 pen.DashStyle = DashStyle.Dash;
+                int p = -1;
+                float ff = (float)highLowValues.highValue / 2f;
                 for (int i = 1; i <= 3; i++)
                 {
                     PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
                     PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
                     g.DrawLine(pen, pl, pr);
+                    Debug.WriteLine("LABEL (BIAS)：" + $"{pl}, {pr}");
+                    g.DrawString($"{(ff * (p++))}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
                 }
             }
 
@@ -875,14 +879,7 @@ namespace EarvinStocksPGM
                     PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
                     g.DrawLine(pen, pl, pr);
                     // 顯示Frame最左側的標籤
-                    Label lbl = new Label();
-                    lbl.Text = $"{(highLowValues.highValue * i / 4)}";
-                    lbl.AutoSize = true;
-//                    lbl.Location = new Point((int)(pl.X + lbl.Height / 2), (int)(pl.Y - lbl.Width));
-                    lbl.Location = new Point((int)(10), (int)(pl.Y));
-                    lbl.Font = new Font(this.Font.FontFamily, 6);
-                    Debug.WriteLine("WMS.lbl -- X= " + lbl.Location.X + ", Y= " + lbl.Location.Y);
-                    this.Controls.Add(lbl);
+                    g.DrawString($"{(highLowValues.highValue * i / 4)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
                 }
             }
 
