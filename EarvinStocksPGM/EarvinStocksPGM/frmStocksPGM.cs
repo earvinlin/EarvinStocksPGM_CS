@@ -435,7 +435,8 @@ namespace EarvinStocksPGM
                             Chalk_MAP_BIAS(e.Graphics, i, FrameNum);
                             break;
                         case GeneralModule.MAP_WMS:
-                            Chalk_MAP_WMS(e.Graphics, i, FrameNum);
+                            //Chalk_MAP_WMS(e.Graphics, i, FrameNum);
+                            Chalk_MAP_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_WMS);
                             break;
                         case GeneralModule.MAP_PSY:
                             Chalk_MAP_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_PSY);
@@ -683,7 +684,7 @@ namespace EarvinStocksPGM
         private void PSYToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
-            //Chalk_MAP_Line(e.Graphics, SelectFramePos, FrameNum);
+            //Chalk_MAP_LINE(e.Graphics, SelectFramePos, FrameNum);
             SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_PSY;
             Debug.WriteLine($"CLICK PSYToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
 
@@ -954,7 +955,7 @@ namespace EarvinStocksPGM
             PointF[] points = new PointF[DisplayCount];
             float xWidth = xAxisLength / DisplayCount;
             float yHeight = yAxisHeight / 100f;
-            Debug.WriteLine("WMS -- xWidth= " + xWidth + ", yHeight= " + yHeight);
+            Debug.WriteLine("Index -- xWidth= " + xWidth + ", yHeight= " + yHeight);
 
             float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
             float yCoord = FrameLeftPoints[framePos].frameY;
@@ -962,6 +963,21 @@ namespace EarvinStocksPGM
             //    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
             //    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
             //    ", xCoord= " + xCoord + ", yCoord= " + yCoord);
+            double[] values = new double[DisplayCount];
+            switch (mapType)
+            {
+                case GeneralModule.MAP_WMS:
+                    //Debug.WriteLine("WMS[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
+                    //    ", IdxData[i].WMS= " + IdxData[i].WMS + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
+                    values = IdxData.Select(d => d.WMS).ToArray();
+                    break;
+                case GeneralModule.MAP_PSY:
+                    //Debug.WriteLine("PSY[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
+                    //    ", IdxData[i].PSY= " + IdxData[i].PSY + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
+                    values = IdxData.Select(d => d.PSY).ToArray();
+
+                    break;
+            }
 
             for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
             {
@@ -969,14 +985,14 @@ namespace EarvinStocksPGM
                 float ii = 0;
                 if (i == StartIndex)
                 {
-                    ii = yHeight * ((float)IdxData[i].WMS);
+                    ii = yHeight * ((float)values[i]);
                     yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
                     points[0] = new PointF(xCoord, yCoord);
                 }
                 else
                 {
                     xCoord += xWidth;
-                    ii = yHeight * ((float)IdxData[i].WMS);
+                    ii = yHeight * ((float)values[i]);
                     yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
                     points[i - StartIndex] = new PointF(xCoord, yCoord);
                 }
@@ -986,11 +1002,11 @@ namespace EarvinStocksPGM
                 ", xCoord= " + xCoord + ", yCoord= " + yCoord);
             }
 
-            using (Pen pen = new Pen(Color.Blue, 1))
+            using (Pen pen = new Pen(Color.Green, 1))
             {
                 g.DrawLines(pen, points);
             }
-            Debug.WriteLine("Chalk_MAP_WMS() END!!!!!");
+            Debug.WriteLine("Chalk_MAP_LINE() END!!!!!");
         }
 
 
