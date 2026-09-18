@@ -441,6 +441,9 @@ namespace EarvinStocksPGM
                         case GeneralModule.MAP_PSY:
                             Chalk_MAP_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_PSY);
                             break;
+                        case GeneralModule.MAP_SRSI:
+                            Chalk_MAP_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_SRSI);
+                            break;
                     }
                 }
             }
@@ -527,6 +530,9 @@ namespace EarvinStocksPGM
                             break;
                         case GeneralModule.MAP_PSY:
                             g.DrawString("PSY : " + $"{IdxData[curIndex].PSY.ToString("F0")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            break;
+                        case GeneralModule.MAP_SRSI:
+                            g.DrawString("RSI : " + $"{IdxData[curIndex].SRSI.ToString("F0")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
                     }
                 }
@@ -689,6 +695,17 @@ namespace EarvinStocksPGM
             Debug.WriteLine($"CLICK PSYToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
 
             this.Invalidate();
+        }
+
+        private void RSIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
+            //Chalk_MAP_LINE(e.Graphics, SelectFramePos, FrameNum);
+            SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_SRSI;
+            Debug.WriteLine($"CLICK RSIToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
+
+            this.Invalidate();
+
         }
 
 
@@ -975,7 +992,11 @@ namespace EarvinStocksPGM
                     //Debug.WriteLine("PSY[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
                     //    ", IdxData[i].PSY= " + IdxData[i].PSY + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
                     values = IdxData.Select(d => d.PSY).ToArray();
-
+                    break;
+                case GeneralModule.MAP_SRSI:
+                    //Debug.WriteLine("PSY[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
+                    //    ", IdxData[i].PSY= " + IdxData[i].PSY + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
+                    values = IdxData.Select(d => d.SRSI).ToArray();
                     break;
             }
 
@@ -1008,6 +1029,7 @@ namespace EarvinStocksPGM
             }
             Debug.WriteLine("Chalk_MAP_LINE() END!!!!!");
         }
+
 
 
 

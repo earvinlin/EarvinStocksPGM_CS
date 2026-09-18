@@ -550,50 +550,50 @@
             // VolumeToolStripMenuItem
             // 
             VolumeToolStripMenuItem.Name = "VolumeToolStripMenuItem";
-            VolumeToolStripMenuItem.Size = new Size(180, 22);
+            VolumeToolStripMenuItem.Size = new Size(134, 22);
             VolumeToolStripMenuItem.Text = "成交量";
             VolumeToolStripMenuItem.Click += VolumeToolStripMenuItem_Click;
             // 
             // 融資餘額ToolStripMenuItem
             // 
             融資餘額ToolStripMenuItem.Name = "融資餘額ToolStripMenuItem";
-            融資餘額ToolStripMenuItem.Size = new Size(180, 22);
+            融資餘額ToolStripMenuItem.Size = new Size(134, 22);
             融資餘額ToolStripMenuItem.Text = "融資餘額";
             // 
             // 融資增減ToolStripMenuItem
             // 
             融資增減ToolStripMenuItem.Name = "融資增減ToolStripMenuItem";
-            融資增減ToolStripMenuItem.Size = new Size(180, 22);
+            融資增減ToolStripMenuItem.Size = new Size(134, 22);
             融資增減ToolStripMenuItem.Text = "融資增減";
             // 
             // 融券餘額ToolStripMenuItem
             // 
             融券餘額ToolStripMenuItem.Name = "融券餘額ToolStripMenuItem";
-            融券餘額ToolStripMenuItem.Size = new Size(180, 22);
+            融券餘額ToolStripMenuItem.Size = new Size(134, 22);
             融券餘額ToolStripMenuItem.Text = "融券餘額";
             // 
             // 法人庫存ToolStripMenuItem
             // 
             法人庫存ToolStripMenuItem.Name = "法人庫存ToolStripMenuItem";
-            法人庫存ToolStripMenuItem.Size = new Size(180, 22);
+            法人庫存ToolStripMenuItem.Size = new Size(134, 22);
             法人庫存ToolStripMenuItem.Text = "法人庫存";
             // 
             // 自營商庫存ToolStripMenuItem
             // 
             自營商庫存ToolStripMenuItem.Name = "自營商庫存ToolStripMenuItem";
-            自營商庫存ToolStripMenuItem.Size = new Size(180, 22);
+            自營商庫存ToolStripMenuItem.Size = new Size(134, 22);
             自營商庫存ToolStripMenuItem.Text = "自營商庫存";
             // 
             // 投信庫存ToolStripMenuItem
             // 
             投信庫存ToolStripMenuItem.Name = "投信庫存ToolStripMenuItem";
-            投信庫存ToolStripMenuItem.Size = new Size(180, 22);
+            投信庫存ToolStripMenuItem.Size = new Size(134, 22);
             投信庫存ToolStripMenuItem.Text = "投信庫存";
             // 
             // 外資庫存ToolStripMenuItem
             // 
             外資庫存ToolStripMenuItem.Name = "外資庫存ToolStripMenuItem";
-            外資庫存ToolStripMenuItem.Size = new Size(180, 22);
+            外資庫存ToolStripMenuItem.Size = new Size(134, 22);
             外資庫存ToolStripMenuItem.Text = "外資庫存";
             // 
             // 熱門指標ToolStripMenuItem
@@ -620,6 +620,7 @@
             RSIToolStripMenuItem.Name = "RSIToolStripMenuItem";
             RSIToolStripMenuItem.Size = new Size(180, 22);
             RSIToolStripMenuItem.Text = "RSI";
+            RSIToolStripMenuItem.Click += RSIToolStripMenuItem_Click;
             // 
             // stochRSIToolStripMenuItem
             // 

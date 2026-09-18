@@ -26,6 +26,8 @@ namespace EarvinStocksPGM.Modules
         public double BIAS { get; set; }
         public double WMS { get; set; }
         public double PSY { get; set; }
+        public double SRSI { get; set; }
+        public double LRSI { get; set; }
     }
 
     public static class IndexModule
@@ -47,6 +49,8 @@ namespace EarvinStocksPGM.Modules
             double[] dblBIAS = new double[sd.Length];
             double[] dblWMS = new double[sd.Length];
             double[] dblPSY = new double[sd.Length];
+            double[] dblSRSI = new double[sd.Length];
+            double[] dblLRSI = new double[sd.Length];
 
             dblMAPValues5 = CalculateAverage(sd, 5, true);
             dblMAPValues10 = CalculateAverage(sd, 10, true);
@@ -62,6 +66,8 @@ namespace EarvinStocksPGM.Modules
             dblBIAS = CalculateBIAS(sd, 10);
             dblWMS = CalculateWMS(sd, 5);
             dblPSY = CalculatePSY(sd, 5);
+            dblSRSI = CalculateRSI(sd, 5);
+            dblLRSI = CalculateRSI(sd, 5);
 
             for (int i = 0; i < sd.Length; i++)
             {
@@ -80,6 +86,8 @@ namespace EarvinStocksPGM.Modules
                 idx[i].BIAS = dblBIAS[i];
                 idx[i].WMS = dblWMS[i];
                 idx[i].PSY = dblPSY[i];
+                idx[i].SRSI = dblSRSI[i];
+                idx[i].LRSI = dblLRSI[i];
             }
             return idx;
         }
@@ -256,10 +264,70 @@ namespace EarvinStocksPGM.Modules
 
                 i++;
             }
+            //// DEBUG : Display the PSY values for verification
+            //for (i = 0; i < sd.Length; i++)
+            //{
+            //    Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", PSY= " + Math.Round(dblValues[i], 2));
+            //}
+            return dblValues;
+        }
+
+        public static double[] CalculateRSI(StockData[] sd, int intDayNo)
+        {
+            int i = 0;
+            double dblUpValue = 0, dblDownValue = 0, dblDiff = 0;
+            double dblAverage;
+            double[] dblValues = new double[sd.Length];
+
+            Debug.WriteLine("intDayNo= " + intDayNo);
+            while (i < sd.Length)
+            {
+                dblUpValue = 0;
+                dblDownValue = 0;
+                if (i < intDayNo)
+                {
+                    for (int j = 1; j < i; j++)
+                    {
+                        Debug.WriteLine("**sd[" + j + "].Date= " + sd[j].TradeDate + 
+                            ", j_price= " + sd[j].EndPrice + ", (j-1)_price= " + sd[j-1].EndPrice);
+                        dblDiff = sd[j].EndPrice - sd[j - 1].EndPrice;
+                        if (dblDiff > 0)
+                            dblUpValue += dblDiff;
+                        else
+                            dblDownValue += Math.Abs(dblDiff);
+                    }
+                    dblUpValue = dblUpValue / i;
+                    dblDownValue = dblDownValue / i;
+               }
+                else
+                {
+                    for (int j = i; j > (i - intDayNo); j--)
+                    {
+                        Debug.WriteLine("##sd[" + j + "].Date= " + sd[j].TradeDate +
+                            ", j_price= " + sd[j].EndPrice + ", (j-1)_price= " + sd[j - 1].EndPrice);
+
+                        dblDiff = sd[j].EndPrice - sd[j - 1].EndPrice;
+                        if (dblDiff > 0)
+                            dblUpValue += dblDiff;
+                        else
+                            dblDownValue += Math.Abs(dblDiff);
+                    }
+                    dblUpValue = dblUpValue / intDayNo;
+                    dblDownValue = dblDownValue / intDayNo;
+                 }
+                if (i != 0 && (dblUpValue + dblDownValue) != 0)
+                    dblAverage = dblUpValue / (dblUpValue + dblDownValue) * 100;
+                else
+                    dblAverage = 50;
+
+                dblValues[i] = dblAverage;
+
+                i++;
+            }
             // DEBUG : Display the PSY values for verification
             for (i = 0; i < sd.Length; i++)
             {
-                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", PSY= " + Math.Round(dblValues[i], 2));
+                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", RSI= " + Math.Round(dblValues[i], 2));
             }
             return dblValues;
         }
