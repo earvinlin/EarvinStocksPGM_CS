@@ -460,11 +460,9 @@ namespace EarvinStocksPGM
                 prevNum = nextNum;
             }
 
-            //=== 顯示「成交量」(MAP_VOLUME) START ===// 
+            //=== 顯示 Frame START ===// 
             try
             {
-                //Chalk_MAP_VOLUME(e.Graphics, SelectFramePos, FrameNum);
-                //Chalk_MAP_BIAS(e.Graphics, SelectFramePos, FrameNum);
                 for (int i = 1; i <= FrameNum; i++)
                 {
                     switch (GeneralModule.SelectShowMapOnFrames[i])
@@ -479,6 +477,7 @@ namespace EarvinStocksPGM
                             break;
                         case GeneralModule.MAP_BIAS:
                             Chalk_MAP_BIAS(e.Graphics, i, FrameNum);
+                            g.DrawString($"{(highLowValues.highValue * i / 4)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
                             break;
                         case GeneralModule.MAP_WMS:
                             Chalk_MAP_WMS(e.Graphics, i, FrameNum);
