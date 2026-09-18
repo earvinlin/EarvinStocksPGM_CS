@@ -25,6 +25,7 @@ namespace EarvinStocksPGM.Modules
         public double MAV120 { get; set; }
         public double BIAS { get; set; }
         public double WMS { get; set; }
+        public double PSY { get; set; }
     }
 
     public static class IndexModule
@@ -45,6 +46,7 @@ namespace EarvinStocksPGM.Modules
             double[] dblMAVValues120 = new double[sd.Length];
             double[] dblBIAS = new double[sd.Length];
             double[] dblWMS = new double[sd.Length];
+            double[] dblPSY = new double[sd.Length];
 
             dblMAPValues5 = CalculateAverage(sd, 5, true);
             dblMAPValues10 = CalculateAverage(sd, 10, true);
@@ -59,6 +61,7 @@ namespace EarvinStocksPGM.Modules
             dblMAVValues120 = CalculateAverage(sd, 120, false);
             dblBIAS = CalculateBIAS(sd, 10);
             dblWMS = CalculateWMS(sd, 5);
+            dblPSY = CalculatePSY(sd, 5);
 
             for (int i = 0; i < sd.Length; i++)
             {
@@ -76,6 +79,7 @@ namespace EarvinStocksPGM.Modules
                 idx[i].MAV120 = dblMAVValues120[i];
                 idx[i].BIAS = dblBIAS[i];
                 idx[i].WMS = dblWMS[i];
+                idx[i].PSY = dblPSY[i];
             }
             return idx;
         }
@@ -161,11 +165,11 @@ namespace EarvinStocksPGM.Modules
 
                 i++;
             }
-            // DEBUG : Display the BIAS values for verification
-            for (i = 0; i < sd.Length; i++)
-            {
-                Debug.WriteLine($"BIAS[{i}] = {Math.Round(dblValues[i], 2)}");
-            }
+            //// DEBUG : Display the BIAS values for verification
+            //for (i = 0; i < sd.Length; i++)
+            //{
+            //    Debug.WriteLine($"BIAS[{i}] = {Math.Round(dblValues[i], 2)}");
+            //}
             return dblValues;
         }
 
@@ -222,6 +226,45 @@ namespace EarvinStocksPGM.Modules
 //            }
             return dblValues;
         }
+
+        public static double[] CalculatePSY(StockData[] sd, int intDayNo)
+        {
+            int i = 0;
+            int upDays = 0;
+            double dblAverage = 0;
+            double[] dblValues = new double[sd.Length];
+
+            while (i < sd.Length)
+            {
+                if (i < intDayNo)
+                {
+                    dblAverage = 50;
+                }
+                else
+                {
+                    upDays = 0;
+                    for (int j = i; j > (i - intDayNo); j--)
+                    {
+                        //Debug.WriteLine("sd[" + j + "].Date= " + sd[j].TradeDate + ", i= " + sd[j].EndPrice + ", (i-1)= " + sd[j - 1].EndPrice + ",up= " + upDays);
+                        if (sd[j].EndPrice > sd[j - 1].EndPrice)
+                            upDays++;
+                    }
+                    //Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", upDays= " + upDays);
+                    dblAverage = upDays / (double)intDayNo * 100;
+                }
+                dblValues[i] = dblAverage;
+
+                i++;
+            }
+            // DEBUG : Display the PSY values for verification
+            for (i = 0; i < sd.Length; i++)
+            {
+                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", PSY= " + Math.Round(dblValues[i], 2));
+            }
+            return dblValues;
+        }
+
+
 
         //--- Write Here ---//
 

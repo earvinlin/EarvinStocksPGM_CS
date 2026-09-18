@@ -20,10 +20,6 @@ namespace EarvinStocksPGM
         private Label lblStokInfo;              // 動態新增label元件：顯示股票資訊用
         private Label lblHighPrice;             // 動態新增label元件：顯示股票最高價
         private Label lblLowPrice;              // 動態新增label元件：顯示股票最低價
-        private Label lblHighVolume;             // 動態新增label元件：顯示成交量最高價
-        private Label lblLowVolume;              // 動態新增label元件：顯示成交量最低價
-        private Label lblHighBias;             // 動態新增label元件：顯示乖離率最高價
-        private Label lblLowBias;              // 動態新增label元件：顯示乖離率最低價
 
         private Label[] lblStockYM = new Label[STOCKYM_CNTS];
 
@@ -123,46 +119,6 @@ namespace EarvinStocksPGM
                 Font = new Font(this.Font.FontFamily, 6),
             };
             this.Controls.Add(lblLowPrice);
-
-            // 新增顯示股票資訊的標籤
-            lblHighVolume = new Label()
-            {
-                Name = "lblHighVolume",
-                Text = "high",
-                AutoSize = true,
-                Font = new Font(this.Font.FontFamily, 5),
-            };
-            this.Controls.Add(lblHighVolume);
-
-            // 新增顯示股票資訊的標籤
-            lblLowVolume = new Label()
-            {
-                Name = "lblLowVolume",
-                Text = "low",
-                AutoSize = true,
-                Font = new Font(this.Font.FontFamily, 5),
-            };
-            this.Controls.Add(lblLowVolume);
-
-            // 新增顯示股票資訊的標籤
-            lblHighVolume = new Label()
-            {
-                Name = "lblHighBias",
-                Text = "high",
-                AutoSize = true,
-                Font = new Font(this.Font.FontFamily, 5),
-            };
-            this.Controls.Add(lblHighVolume);
-
-            // 新增顯示股票資訊的標籤
-            lblLowVolume = new Label()
-            {
-                Name = "lblLowBias",
-                Text = "low",
-                AutoSize = true,
-                Font = new Font(this.Font.FontFamily, 5),
-            };
-            this.Controls.Add(lblLowVolume);
 
             // 新增 Label 元件(預設建立 STOCKYM_CNTS 個備用)
             for (int i = 0; i < STOCKYM_CNTS; i++)
@@ -477,11 +433,10 @@ namespace EarvinStocksPGM
                             break;
                         case GeneralModule.MAP_BIAS:
                             Chalk_MAP_BIAS(e.Graphics, i, FrameNum);
-                            g.DrawString($"{(highLowValues.highValue * i / 4)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
                             break;
                         case GeneralModule.MAP_WMS:
                             Chalk_MAP_WMS(e.Graphics, i, FrameNum);
-                            break;    
+                            break;
                     }
                 }
             }
@@ -520,7 +475,9 @@ namespace EarvinStocksPGM
             //lblHighPrice.Text = highLowValues.highValue.ToString("F2");
             //lblLowPrice.Text = highLowValues.lowValue.ToString("F2");
 
+            //--------------------------------//
             //=== 最右側的各項指標數值顯示 ===//
+            //--------------------------------//
             lblMAP1.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1);
             lblMAP2.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height);
             lblMAP3.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 2);
@@ -544,6 +501,34 @@ namespace EarvinStocksPGM
             lblMAV3.Text = "MAV 20: " + IdxData[curIndex].MAV20.ToString("F2");
             lblMAV4.Text = "MAV 60: " + IdxData[curIndex].MAV60.ToString("F2");
             lblMAV5.Text = "MAV120: " + IdxData[curIndex].MAV120.ToString("F2");
+
+            try
+            {
+                for (int i = 1; i <= FrameNum; i++)
+                {
+                    switch (GeneralModule.SelectShowMapOnFrames[i])
+                    {
+                        case GeneralModule.MAP_UNSELECTED:
+                            break;
+                        case GeneralModule.MAP_K:
+                            break;
+                        case GeneralModule.MAP_VOLUME:
+                            g.DrawString("VOL : " + $"{StkData[curIndex].Volume}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            break;
+                        case GeneralModule.MAP_BIAS:
+                            g.DrawString("BIAS : " + $"{IdxData[curIndex].BIAS.ToString("F2")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            break;
+                        case GeneralModule.MAP_WMS:
+                            g.DrawString("WMS : " + $"{IdxData[curIndex].WMS.ToString("F2")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
 
             //-- FOR DEBUG : Display Frame's 端點指標 --//
             for (int i = 0; i < (FrameNum + 1); i++)
@@ -689,6 +674,17 @@ namespace EarvinStocksPGM
             this.Invalidate();
         }
 
+        private void PSYToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
+            //Chalk_MAP_Line(e.Graphics, SelectFramePos, FrameNum);
+            SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_PSY;
+            Debug.WriteLine($"CLICK PSYToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
+
+            this.Invalidate();
+        }
+
+
         private void Chalk_MAP_VOLUME(Graphics g, int framePos, int frameNum)
         {
             //========================================//
@@ -705,21 +701,28 @@ namespace EarvinStocksPGM
             HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_VOLUME);
             Debug.WriteLine("最高/低價(Vol.)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
 
-            lblHighVolume.Text = highLowValues.highValue.ToString();
-            lblLowVolume.Text = highLowValues.lowValue.ToString();
-            lblHighVolume.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos - 1].frameX - lblHighVolume.Width, (int)FrameLeftPoints[framePos - 1].frameY);
-            lblLowVolume.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos].frameX - lblLowVolume.Width, (int)FrameLeftPoints[framePos].frameY - lblLowVolume.Height);
             float yDistance = yAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
+
+            g.DrawString($"{(highLowValues.highValue)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)FrameLeftPoints[framePos - 1].frameY);
+            g.DrawString($"{(highLowValues.lowValue)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)FrameLeftPoints[framePos].frameY);
+
 
             // 劃虛線 (劃3條)
             using (Pen pen = new Pen(Color.Black, 1))
             {
                 pen.DashStyle = DashStyle.Dash;
+                int p = 3;
+                float ff = (float)(highLowValues.highValue - highLowValues.lowValue) / 4f;
+                Debug.WriteLine("VOLUME /4：" + $"{ff}");
                 for (int i = 1; i <= 3; i++)
                 {
                     PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yAxisLength * i / 4);
                     PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yAxisLength * i / 4);
                     g.DrawLine(pen, pl, pr);
+
+                    //Debug.WriteLine("LABEL (VOLUME)：" + $"{pl}, {pr}, {ff}, {p}, {(ff * (p))}, {(highLowValues.highValue - ff * (p))}");
+                    g.DrawString($"{(highLowValues.highValue - ff * (p--))}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
+
                 }
             }
 
@@ -763,7 +766,7 @@ namespace EarvinStocksPGM
             if (framePos <= 0 || framePos > frameNum)
                 return;
 
-            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;    // 儲存要繪製指標柱狀圖的X軸長度
+            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;      // 儲存要繪製指標柱狀圖的X軸長度
             float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
             float yDistance = yAxisHeight / 4;
 
@@ -794,14 +797,13 @@ namespace EarvinStocksPGM
 
             float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
             float yCoord = FrameLeftPoints[framePos].frameY;
-            Debug.WriteLine("Baseline -- framePos= " + framePos +
-                ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
-                ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
-                ", xCoord= " + xCoord + ", yCoord= " + yCoord);
+            //Debug.WriteLine("Baseline -- framePos= " + framePos +
+            //    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
+            //    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
+            //    ", xCoord= " + xCoord + ", yCoord= " + yCoord);
 
             for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
             {
-                //Debug.WriteLine("i= " + i + ", StartIndex= " + StartIndex + ", DisplayCount= " + DisplayCount);
                 float ii = 0;
                 if (i == StartIndex)
                 {
@@ -811,7 +813,6 @@ namespace EarvinStocksPGM
                     }
                     else
                     {
-                        //                        ii = ((float)highLowValues.highValue - Math.Abs((float)IdxData[StartIndex].BIAS)) * yHeight;
                         ii = Math.Abs((float)IdxData[StartIndex].BIAS) * yHeight;
                     }
                     yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
@@ -823,13 +824,10 @@ namespace EarvinStocksPGM
                     if (IdxData[i].BIAS >= 0)
                     {
                         ii = ((float)IdxData[i].BIAS + Math.Abs((float)highLowValues.highValue)) * yHeight;
-                        Debug.WriteLine("BIAS[" + i + "]>0 -- ii= " + ii + ", yDist= " + (float)highLowValues.highValue * yHeight + ", IdxData[i].BIAS= " + IdxData[i].BIAS);
                     }
                     else
                     {
-                        //ii = ((float)highLowValues.highValue - Math.Abs((float)IdxData[i].BIAS)) * yHeight;
                         ii = Math.Abs((float)IdxData[i].BIAS) * yHeight;
-                        Debug.WriteLine("BIAS[" + i + "]<0 -- ii= " + ii + ", yDist= " + (float)highLowValues.highValue * yHeight + ", IdxData[i].BIAS= " + IdxData[i].BIAS);
                     }
                     yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
                     points[i - StartIndex] = new PointF(xCoord, yCoord);
@@ -842,14 +840,6 @@ namespace EarvinStocksPGM
             {
                 g.DrawLines(pen, points);
             }
-
-            // 顯示Frame最左側的標籤
-            ////lblHighBias.Text = highLowValues.highValue.ToString();
-            ////lblLowBias.Text = highLowValues.lowValue.ToString();
-            ////lblHighBias.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos - 1].frameX - lblHighBias.Width, (int)FrameLeftPoints[framePos - 1].frameY);
-            ////lblLowBias.Location = new System.Drawing.Point((int)FrameLeftPoints[framePos].frameX - lblLowBias.Width, (int)FrameLeftPoints[framePos].frameY - lblLowBias.Height);
-            ////float yDistance = yAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
-
             Debug.WriteLine("Chalk_MAP_BIAS() END!!!!!");
         }
 
@@ -901,24 +891,21 @@ namespace EarvinStocksPGM
                 float ii = 0;
                 if (i == StartIndex)
                 {
-                    ii = yHeight * ((float) IdxData[i].WMS);
+                    ii = yHeight * ((float)IdxData[i].WMS);
                     yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
                     points[0] = new PointF(xCoord, yCoord);
                 }
                 else
                 {
                     xCoord += xWidth;
-                    ii = yHeight * ((float) IdxData[i].WMS);
+                    ii = yHeight * ((float)IdxData[i].WMS);
                     yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
                     points[i - StartIndex] = new PointF(xCoord, yCoord);
                 }
-                //Debug.WriteLine("WMS[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
-                //    ", IdxData[i].WMS= " + IdxData[i].WMS + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
                 Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
                     ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
                     ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
                 ", xCoord= " + xCoord + ", yCoord= " + yCoord);
-
             }
 
             using (Pen pen = new Pen(Color.Blue, 1))
@@ -928,8 +915,83 @@ namespace EarvinStocksPGM
             Debug.WriteLine("Chalk_MAP_WMS() END!!!!!");
         }
 
+        private void Chalk_MAP_Line(Graphics g, int mapType, int framePos, int frameNum)
+        {
+            //=======================================//
+            //=== 顯示「威廉指標」(MAP_WMS) START ===// 
+            //=======================================//
+            if (framePos <= 0 || framePos > frameNum)
+                return;
+
+            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;    // 儲存要繪製指標柱狀圖的X軸長度
+            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
+            float yDistance = yAxisHeight / 4;
+
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType);
+            Debug.WriteLine("最高/低價(LINE)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+
+            // 劃虛線 (劃3條)
+            using (Pen pen = new Pen(Color.Black, 1))
+            {
+                pen.DashStyle = DashStyle.Dash;
+                for (int i = 1; i <= 3; i++)
+                {
+                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
+                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
+                    g.DrawLine(pen, pl, pr);
+                    // 顯示Frame最左側的標籤
+                    g.DrawString($"{(highLowValues.highValue * i / 4)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
+                }
+            }
+
+            // Draw Index Values
+            PointF[] points = new PointF[DisplayCount];
+            float xWidth = xAxisLength / DisplayCount;
+            float yHeight = yAxisHeight / 100f;
+            Debug.WriteLine("WMS -- xWidth= " + xWidth + ", yHeight= " + yHeight);
+
+            float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
+            float yCoord = FrameLeftPoints[framePos].frameY;
+            //Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
+            //    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
+            //    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
+            //    ", xCoord= " + xCoord + ", yCoord= " + yCoord);
+
+            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
+            {
+                //Debug.WriteLine("i= " + i + ", StartIndex= " + StartIndex + ", DisplayCount= " + DisplayCount);
+                float ii = 0;
+                if (i == StartIndex)
+                {
+                    ii = yHeight * ((float)IdxData[i].WMS);
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points[0] = new PointF(xCoord, yCoord);
+                }
+                else
+                {
+                    xCoord += xWidth;
+                    ii = yHeight * ((float)IdxData[i].WMS);
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points[i - StartIndex] = new PointF(xCoord, yCoord);
+                }
+                Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
+                    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
+                    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
+                ", xCoord= " + xCoord + ", yCoord= " + yCoord);
+            }
+
+            using (Pen pen = new Pen(Color.Blue, 1))
+            {
+                g.DrawLines(pen, points);
+            }
+            Debug.WriteLine("Chalk_MAP_WMS() END!!!!!");
+        }
+
+
+
+
         //-- Write Next Here --//
-        
+
 
     }
 }

@@ -35,6 +35,7 @@ namespace EarvinStocksPGM.Modules
         public const int MAP_VOLUME = 2;
         public const int MAP_BIAS = 3;
         public const int MAP_WMS = 4;
+        public const int MAP_PSY = 5;
 
         // 記錄每個FRAME選擇顯示的資料(最多只能選9個；第1個一定是MAP_K)
         public static int[] SelectShowMapOnFrames = new int[9];
@@ -108,6 +109,10 @@ namespace EarvinStocksPGM.Modules
                     }
                     break;
                 case MAP_WMS:
+                    highValue = 100;
+                    lowValue = 0;
+                    break;
+                case MAP_PSY:
                     highValue = 100;
                     lowValue = 0;
                     break;
