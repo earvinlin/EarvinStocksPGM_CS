@@ -437,6 +437,9 @@ namespace EarvinStocksPGM
                         case GeneralModule.MAP_WMS:
                             Chalk_MAP_WMS(e.Graphics, i, FrameNum);
                             break;
+                        case GeneralModule.MAP_PSY:
+                            Chalk_MAP_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_PSY);
+                            break;
                     }
                 }
             }
@@ -519,7 +522,10 @@ namespace EarvinStocksPGM
                             g.DrawString("BIAS : " + $"{IdxData[curIndex].BIAS.ToString("F2")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
                         case GeneralModule.MAP_WMS:
-                            g.DrawString("WMS : " + $"{IdxData[curIndex].WMS.ToString("F2")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            g.DrawString("WMS : " + $"{IdxData[curIndex].WMS.ToString("F")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            break;
+                        case GeneralModule.MAP_PSY:
+                            g.DrawString("PSY : " + $"{IdxData[curIndex].PSY.ToString("F0")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
                     }
                 }
@@ -915,7 +921,7 @@ namespace EarvinStocksPGM
             Debug.WriteLine("Chalk_MAP_WMS() END!!!!!");
         }
 
-        private void Chalk_MAP_Line(Graphics g, int mapType, int framePos, int frameNum)
+        private void Chalk_MAP_LINE(Graphics g, int framePos, int frameNum, int mapType)
         {
             //=======================================//
             //=== 顯示「威廉指標」(MAP_WMS) START ===// 
