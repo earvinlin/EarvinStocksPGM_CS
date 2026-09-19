@@ -7,13 +7,6 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace EarvinStocksPGM
 {
-
-    //public struct FramePoints
-    //{
-    //    public float frameX; 
-    //    public float frameY;
-    //}
-
     public partial class frmStocksPGM : Form
     {
         //-- 動態元件 --//
@@ -65,7 +58,6 @@ namespace EarvinStocksPGM
         {
             StartIndex = 0;
             // 取得要顯示的股票資料
-            //StkData = DbHelper.TestConnectDB(cboStocks.Text);
             StkData = StockModule.GetStockData(cboStocks.Text);
             IdxData = IndexModule.GetIndexData(StkData);
 
@@ -483,8 +475,6 @@ namespace EarvinStocksPGM
             lblStokInfo.Text = "日期：" + StkData[curIndex].TradeDate + " 開 " + StkData[curIndex].StartPrice + " 高 " + StkData[curIndex].HighPrice + " 低 " + StkData[curIndex].LowPrice + " 收 " + StkData[curIndex].EndPrice;
             lblHighPrice.Location = new System.Drawing.Point((int)FrameLeftPoints[0].frameX - lblHighPrice.Width, (int)FrameLeftPoints[0].frameY);
             lblLowPrice.Location = new System.Drawing.Point((int)FrameLeftPoints[1].frameX - lblLowPrice.Width, (int)FrameLeftPoints[1].frameY - lblLowPrice.Height);
-            //lblHighPrice.Text = highLowValues.highValue.ToString("F2");
-            //lblLowPrice.Text = highLowValues.lowValue.ToString("F2");
 
             //--------------------------------//
             //=== 最右側的各項指標數值顯示 ===//
@@ -549,14 +539,13 @@ namespace EarvinStocksPGM
                 MessageBox.Show(ex.ToString());
             }
 
-
-            //-- FOR DEBUG : Display Frame's 端點指標 --//
-            for (int i = 0; i < (FrameNum + 1); i++)
-            {
-                Debug.WriteLine("FramePoint[" + i + "], Left.X= " + FrameLeftPoints[i].frameY + ", Left.Y= " + FrameLeftPoints[i].frameY
-                                + ", Right.X= " + FrameRightPoints[i].frameY + ", Right.Y= " + FrameRightPoints[i].frameY
-                                + ", Mid.X= " + FrameMiddlePoints[i].frameY + ", Mid.Y= " + FrameMiddlePoints[i].frameY);
-            }
+            ////-- FOR DEBUG : Display Frame's 端點指標 --//
+            //for (int i = 0; i < (FrameNum + 1); i++)
+            //{
+            //    Debug.WriteLine("FramePoint[" + i + "], Left.X= " + FrameLeftPoints[i].frameY + ", Left.Y= " + FrameLeftPoints[i].frameY
+            //                    + ", Right.X= " + FrameRightPoints[i].frameY + ", Right.Y= " + FrameRightPoints[i].frameY
+            //                    + ", Mid.X= " + FrameMiddlePoints[i].frameY + ", Mid.Y= " + FrameMiddlePoints[i].frameY);
+            //}
         }
 
         private void cboFrameNum_SelectedIndexChanged(object sender, EventArgs e)
@@ -668,16 +657,15 @@ namespace EarvinStocksPGM
         private void VolumeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
-            //Chalk_MAP_VOLUME(e.Graphics, SelectFramePos, FrameNum);
             SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_VOLUME;
             Debug.WriteLine($"CLICK VolumeToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
+
             this.Invalidate();
         }
 
         private void BIASToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
-            //Chalk_MAP_BIAS(e.Graphics, SelectFramePos, FrameNum);
             SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_BIAS;
             Debug.WriteLine($"CLICK BIASToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
 
@@ -687,7 +675,6 @@ namespace EarvinStocksPGM
         private void WMSToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
-            //Chalk_MAP_BIAS(e.Graphics, SelectFramePos, FrameNum);
             SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_WMS;
             Debug.WriteLine($"CLICK BIASToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
 
@@ -697,7 +684,6 @@ namespace EarvinStocksPGM
         private void PSYToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
-            //Chalk_MAP_LINE(e.Graphics, SelectFramePos, FrameNum);
             SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_PSY;
             Debug.WriteLine($"CLICK PSYToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
 
@@ -707,14 +693,12 @@ namespace EarvinStocksPGM
         private void RSIToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
-            //Chalk_MAP_LINE(e.Graphics, SelectFramePos, FrameNum);
             SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_RSI;
             Debug.WriteLine($"CLICK RSIToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
 
             this.Invalidate();
 
         }
-
 
         private void Chalk_MAP_VOLUME(Graphics g, int framePos, int frameNum)
         {
@@ -872,78 +856,6 @@ namespace EarvinStocksPGM
                 g.DrawLines(pen, points);
             }
             Debug.WriteLine("Chalk_MAP_BIAS() END!!!!!");
-        }
-
-        private void Chalk_MAP_WMS(Graphics g, int framePos, int frameNum)
-        {
-            //=======================================//
-            //=== 顯示「威廉指標」(MAP_WMS) START ===// 
-            //=======================================//
-            if (framePos <= 0 || framePos > frameNum)
-                return;
-
-            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;    // 儲存要繪製指標柱狀圖的X軸長度
-            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
-            float yDistance = yAxisHeight / 4;
-
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_WMS);
-            Debug.WriteLine("最高/低價(WMS)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
-
-            // 劃虛線 (劃3條)
-            using (Pen pen = new Pen(Color.Black, 1))
-            {
-                pen.DashStyle = DashStyle.Dash;
-                for (int i = 1; i <= 3; i++)
-                {
-                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
-                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
-                    g.DrawLine(pen, pl, pr);
-                    // 顯示Frame最左側的標籤
-                    g.DrawString($"{(highLowValues.highValue * i / 4)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
-                }
-            }
-
-            // Draw Index Values
-            PointF[] points = new PointF[DisplayCount];
-            float xWidth = xAxisLength / DisplayCount;
-            float yHeight = yAxisHeight / 100f;
-            Debug.WriteLine("WMS -- xWidth= " + xWidth + ", yHeight= " + yHeight);
-
-            float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
-            float yCoord = FrameLeftPoints[framePos].frameY;
-            //Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
-            //    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
-            //    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
-            //    ", xCoord= " + xCoord + ", yCoord= " + yCoord);
-
-            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
-            {
-                //Debug.WriteLine("i= " + i + ", StartIndex= " + StartIndex + ", DisplayCount= " + DisplayCount);
-                float ii = 0;
-                if (i == StartIndex)
-                {
-                    ii = yHeight * ((float)IdxData[i].WMS);
-                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-                    points[0] = new PointF(xCoord, yCoord);
-                }
-                else
-                {
-                    xCoord += xWidth;
-                    ii = yHeight * ((float)IdxData[i].WMS);
-                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-                    points[i - StartIndex] = new PointF(xCoord, yCoord);
-                }
-                Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
-                    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
-                    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
-                ", xCoord= " + xCoord + ", yCoord= " + yCoord);
-            }
-
-            using (Pen pen = new Pen(Color.Blue, 1))
-            {
-                g.DrawLines(pen, points);
-            }
-            Debug.WriteLine("Chalk_MAP_WMS() END!!!!!");
         }
 
         private void Chalk_MAP_SINGLE_LINE(Graphics g, int framePos, int frameNum, int mapType)
