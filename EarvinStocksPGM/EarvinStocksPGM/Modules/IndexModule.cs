@@ -51,6 +51,8 @@ namespace EarvinStocksPGM.Modules
             double[] dblPSY = new double[sd.Length];
             double[] dblSRSI = new double[sd.Length];
             double[] dblLRSI = new double[sd.Length];
+            double[] dblK = new double[sd.Length];
+            double[] dblD = new double[sd.Length];
 
             dblMAPValues5 = CalculateAverage(sd, 5, true);
             dblMAPValues10 = CalculateAverage(sd, 10, true);
@@ -67,7 +69,8 @@ namespace EarvinStocksPGM.Modules
             dblWMS = CalculateWMS(sd, 5);
             dblPSY = CalculatePSY(sd, 5);
             dblSRSI = CalculateRSI(sd, 5);
-            dblLRSI = CalculateRSI(sd, 5);
+            dblLRSI = CalculateRSI(sd, 10);
+            //dblKD = CalculateKD(sd, 5, 10);
 
             for (int i = 0; i < sd.Length; i++)
             {
@@ -324,11 +327,11 @@ namespace EarvinStocksPGM.Modules
 
                 i++;
             }
-            // DEBUG : Display the PSY values for verification
-            for (i = 0; i < sd.Length; i++)
-            {
-                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", RSI= " + Math.Round(dblValues[i], 2));
-            }
+            //// DEBUG : Display the PSY values for verification
+            //for (i = 0; i < sd.Length; i++)
+            //{
+            //    Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", RSI= " + Math.Round(dblValues[i], 2));
+            //}
             return dblValues;
         }
 

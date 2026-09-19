@@ -436,13 +436,17 @@ namespace EarvinStocksPGM
                             break;
                         case GeneralModule.MAP_WMS:
                             //Chalk_MAP_WMS(e.Graphics, i, FrameNum);
-                            Chalk_MAP_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_WMS);
+                            Chalk_MAP_SINGLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_WMS);
                             break;
                         case GeneralModule.MAP_PSY:
-                            Chalk_MAP_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_PSY);
+                            //Chalk_MAP_PSY(e.Graphics, i, FrameNum);
+                            Chalk_MAP_SINGLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_PSY);
                             break;
                         case GeneralModule.MAP_SRSI:
-                            Chalk_MAP_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_SRSI);
+                            Chalk_MAP_SINGLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_SRSI);
+                            break;
+                        case GeneralModule.MAP_RSI:
+                            Chalk_MAP_DOUBLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_SRSI, GeneralModule.MAP_LRSI);
                             break;
                     }
                 }
@@ -531,8 +535,11 @@ namespace EarvinStocksPGM
                         case GeneralModule.MAP_PSY:
                             g.DrawString("PSY : " + $"{IdxData[curIndex].PSY.ToString("F0")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
-                        case GeneralModule.MAP_SRSI:
-                            g.DrawString("RSI : " + $"{IdxData[curIndex].SRSI.ToString("F0")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                        case GeneralModule.MAP_RSI:
+                            Font f = new Font(this.Font.FontFamily, 6);
+                            int lineHeight = f.Height;
+                            g.DrawString($"SRSI : {IdxData[curIndex].SRSI:F0}",f,Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            g.DrawString($"LRSI : {IdxData[curIndex].LRSI:F0}",f,Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight);
                             break;
                     }
                 }
@@ -701,7 +708,7 @@ namespace EarvinStocksPGM
         {
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
             //Chalk_MAP_LINE(e.Graphics, SelectFramePos, FrameNum);
-            SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_SRSI;
+            SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_RSI;
             Debug.WriteLine($"CLICK RSIToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
 
             this.Invalidate();
@@ -939,7 +946,7 @@ namespace EarvinStocksPGM
             Debug.WriteLine("Chalk_MAP_WMS() END!!!!!");
         }
 
-        private void Chalk_MAP_LINE(Graphics g, int framePos, int frameNum, int mapType)
+        private void Chalk_MAP_SINGLE_LINE(Graphics g, int framePos, int frameNum, int mapType)
         {
             //=======================================//
             //=== 顯示「威廉指標」(MAP_WMS) START ===// 
@@ -1031,7 +1038,136 @@ namespace EarvinStocksPGM
         }
 
 
+        private void Chalk_MAP_DOUBLE_LINE(Graphics g, int framePos, int frameNum, int mapType1, int mapType2)
+        {
+            if (framePos <= 0 || framePos > frameNum)
+                return;
 
+            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;    // 儲存要繪製指標柱狀圖的X軸長度
+            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
+            float yDistance = yAxisHeight / 4;
+
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType1);
+            Debug.WriteLine("最高/低價(LINE)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+
+            // 劃虛線 (劃3條)
+            using (Pen pen = new Pen(Color.Black, 1))
+            {
+                pen.DashStyle = DashStyle.Dash;
+                pen.DashPattern = new float[] { 7, 3 };
+                for (int i = 1; i <= 3; i++)
+                {
+                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
+                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
+                    g.DrawLine(pen, pl, pr);
+                    // 顯示Frame最左側的標籤
+                    g.DrawString($"{(highLowValues.highValue * i / 4)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
+                }
+            }
+
+            // Draw Index Values
+            float xWidth = xAxisLength / DisplayCount;
+            float yHeight = yAxisHeight / 100f;
+            Debug.WriteLine("Index -- xWidth= " + xWidth + ", yHeight= " + yHeight);
+
+            float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
+            float yCoord = FrameLeftPoints[framePos].frameY;
+            //Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
+            //    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
+            //    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
+            //    ", xCoord= " + xCoord + ", yCoord= " + yCoord);
+
+            //-----------------------//
+            /*-- Draw Double Lines --*/
+            //-----------------------//
+            PointF[] points1 = new PointF[DisplayCount];
+            PointF[] points2 = new PointF[DisplayCount];
+            double[] values1 = new double[DisplayCount];
+            double[] values2 = new double[DisplayCount];
+            switch (mapType1)
+            {
+                case GeneralModule.MAP_WMS:
+                    values1 = IdxData.Select(d => d.WMS).ToArray();
+                    break;
+                case GeneralModule.MAP_PSY:
+                    values1 = IdxData.Select(d => d.PSY).ToArray();
+                    break;
+                case GeneralModule.MAP_SRSI:
+                    values1 = IdxData.Select(d => d.SRSI).ToArray();
+                    break;
+                case GeneralModule.MAP_LRSI:
+                    values1 = IdxData.Select(d => d.LRSI).ToArray();
+                    break;
+                case GeneralModule.MAP_RSI:
+                    values1 = IdxData.Select(d => d.SRSI).ToArray();
+                    values2 = IdxData.Select(d => d.LRSI).ToArray();
+                    break;
+            }
+            switch (mapType2)
+            {
+                case GeneralModule.MAP_WMS:
+                    values2 = IdxData.Select(d => d.WMS).ToArray();
+                    break;
+                case GeneralModule.MAP_PSY:
+                    values2 = IdxData.Select(d => d.PSY).ToArray();
+                    break;
+                case GeneralModule.MAP_SRSI:
+                    values2 = IdxData.Select(d => d.SRSI).ToArray();
+                    break;
+                case GeneralModule.MAP_LRSI:
+                    values2 = IdxData.Select(d => d.LRSI).ToArray();
+                    break;
+                case GeneralModule.MAP_RSI:
+                    values1 = IdxData.Select(d => d.SRSI).ToArray();
+                    values2 = IdxData.Select(d => d.LRSI).ToArray();
+                    break;
+            }
+
+            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
+            {
+                float ii = 0;
+                if (i == StartIndex)
+                {
+                    // 1st line
+                    ii = yHeight * ((float)values1[i]);
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points1[0] = new PointF(xCoord, yCoord);
+                    // 2nd line
+                    ii = yHeight * ((float)values2[i]);
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points2[0] = new PointF(xCoord, yCoord);
+                }
+                else
+                {
+                    // 1st line
+                    xCoord += xWidth;
+                    ii = yHeight * ((float)values1[i]);
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points1[i - StartIndex] = new PointF(xCoord, yCoord);
+                    // 2nd line
+                    ii = yHeight * ((float)values2[i]);
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points2[i - StartIndex] = new PointF(xCoord, yCoord);
+                }
+                Debug.WriteLine("DoubleLine-Baseline -- framePos= " + framePos +
+                    ", poin1[" + framePos + "].X= " + points1[framePos].X +
+                    ", poin1[" + framePos + "].Y= " + points1[framePos].Y +
+                    ", point2[" + framePos + "].X= " + points2[framePos].X +
+                    ", point2[" + framePos + "].Y= " + points2[framePos].Y);
+            }
+
+            using (Pen pen1 = new Pen(Color.Green, 1))
+            {
+                g.DrawLines(pen1, points1);
+            }
+            using (Pen pen2 = new Pen(Color.RosyBrown, 1))
+            {
+                pen2.DashStyle = DashStyle.Dash;
+                pen2.DashPattern = new float[] { 6, 2 };
+                g.DrawLines(pen2, points2);
+            }
+            Debug.WriteLine("Chalk_MAP_DOUBLE_LINE() END!!!!!");
+        }
 
 
         //-- Write Next Here --//

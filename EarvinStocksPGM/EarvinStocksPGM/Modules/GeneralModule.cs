@@ -7,23 +7,6 @@ namespace EarvinStocksPGM.Modules
 {
     public static class GeneralModule
     {
-        /////**
-        //// * 記錄每個FRAME選擇顯示的資料(最多只能選9個；第1個一定是MAP_K) 
-        //// */
-        ////public class SelectShowMapOnFrames
-        ////{
-        ////    public int frame01 = GeneralModule.MAP_K;
-        ////    public int frame02 = GeneralModule.MAP_UNSELECTED;
-        ////    public int frame03 = GeneralModule.MAP_UNSELECTED;
-        ////    public int frame04 = GeneralModule.MAP_UNSELECTED;
-        ////    public int frame05 = GeneralModule.MAP_UNSELECTED;
-        ////    public int frame06 = GeneralModule.MAP_UNSELECTED;
-        ////    public int frame07 = GeneralModule.MAP_UNSELECTED;
-        ////    public int frame08 = GeneralModule.MAP_UNSELECTED;
-        ////    public int frame09 = GeneralModule.MAP_UNSELECTED;
-        ////    //public int frame10 = GeneralModule.MAP_UNSELECTED;
-        ////}
-
         public struct FramePoints
         {
             public float frameX;
@@ -37,6 +20,8 @@ namespace EarvinStocksPGM.Modules
         public const int MAP_WMS = 4;
         public const int MAP_PSY = 5;
         public const int MAP_SRSI = 6;
+        public const int MAP_LRSI = 7;
+        public const int MAP_RSI = 8;
 
         // 記錄每個FRAME選擇顯示的資料(最多只能選9個；第1個一定是MAP_K)
         public static int[] SelectShowMapOnFrames = new int[9];
@@ -118,6 +103,10 @@ namespace EarvinStocksPGM.Modules
                     lowValue = 0;
                     break;
                 case MAP_SRSI:
+                    highValue = 100;
+                    lowValue = 0;
+                    break;
+                case MAP_LRSI:
                     highValue = 100;
                     lowValue = 0;
                     break;
