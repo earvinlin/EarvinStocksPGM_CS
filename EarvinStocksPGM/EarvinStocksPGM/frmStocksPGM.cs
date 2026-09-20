@@ -22,7 +22,7 @@ namespace EarvinStocksPGM
         private static int FrameNum = 5;            // 要顯示的frame數量
         private static int SelectFramePos = 0;      // 選擇的frame位置(1~FrameNum)
         private float XWidthBorder = 20;            // frame左、右兩邊預留的空間
-        private float YHeightBorder = 10;           // frame最下面預留的空間
+        private float YHeightBorder = 20;           // frame最下面預留的空間
                                                     //        private float FrameXTop = 30;               // frame最左上角的X座標
         private float FrameXTop = 40;               // frame最左上角的X座標
         private float FrameRightBorder = 150;       // frame最左上角的Y座標
@@ -267,7 +267,7 @@ namespace EarvinStocksPGM
             }
 
             // 顯示畫面筆數之最高/最低價 (因為資料庫的資料型態為 decimal，為了便於計算故宣告為 decimal)
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_K);
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_KBAR);
             lblHighPrice.Text = highLowValues.highValue.ToString("F2");
             lblLowPrice.Text = highLowValues.lowValue.ToString("F2");
             Debug.WriteLine("最高/低價：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
@@ -397,7 +397,8 @@ namespace EarvinStocksPGM
                     float x0 = FrameLeftPoints[0].frameX + (barWidth * (i - StartIndex));
                     float y0 = FrameLeftPoints[0].frameY;
                     float x1 = x0;
-                    float y1 = FrameLeftPoints[1].frameY;
+//                    float y1 = FrameLeftPoints[1].frameY;
+                    float y1 = FrameLeftPoints[FrameNum].frameY;
                     g.DrawLine(pen, x0, y0, x1, y1);
                     // 顯示交易日期(年月)
                     string strnum = StkData[i].TradeDate.ToString();
@@ -417,8 +418,8 @@ namespace EarvinStocksPGM
                     {
                         case GeneralModule.MAP_UNSELECTED:
                             break;
-                        case GeneralModule.MAP_K:
-                            //Chalk_MAP_K(e.Graphics, i, FrameNum);
+                        case GeneralModule.MAP_KBAR:
+                            //Chalk_MAP_KBAR(e.Graphics, i, FrameNum);
                             break;
                         case GeneralModule.MAP_VOLUME:
                             Chalk_MAP_VOLUME(e.Graphics, i, FrameNum);
@@ -440,6 +441,16 @@ namespace EarvinStocksPGM
                         case GeneralModule.MAP_RSI:
                             Chalk_MAP_DOUBLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_SRSI, GeneralModule.MAP_LRSI);
                             break;
+                        case GeneralModule.MAP_K:
+                            Chalk_MAP_SINGLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_K);
+                            break;
+                        case GeneralModule.MAP_D:
+                            Chalk_MAP_SINGLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_D);
+                            break;
+                        case GeneralModule.MAP_KD:
+                            Chalk_MAP_DOUBLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_K, GeneralModule.MAP_D);
+                            break;
+
                     }
                 }
             }
@@ -476,9 +487,9 @@ namespace EarvinStocksPGM
             lblHighPrice.Location = new System.Drawing.Point((int)FrameLeftPoints[0].frameX - lblHighPrice.Width, (int)FrameLeftPoints[0].frameY);
             lblLowPrice.Location = new System.Drawing.Point((int)FrameLeftPoints[1].frameX - lblLowPrice.Width, (int)FrameLeftPoints[1].frameY - lblLowPrice.Height);
 
-            //--------------------------------//
-            //=== 最右側的各項指標數值顯示 ===//
-            //--------------------------------//
+            //---------------------------------------//
+            //=== 最右側的各項指標數值顯示(START) ===//
+            //---------------------------------------//
             lblMAP1.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1);
             lblMAP2.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height);
             lblMAP3.Location = new System.Drawing.Point((int)FrameMiddlePoints[0].frameX + 1, (int)FrameMiddlePoints[0].frameY + 1 + lblMAP1.Size.Height * 2);
@@ -528,8 +539,14 @@ namespace EarvinStocksPGM
                         case GeneralModule.MAP_RSI:
                             Font f = new Font(this.Font.FontFamily, 6);
                             int lineHeight = f.Height;
-                            g.DrawString($"SRSI : {IdxData[curIndex].SRSI:F0}",f,Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
-                            g.DrawString($"LRSI : {IdxData[curIndex].LRSI:F0}",f,Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight);
+                            g.DrawString($"SRSI : {IdxData[curIndex].SRSI:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            g.DrawString($"LRSI : {IdxData[curIndex].LRSI:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight);
+                            break;
+                        case GeneralModule.MAP_KD:
+                            f = new Font(this.Font.FontFamily, 6);
+                            lineHeight = f.Height;
+                            g.DrawString($"K : {IdxData[curIndex].K:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            g.DrawString($"D : {IdxData[curIndex].D:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight);
                             break;
                     }
                 }
@@ -538,6 +555,10 @@ namespace EarvinStocksPGM
             {
                 MessageBox.Show(ex.ToString());
             }
+            //---------------------------------------//
+            //=== 最右側的各項指標數值顯示( END ) ===//
+            //---------------------------------------//
+
 
             ////-- FOR DEBUG : Display Frame's 端點指標 --//
             //for (int i = 0; i < (FrameNum + 1); i++)
@@ -699,6 +720,16 @@ namespace EarvinStocksPGM
             this.Invalidate();
 
         }
+
+        private void KDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
+            SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_KD;
+            Debug.WriteLine($"CLICK KDToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
+
+            this.Invalidate();
+        }
+
 
         private void Chalk_MAP_VOLUME(Graphics g, int framePos, int frameNum)
         {
@@ -1014,6 +1045,16 @@ namespace EarvinStocksPGM
                     values1 = IdxData.Select(d => d.SRSI).ToArray();
                     values2 = IdxData.Select(d => d.LRSI).ToArray();
                     break;
+                case GeneralModule.MAP_K:
+                    values1 = IdxData.Select(d => d.K).ToArray();
+                    break;
+                case GeneralModule.MAP_D:
+                    values1 = IdxData.Select(d => d.D).ToArray();
+                    break;
+                case GeneralModule.MAP_KD:
+                    values1 = IdxData.Select(d => d.K).ToArray();
+                    values2 = IdxData.Select(d => d.D).ToArray();
+                    break;
             }
             switch (mapType2)
             {
@@ -1029,9 +1070,15 @@ namespace EarvinStocksPGM
                 case GeneralModule.MAP_LRSI:
                     values2 = IdxData.Select(d => d.LRSI).ToArray();
                     break;
-                case GeneralModule.MAP_RSI:
-                    values1 = IdxData.Select(d => d.SRSI).ToArray();
-                    values2 = IdxData.Select(d => d.LRSI).ToArray();
+                case GeneralModule.MAP_K:
+                    values2 = IdxData.Select(d => d.K).ToArray();
+                    break;
+                case GeneralModule.MAP_D:
+                    values2 = IdxData.Select(d => d.D).ToArray();
+                    break;
+                case GeneralModule.MAP_KD:
+                    values1 = IdxData.Select(d => d.K).ToArray();
+                    values2 = IdxData.Select(d => d.D).ToArray();
                     break;
             }
 
@@ -1080,6 +1127,8 @@ namespace EarvinStocksPGM
             }
             Debug.WriteLine("Chalk_MAP_DOUBLE_LINE() END!!!!!");
         }
+
+
 
 
         //-- Write Next Here --//

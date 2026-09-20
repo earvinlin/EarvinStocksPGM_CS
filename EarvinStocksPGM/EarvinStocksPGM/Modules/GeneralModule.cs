@@ -14,7 +14,7 @@ namespace EarvinStocksPGM.Modules
         }
 
         public const int MAP_UNSELECTED = 0;
-        public const int MAP_K = 1;
+        public const int MAP_KBAR = 1;
         public const int MAP_VOLUME = 2;
         public const int MAP_BIAS = 3;
         public const int MAP_WMS = 4;
@@ -22,6 +22,9 @@ namespace EarvinStocksPGM.Modules
         public const int MAP_SRSI = 6;
         public const int MAP_LRSI = 7;
         public const int MAP_RSI = 8;
+        public const int MAP_K = 9;
+        public const int MAP_D = 10;
+        public const int MAP_KD = 11;
 
         // 記錄每個FRAME選擇顯示的資料(最多只能選9個；第1個一定是MAP_K)
         public static int[] SelectShowMapOnFrames = new int[9];
@@ -39,7 +42,7 @@ namespace EarvinStocksPGM.Modules
 
             switch (type)
             {
-                case MAP_K :
+                case MAP_KBAR :
                     for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
                     {
                         if (highValue < sd[i].HighPrice)
@@ -107,6 +110,18 @@ namespace EarvinStocksPGM.Modules
                     lowValue = 0;
                     break;
                 case MAP_LRSI:
+                    highValue = 100;
+                    lowValue = 0;
+                    break;
+                case MAP_K:
+                    highValue = 100;
+                    lowValue = 0;
+                    break;
+                case MAP_D:
+                    highValue = 100;
+                    lowValue = 0;
+                    break;
+                case MAP_KD:
                     highValue = 100;
                     lowValue = 0;
                     break;

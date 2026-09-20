@@ -608,6 +608,7 @@
             KDToolStripMenuItem.Name = "KDToolStripMenuItem";
             KDToolStripMenuItem.Size = new Size(180, 22);
             KDToolStripMenuItem.Text = "KD";
+            KDToolStripMenuItem.Click += KDToolStripMenuItem_Click;
             // 
             // MACDToolStripMenuItem
             // 

@@ -28,6 +28,8 @@ namespace EarvinStocksPGM.Modules
         public double PSY { get; set; }
         public double SRSI { get; set; }
         public double LRSI { get; set; }
+        public double K { get; set; }
+        public double D { get; set; }
     }
 
     public static class IndexModule
@@ -66,11 +68,11 @@ namespace EarvinStocksPGM.Modules
             dblMAVValues60 = CalculateAverage(sd, 60, false);
             dblMAVValues120 = CalculateAverage(sd, 120, false);
             dblBIAS = CalculateBIAS(sd, 10);
-            dblWMS = CalculateWMS(sd, 5);
-            dblPSY = CalculatePSY(sd, 5);
-            dblSRSI = CalculateRSI(sd, 5);
-            dblLRSI = CalculateRSI(sd, 10);
-            //dblKD = CalculateKD(sd, 5, 10);
+            dblWMS = CalculateWMS(sd, 10);
+            dblPSY = CalculatePSY(sd, 10);
+            dblSRSI = CalculateRSI(sd, 6);
+            dblLRSI = CalculateRSI(sd, 20);
+            (dblK, dblD) = CalculateKD(sd, 9);
 
             for (int i = 0; i < sd.Length; i++)
             {
@@ -91,6 +93,8 @@ namespace EarvinStocksPGM.Modules
                 idx[i].PSY = dblPSY[i];
                 idx[i].SRSI = dblSRSI[i];
                 idx[i].LRSI = dblLRSI[i];
+                idx[i].K = dblK[i];
+                idx[i].D = dblD[i];
             }
             return idx;
         }
@@ -217,8 +221,6 @@ namespace EarvinStocksPGM.Modules
                 }
                 if (dblMax != dblMin)
                 {
-                    //Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", EndPrice= " + sd[i].EndPrice  + 
-                    //    ", dblMax = " + dblMax + ", dblMin= " + dblMin);
                     dblAverage = (dblMax - sd[i].EndPrice) / (dblMax - dblMin) * 100;
                 }
                 else
@@ -291,8 +293,6 @@ namespace EarvinStocksPGM.Modules
                 {
                     for (int j = 1; j < i; j++)
                     {
-                        Debug.WriteLine("**sd[" + j + "].Date= " + sd[j].TradeDate + 
-                            ", j_price= " + sd[j].EndPrice + ", (j-1)_price= " + sd[j-1].EndPrice);
                         dblDiff = sd[j].EndPrice - sd[j - 1].EndPrice;
                         if (dblDiff > 0)
                             dblUpValue += dblDiff;
@@ -306,9 +306,6 @@ namespace EarvinStocksPGM.Modules
                 {
                     for (int j = i; j > (i - intDayNo); j--)
                     {
-                        Debug.WriteLine("##sd[" + j + "].Date= " + sd[j].TradeDate +
-                            ", j_price= " + sd[j].EndPrice + ", (j-1)_price= " + sd[j - 1].EndPrice);
-
                         dblDiff = sd[j].EndPrice - sd[j - 1].EndPrice;
                         if (dblDiff > 0)
                             dblUpValue += dblDiff;
@@ -335,9 +332,134 @@ namespace EarvinStocksPGM.Modules
             return dblValues;
         }
 
+        public static (double[] K, double[] D) CalculateKD(StockData[] sd, int period = 9)
+        {
+            double prevK = 50;
+            double prevD = 50;
+
+            double[] kValues = new double[sd.Length];
+            double[] dValues = new double[sd.Length];
+
+            for (int i = 0; i < sd.Length; i++)
+            {
+                // 前 N-1 天無法計算
+                if (i < period - 1)
+                {
+                    //kValues[i] = double.NaN;
+                    //dValues[i] = double.NaN;
+                    kValues[i] = 0;
+                    dValues[i] = 0;
+                    continue;
+                }
+
+                double highest = double.MinValue;
+                double lowest = double.MaxValue;
+
+                for (int j = i - period + 1; j <= i; j++)
+                {
+                    highest = Math.Max(highest, sd[j].HighPrice);
+                    lowest = Math.Min(lowest, sd[j].LowPrice);
+                }
+
+                double rsv;
+
+                if (highest == lowest)
+                {
+                    rsv = 50;
+                }
+                else
+                {
+                    rsv = (sd[i].EndPrice - lowest) / (highest - lowest) * 100.0;
+                }
+
+                double k = prevK * 2.0 / 3.0 + rsv * 1.0 / 3.0;
+                double d = prevD * 2.0 / 3.0 + k * 1.0 / 3.0;
+
+                kValues[i] = k;
+                dValues[i] = d;
+
+                prevK = k;
+                prevD = d;
+            }
+            for (int i = 0; i < sd.Length; i++)
+            {
+                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", K= " + Math.Round(kValues[i], 2) + ", D= " + Math.Round(dValues[i], 2));
+            }
+
+            return (kValues, dValues);
+        }
+
+
 
 
         //--- Write Here ---//
 
     }
 }
+
+
+
+
+//////        public static (double[] K, double[] D) CalculateKD(StockData[] sd, int intDayNo)
+//////        {
+//////            int i = 0, j = 0;
+//////            double dblPrevK = 50, dblPrevD = 50, dblRsv = 0;
+//////            double dblK = 0, dblD = 0;
+//////            double dblMax = 0, dblMin = 0;
+//////            double[] dblKValues = new double[sd.Length];
+//////            double[] dblDValues = new double[sd.Length];
+
+//////            while (i < sd.Length)
+//////            {
+//////                dblMax = double.MinValue;
+//////                dblMin = double.MaxValue;
+//////                if (i < (intDayNo - 1))
+//////                {
+//////                    dblKValues[i] = double.NaN;
+//////                    dblDValues[i] = double.NaN;
+//////                    i++;
+//////                    continue;
+//////                }
+//////                else
+//////                {
+////////                    for (j = i; j > (i - intDayNo); j--)
+//////                    for (j = i - intDayNo + 1; j <= i; j++)
+//////                    {
+//////                        if (dblMax < sd[j].HighPrice)
+//////                            dblMax = sd[j].HighPrice;
+//////                        if (dblMin > sd[j].LowPrice)
+//////                            dblMin = sd[j].LowPrice;
+//////                    }
+//////                }
+
+//////                if (dblMax != dblMin)
+//////                    dblRsv = (sd[i].EndPrice - dblMin) / (dblMax - dblMin) * 100;
+//////                else
+//////                    dblRsv = 50;
+
+//////                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", dblMax= " + Math.Round(dblMax, 2) +
+//////                    ", dblMin= " + Math.Round(dblMin, 2) + ", EndPrice= " + sd[i].EndPrice + ", dblRsv= " + dblRsv);
+//////                dblK = dblPrevK * 2 / 3 + dblRsv / 3;
+//////                dblD = dblPrevD * 2 / 3 + dblK / 3;
+//////                Debug.WriteLine("dblPrevK= " + dblPrevK + ", dblPrevD= " + dblPrevD + ", dblK= " + dblK + ", dblD= " + dblD);
+
+//////                if (i < (intDayNo - 1))
+//////                {
+//////                    dblKValues[i] = double.NaN;
+//////                    dblDValues[i] = double.NaN;
+//////                } 
+//////                else
+//////                {
+//////                    dblKValues[i] = dblK;
+//////                    dblDValues[i] = dblD;
+//////                }
+//////                i++;
+//////            }
+//////            // DEBUG : Display the PSY values for verification
+//////            for (i = 0; i < sd.Length; i++)
+//////            {
+//////                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", K= " + Math.Round(dblKValues[i], 2) + ", D= " + Math.Round(dblDValues[i], 2));
+//////            }
+
+//////            return (dblKValues, dblDValues);
+//////        }
