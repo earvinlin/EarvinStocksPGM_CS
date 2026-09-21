@@ -22,7 +22,7 @@ namespace EarvinStocksPGM
         private static int FrameNum = 5;            // 要顯示的frame數量
         private static int SelectFramePos = 0;      // 選擇的frame位置(1~FrameNum)
         private float XWidthBorder = 20;            // frame左、右兩邊預留的空間
-        private float YHeightBorder = 20;           // frame最下面預留的空間
+        private float YHeightBorder = 30;           // frame最下面預留的空間
                                                     //        private float FrameXTop = 30;               // frame最左上角的X座標
         private float FrameXTop = 40;               // frame最左上角的X座標
         private float FrameRightBorder = 150;       // frame最左上角的Y座標
@@ -450,7 +450,6 @@ namespace EarvinStocksPGM
                         case GeneralModule.MAP_KD:
                             Chalk_MAP_DOUBLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_K, GeneralModule.MAP_D);
                             break;
-
                     }
                 }
             }

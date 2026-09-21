@@ -25,6 +25,9 @@ namespace EarvinStocksPGM.Modules
         public const int MAP_K = 9;
         public const int MAP_D = 10;
         public const int MAP_KD = 11;
+        public const int MAP_DIF = 12;
+        public const int MAP_DIF_MACD = 13;
+        public const int MAP_MACD = 14;
 
         // 記錄每個FRAME選擇顯示的資料(最多只能選9個；第1個一定是MAP_K)
         public static int[] SelectShowMapOnFrames = new int[9];
@@ -97,6 +100,45 @@ namespace EarvinStocksPGM.Modules
                         lowValue = -highValue;
                     }
                     break;
+
+                case MAP_MACD:
+                    for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
+                    {
+                        if (highValue < idx[i].MACD)
+                            highValue = idx[i].MACD;
+                        if (lowValue > idx[i].MACD)
+                            lowValue = idx[i].MACD;
+                    }
+                    highValue = Math.Round(highValue, 2);
+                    lowValue = Math.Round(lowValue, 2);
+
+                    if (highValue >= 0 && lowValue >= 0)
+                    {
+                        highValue = Math.Ceiling(Math.Abs(highValue));
+                        lowValue = -highValue;
+                    }
+                    else if (highValue >= 0 && lowValue < 0)
+                    {
+                        if (Math.Abs(highValue) >= Math.Abs(lowValue))
+                        {
+                            highValue = Math.Ceiling(Math.Abs(highValue));
+                            lowValue = -highValue;
+                        }
+                        else
+                        {
+                            highValue = Math.Ceiling(Math.Abs(lowValue));
+                            lowValue = -highValue;
+                        }
+                    }
+                    else
+                    {
+                        //lowValue = Math.Floor(Math.Abs(lowValue));
+                        //highValue = -lowValue;
+                        highValue = Math.Ceiling(Math.Abs(lowValue));
+                        lowValue = -highValue;
+                    }
+                    break;
+
                 case MAP_WMS:
                     highValue = 100;
                     lowValue = 0;

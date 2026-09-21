@@ -55,6 +55,7 @@ namespace EarvinStocksPGM.Modules
             double[] dblLRSI = new double[sd.Length];
             double[] dblK = new double[sd.Length];
             double[] dblD = new double[sd.Length];
+            double[] dblMACD = new double[sd.Length];
 
             dblMAPValues5 = CalculateAverage(sd, 5, true);
             dblMAPValues10 = CalculateAverage(sd, 10, true);
@@ -73,6 +74,7 @@ namespace EarvinStocksPGM.Modules
             dblSRSI = CalculateRSI(sd, 6);
             dblLRSI = CalculateRSI(sd, 20);
             (dblK, dblD) = CalculateKD(sd, 9);
+            dblMACD = CalculateMACD(sd, 12);
 
             for (int i = 0; i < sd.Length; i++)
             {
@@ -390,7 +392,60 @@ namespace EarvinStocksPGM.Modules
         }
 
 
+        /*
+         <20260921 Coding ... >
+        ByVal intStockNo As Integer, _
+                    ByVal intMACDNo As Integer, _
+                    ByVal intSEMANo As Integer, _
+                    ByVal intLEMANo As Integer, _
+                    ByVal IsDaily As Boolean)
+        */
+        public static (double[] DIF, double[] MACD, double[] DIF_MACD) CalculateMACD(StockData[] sd, int period = 12)
+        {
+            double sngEMA_S;
+            double sngEMA_L;
+            double sngPreEMA_S;
+            double sngPreEMA_L;
+            double sngPreMACD;
+            double sngMACD;
+            double sngDIF;
+            double sngDIF_MACD;
+            double sngDI;
+            int j;
+            int i;
 
+            double[] difValues = new double[sd.Length];
+            double[] macdValues = new double[sd.Length];
+            double[] dif_macdValues = new double[sd.Length];
+
+            sngPreEMA_S = sd[0].EndPrice;
+            sngPreEMA_L = sd[0].EndPrice;
+            sngPreMACD = 0;
+            j = 1;
+
+            While (j <= period) 
+            {
+                sngDI = (sd[j].HighPrice + sd[j].LowPrice + sd[j].EndPrice * 2) / 4;
+                sngEMA_S = sngPreEMA_S + (2 * (sngDI - sngPreEMA_S) / (1 + intSEMANo));
+                sngEMA_L = sngPreEMA_L + (2 * (sngDI - sngPreEMA_L) / (1 + intLEMANo));
+                sngDIF = sngEMA_S - sngEMA_L;
+                sngMACD = sngPreMACD + (2 * (sngDIF - sngPreMACD) / (1 + intMACDNo));
+                sngDIF_MACD = sngDIF - sngMACD;
+
+                difValues[j] = sngDIF;
+                macdValues[j] = sngMACD;
+                dif_macdValues[j] = sngDIF_MACD;
+
+                sngPreEMA_S = sngEMA_S;
+                sngPreEMA_L = sngEMA_L;
+                sngPreMACD = sngMACD;
+                j = j + 1;
+            }
+
+            return (difValues, macdValues, dif_macdValues);
+        }
+
+        
 
         //--- Write Here ---//
 
