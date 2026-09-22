@@ -102,50 +102,11 @@ namespace EarvinStocksPGM.Modules
                     break;
 
                 case MAP_MACD:
-                    for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
-                    {
-
-                    }
-                    double[] difValues = idx.Select(d => d.DIF).ToArray();
-                    double[] macdValues = idx.Select(d => d.DEA).ToArray();
-                    double[] oscValues = idx.Select(d => d.HIST).ToArray();
+                    double[] difValues = idx[startIndex..(startIndex + displayCount - 1)].Select(d => d.DIF).ToArray();
+                    double[] macdValues = idx[startIndex..(startIndex + displayCount - 1)].Select(d => d.DEA).ToArray();
+                    double[] oscValues = idx[startIndex..(startIndex + displayCount - 1)].Select(d => d.HIST).ToArray();
                     highValue = Math.Max(difValues.Max(), Math.Max(macdValues.Max(),oscValues.Max()));
                     lowValue = Math.Min(difValues.Min(), Math.Min(macdValues.Min(),oscValues.Min()));
-                    ////for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
-                    ////{
-                    ////    if (highValue < idx[i].MACD)
-                    ////        highValue = idx[i].MACD;
-                    ////    if (lowValue > idx[i].MACD)
-                    ////        lowValue = idx[i].MACD;
-                    ////}
-                    ////highValue = Math.Round(highValue, 2);
-                    ////lowValue = Math.Round(lowValue, 2);
-
-                    ////if (highValue >= 0 && lowValue >= 0)
-                    ////{
-                    ////    highValue = Math.Ceiling(Math.Abs(highValue));
-                    ////    lowValue = -highValue;
-                    ////}
-                    ////else if (highValue >= 0 && lowValue < 0)
-                    ////{
-                    ////    if (Math.Abs(highValue) >= Math.Abs(lowValue))
-                    ////    {
-                    ////        highValue = Math.Ceiling(Math.Abs(highValue));
-                    ////        lowValue = -highValue;
-                    ////    }
-                    ////    else
-                    ////    {
-                    ////        highValue = Math.Ceiling(Math.Abs(lowValue));
-                    ////        lowValue = -highValue;
-                    ////    }
-                    ////}
-                    ////else
-                    ////{
-                    ////    //lowValue = Math.Floor(Math.Abs(lowValue));
-                    ////    //highValue = -lowValue;
-                    ////    highValue = Math.Ceiling(Math.Abs(lowValue));
-                    ////    lowValue = -highValue;
-                    ////}
                     break;
 
                 case MAP_WMS:

@@ -397,7 +397,7 @@ namespace EarvinStocksPGM
                     float x0 = FrameLeftPoints[0].frameX + (barWidth * (i - StartIndex));
                     float y0 = FrameLeftPoints[0].frameY;
                     float x1 = x0;
-//                    float y1 = FrameLeftPoints[1].frameY;
+                    //                    float y1 = FrameLeftPoints[1].frameY;
                     float y1 = FrameLeftPoints[FrameNum].frameY;
                     g.DrawLine(pen, x0, y0, x1, y1);
                     // 顯示交易日期(年月)
@@ -449,6 +449,9 @@ namespace EarvinStocksPGM
                             break;
                         case GeneralModule.MAP_KD:
                             Chalk_MAP_DOUBLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_K, GeneralModule.MAP_D);
+                            break;
+                        case GeneralModule.MAP_MACD:
+                            Chalk_MAP_MACD_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_MACD);
                             break;
                     }
                 }
@@ -546,6 +549,12 @@ namespace EarvinStocksPGM
                             lineHeight = f.Height;
                             g.DrawString($"K : {IdxData[curIndex].K:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             g.DrawString($"D : {IdxData[curIndex].D:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight);
+                            break;
+                        case GeneralModule.MAP_MACD: // 20260922 : Not Finish
+                            //f = new Font(this.Font.FontFamily, 6);
+                            //lineHeight = f.Height;
+                            //g.DrawString($"K : {IdxData[curIndex].K:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            //g.DrawString($"D : {IdxData[curIndex].D:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight);
                             break;
                     }
                 }
@@ -679,7 +688,6 @@ namespace EarvinStocksPGM
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
             SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_VOLUME;
             Debug.WriteLine($"CLICK VolumeToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
-
             this.Invalidate();
         }
 
@@ -688,7 +696,6 @@ namespace EarvinStocksPGM
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
             SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_BIAS;
             Debug.WriteLine($"CLICK BIASToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
-
             this.Invalidate();
         }
 
@@ -697,7 +704,6 @@ namespace EarvinStocksPGM
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
             SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_WMS;
             Debug.WriteLine($"CLICK BIASToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
-
             this.Invalidate();
         }
 
@@ -706,7 +712,6 @@ namespace EarvinStocksPGM
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
             SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_PSY;
             Debug.WriteLine($"CLICK PSYToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
-
             this.Invalidate();
         }
 
@@ -715,9 +720,7 @@ namespace EarvinStocksPGM
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
             SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_RSI;
             Debug.WriteLine($"CLICK RSIToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
-
             this.Invalidate();
-
         }
 
         private void KDToolStripMenuItem_Click(object sender, EventArgs e)
@@ -725,10 +728,16 @@ namespace EarvinStocksPGM
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
             SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_KD;
             Debug.WriteLine($"CLICK KDToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
-
             this.Invalidate();
         }
 
+        private void MACDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
+            SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_MACD;
+            Debug.WriteLine($"CLICK MACDToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
+            this.Invalidate();
+        }
 
         private void Chalk_MAP_VOLUME(Graphics g, int framePos, int frameNum)
         {
@@ -1129,7 +1138,7 @@ namespace EarvinStocksPGM
 
 
 
-        private void Chalk_MAP_MACD_LINE(Graphics g, int framePos, int frameNum, int mapType1, int mapType2)
+        private void Chalk_MAP_MACD_LINE(Graphics g, int framePos, int frameNum, int mapType1)
         {
             if (framePos <= 0 || framePos > frameNum)
                 return;
@@ -1139,7 +1148,23 @@ namespace EarvinStocksPGM
             float yDistance = yAxisHeight / 4;
 
             HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType1);
-            Debug.WriteLine("最高/低價(LINE)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+            Debug.WriteLine("最高/低價(MACD)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+            double[] LV = new double[3];
+            double maxV = 0;
+            if (Math.Abs(highLowValues.highValue) > Math.Abs(highLowValues.lowValue))
+            {
+                LV[2] = Math.Abs(highLowValues.highValue) / 2.0;
+                LV[1] = 0;
+                LV[0] = -(Math.Abs(highLowValues.highValue)) / 2.0;
+                maxV = Math.Abs(highLowValues.highValue);
+            }
+            else
+            {
+                LV[2] = Math.Abs(highLowValues.lowValue) / 2.0;
+                LV[1] = 0;
+                LV[0] = -(Math.Abs(highLowValues.lowValue)) / 2.0;
+                maxV = Math.Abs(highLowValues.lowValue);
+            }
 
             // 劃虛線 (劃3條)
             using (Pen pen = new Pen(Color.Black, 1))
@@ -1152,13 +1177,15 @@ namespace EarvinStocksPGM
                     PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
                     g.DrawLine(pen, pl, pr);
                     // 顯示Frame最左側的標籤
-                    g.DrawString($"{(highLowValues.highValue * i / 4)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
+                    double values = highLowValues.highValue - (highLowValues.highValue - highLowValues.lowValue) * i / 4.0;
+                    g.DrawString(LV[i-1].ToString("0.00"), new Font(this.Font.FontFamily, 6), Brushes.Black, 
+                        10, (int)(pl.Y));
                 }
             }
 
             // Draw Index Values
             float xWidth = xAxisLength / DisplayCount;
-            float yHeight = yAxisHeight / 100f;
+            float yHeight = yAxisHeight / (float)(maxV * 2.0);
             Debug.WriteLine("Index -- xWidth= " + xWidth + ", yHeight= " + yHeight);
 
             float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
@@ -1211,37 +1238,8 @@ namespace EarvinStocksPGM
                     values3 = IdxData.Select(d => d.HIST).ToArray();
                     break;
             }
-            switch (mapType2)
-            {
-                case GeneralModule.MAP_WMS:
-                    values2 = IdxData.Select(d => d.WMS).ToArray();
-                    break;
-                case GeneralModule.MAP_PSY:
-                    values2 = IdxData.Select(d => d.PSY).ToArray();
-                    break;
-                case GeneralModule.MAP_SRSI:
-                    values2 = IdxData.Select(d => d.SRSI).ToArray();
-                    break;
-                case GeneralModule.MAP_LRSI:
-                    values2 = IdxData.Select(d => d.LRSI).ToArray();
-                    break;
-                case GeneralModule.MAP_K:
-                    values2 = IdxData.Select(d => d.K).ToArray();
-                    break;
-                case GeneralModule.MAP_D:
-                    values2 = IdxData.Select(d => d.D).ToArray();
-                    break;
-                case GeneralModule.MAP_KD:
-                    values1 = IdxData.Select(d => d.K).ToArray();
-                    values2 = IdxData.Select(d => d.D).ToArray();
-                    break;
-                case GeneralModule.MAP_MACD:
-                    values1 = IdxData.Select(d => d.DIF).ToArray();
-                    values2 = IdxData.Select(d => d.DEA).ToArray();
-                    values3 = IdxData.Select(d => d.HIST).ToArray();
-                    break;
-            }
 
+            double aaa = FrameLeftPoints[framePos].frameY - (FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos-1].frameY) / 2.0;
             for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
             {
                 float ii = 0;
@@ -1249,11 +1247,13 @@ namespace EarvinStocksPGM
                 {
                     // 1st line
                     ii = yHeight * ((float)values1[i]);
-                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    //yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    yCoord = (float)aaa - ii;
                     points1[0] = new PointF(xCoord, yCoord);
                     // 2nd line
                     ii = yHeight * ((float)values2[i]);
-                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+//                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    yCoord = (float)aaa - ii;
                     points2[0] = new PointF(xCoord, yCoord);
                 }
                 else
@@ -1261,11 +1261,13 @@ namespace EarvinStocksPGM
                     // 1st line
                     xCoord += xWidth;
                     ii = yHeight * ((float)values1[i]);
-                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+//                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    yCoord = (float)aaa - ii;
                     points1[i - StartIndex] = new PointF(xCoord, yCoord);
                     // 2nd line
                     ii = yHeight * ((float)values2[i]);
-                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+//                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    yCoord = (float)aaa - ii;
                     points2[i - StartIndex] = new PointF(xCoord, yCoord);
                 }
                 Debug.WriteLine("DoubleLine-Baseline -- framePos= " + framePos +
@@ -1285,8 +1287,9 @@ namespace EarvinStocksPGM
                 pen2.DashPattern = new float[] { 6, 2 };
                 g.DrawLines(pen2, points2);
             }
-            Debug.WriteLine("Chalk_MAP_DOUBLE_LINE() END!!!!!");
+            Debug.WriteLine("Chalk_MAP_MACD_LINE() END!!!!!");
         }
+
 
 
 
