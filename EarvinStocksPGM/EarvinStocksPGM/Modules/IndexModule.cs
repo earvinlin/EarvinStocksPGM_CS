@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -30,6 +31,9 @@ namespace EarvinStocksPGM.Modules
         public double LRSI { get; set; }
         public double K { get; set; }
         public double D { get; set; }
+        public double DIF { get; set; }
+        public double DEA { get; set; }
+        public double HIST { get; set; }
     }
 
     public static class IndexModule
@@ -55,7 +59,10 @@ namespace EarvinStocksPGM.Modules
             double[] dblLRSI = new double[sd.Length];
             double[] dblK = new double[sd.Length];
             double[] dblD = new double[sd.Length];
-            double[] dblMACD = new double[sd.Length];
+            double[] dblDIF = new double[sd.Length];
+            double[] dblDEA = new double[sd.Length]; 
+            double[] dblHIST = new double[sd.Length];
+
 
             dblMAPValues5 = CalculateAverage(sd, 5, true);
             dblMAPValues10 = CalculateAverage(sd, 10, true);
@@ -74,7 +81,7 @@ namespace EarvinStocksPGM.Modules
             dblSRSI = CalculateRSI(sd, 6);
             dblLRSI = CalculateRSI(sd, 20);
             (dblK, dblD) = CalculateKD(sd, 9);
-            dblMACD = CalculateMACD(sd, 12);
+            (dblDIF, dblDEA, dblHIST) = CalculateMACD(sd, 12, 26, 9);
 
             for (int i = 0; i < sd.Length; i++)
             {
@@ -97,6 +104,9 @@ namespace EarvinStocksPGM.Modules
                 idx[i].LRSI = dblLRSI[i];
                 idx[i].K = dblK[i];
                 idx[i].D = dblD[i];
+                idx[i].DIF = dblDIF[i];
+                idx[i].DEA = dblDEA[i];
+                idx[i].HIST = dblHIST[i];
             }
             return idx;
         }
@@ -383,184 +393,193 @@ namespace EarvinStocksPGM.Modules
                 prevK = k;
                 prevD = d;
             }
-            for (int i = 0; i < sd.Length; i++)
-            {
-                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", K= " + Math.Round(kValues[i], 2) + ", D= " + Math.Round(dValues[i], 2));
-            }
+            //for (int i = 0; i < sd.Length; i++)
+            //{
+            //    Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", K= " + Math.Round(kValues[i], 2) + ", D= " + Math.Round(dValues[i], 2));
+            //}
 
             return (kValues, dValues);
         }
 
 
-        /*
-         <20260921 Coding ... >
-        ByVal intStockNo As Integer, _
-                    ByVal intMACDNo As Integer, _
-                    ByVal intSEMANo As Integer, _
-                    ByVal intLEMANo As Integer, _
-                    ByVal IsDaily As Boolean)
-        */
-        public static (double[] DIF, double[] MACD, double[] DIF_MACD) CalculateMACD(StockData[] sd,
-            int period = 12, int ema_s = 12, int ema_l = 26, int ema = 5)
+        public static (double[] DIF, double[] DEA, double[] Histogram) CalculateMACD(
+        StockData[] sd, int emaShort = 12, int emaLong = 26,int emaSignal = 9)
         {
-            double sngEMA_S;
-            double sngEMA_L;
-            double sngPreEMA_S;
-            double sngPreEMA_L;
-            double sngPreMACD;
-            double sngMACD;
-            double sngDIF;
-            double sngDIF_MACD;
-            double sngDI;
-            int i;
-            int j;
+            if (sd == null)
+                throw new ArgumentNullException(nameof(sd));
 
-            double[] difValues = new double[sd.Length];
-            double[] macdValues = new double[sd.Length];
-            double[] dif_macdValues = new double[sd.Length];
+            if (sd.Length == 0)
+                return (Array.Empty<double>(),
+                        Array.Empty<double>(),
+                        Array.Empty<double>());
 
-            sngPreEMA_S = sd[0].EndPrice;
-            sngPreEMA_L = sd[0].EndPrice;
-            sngPreMACD = 0;
-            j = 1;
+            int count = sd.Length;
 
-            while (j <= sd.Length) 
+            double[] difValues = new double[count];
+            double[] deaValues = new double[count];
+            double[] histValues = new double[count];
+
+            // EMA初始值使用第一筆收盤價
+            double emaS = sd[0].EndPrice;
+            double emaL = sd[0].EndPrice;
+            double dea = 0.0;
+
+            difValues[0] = 0.0;
+            deaValues[0] = 0.0;
+            histValues[0] = 0.0;
+
+            double shortFactor = 2.0 / (emaShort + 1);
+            double longFactor = 2.0 / (emaLong + 1);
+            double signalFactor = 2.0 / (emaSignal + 1);
+
+            for (int i = 1; i < count; i++)
             {
-                sngDI = (sd[j].HighPrice + sd[j].LowPrice + sd[j].EndPrice * 2) / 4;
-                sngEMA_S = sngPreEMA_S + (2 * (sngDI - sngPreEMA_S) / (1 + ema_s));
-                sngEMA_L = sngPreEMA_L + (2 * (sngDI - sngPreEMA_L) / (1 + ema_l));
-                sngDIF = sngEMA_S - sngEMA_L;
-                //sngMACD = sngPreMACD + (2 * (sngDIF - sngPreMACD) / (1 + period));
-                sngMACD = sngPreMACD + (2 * (sngDIF - sngPreMACD) / (1 + period));
-                sngDIF_MACD = sngDIF - sngMACD;
+                double close = sd[i].EndPrice;
 
-                difValues[j] = sngDIF;
-                macdValues[j] = sngMACD;
-                dif_macdValues[j] = sngDIF_MACD;
+                // EMA Short
+                emaS = emaS + (close - emaS) * shortFactor;
 
-                sngPreEMA_S = sngEMA_S;
-                sngPreEMA_L = sngEMA_L;
-                sngPreMACD = sngMACD;
-                j++;
+                // EMA Long
+                emaL = emaL + (close - emaL) * longFactor;
+
+                // DIF
+                double dif = emaS - emaL;
+
+                // DEA (Signal)
+                dea = dea + (dif - dea) * signalFactor;
+
+                // Histogram
+                double hist = dif - dea;
+
+                difValues[i] = dif;
+                deaValues[i] = dea;     // MACD
+                histValues[i] = hist;   // OSC (MACD Bar)
+            }
+            // DEBUG : Display the MACD values for verification
+            for (int i = 0; i < sd.Length; i++)
+            {
+                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate +
+                    ", dif= " + Math.Round(difValues[i], 5) +
+                    ", dea= " + Math.Round(deaValues[i], 5) +
+                    ", hist= " + Math.Round(histValues[i], 5));
             }
 
-            return (difValues, macdValues, dif_macdValues);
-            /*
-             
-                sngPreEMA_S = udtStock(1).sngEndprice
-                sngPreEMA_L = udtStock(1).sngEndprice
-                sngPreMACD = 0
-                j = 1
-                While j <= intStockNo
-                    sngDI = (udtStock(j).sngHighPrice + udtStock(j).sngLowPrice + udtStock(j).sngEndprice * 2) / 4
-                    sngEMA_S = sngPreEMA_S + (2 * (sngDI - sngPreEMA_S) / (1 + intSEMANo))
-                    sngEMA_L = sngPreEMA_L + (2 * (sngDI - sngPreEMA_L) / (1 + intLEMANo))
-                    sngDIF = sngEMA_S - sngEMA_L
-                    sngMACD = sngPreMACD + (2 * (sngDIF - sngPreMACD) / (1 + intMACDNo))
-                    sngDIF_MACD = sngDIF - sngMACD
-        
-                    udtIndex(j).sngDIF = sngDIF
-                    udtIndex(j).sngMACD = sngMACD
-                    udtIndex(j).sngDIF_MACD = sngDIF_MACD
-        
-                    sngPreEMA_S = sngEMA_S
-                    sngPreEMA_L = sngEMA_L
-                    sngPreMACD = sngMACD
-                    j = j + 1
-                Wend
-
-
-             * 標準 MACD 的寫法應該類似
-                for (int i = 1; i < sd.Length; i++)
-                {
-                    double close = sd[i].EndPrice;
-
-                    ema12 = ema12 + (close - ema12) * 2.0 / 13.0;
-                    ema26 = ema26 + (close - ema26) * 2.0 / 27.0;
-
-                    dif = ema12 - ema26;
-
-                    dea = dea + (dif - dea) * 2.0 / 10.0;
-
-                    hist = dif - dea;
-
-                    difValues[i] = dif;
-                    macdValues[i] = dea;
-                    dif_macdValues[i] = hist;
-                }
-            *-------------------------------
-            public static (double[] DIF, double[] DEA, double[] Histogram)
-                CalculateMACD(
-                    StockData[] sd,
-                    int emaShort = 12,
-                    int emaLong = 26,
-                    int emaSignal = 9)
-{
-    if (sd == null)
-        throw new ArgumentNullException(nameof(sd));
-
-    if (sd.Length == 0)
-        return (Array.Empty<double>(),
-                Array.Empty<double>(),
-                Array.Empty<double>());
-
-    int count = sd.Length;
-
-    double[] difValues = new double[count];
-    double[] deaValues = new double[count];
-    double[] histValues = new double[count];
-
-    // EMA初始值使用第一筆收盤價
-    double emaS = sd[0].EndPrice;
-    double emaL = sd[0].EndPrice;
-    double dea = 0.0;
-
-    difValues[0] = 0.0;
-    deaValues[0] = 0.0;
-    histValues[0] = 0.0;
-
-    double shortFactor = 2.0 / (emaShort + 1);
-    double longFactor = 2.0 / (emaLong + 1);
-    double signalFactor = 2.0 / (emaSignal + 1);
-
-    for (int i = 1; i < count; i++)
-    {
-        double close = sd[i].EndPrice;
-
-        // EMA Short
-        emaS = emaS + (close - emaS) * shortFactor;
-
-        // EMA Long
-        emaL = emaL + (close - emaL) * longFactor;
-
-        // DIF
-        double dif = emaS - emaL;
-
-        // DEA (Signal)
-        dea = dea + (dif - dea) * signalFactor;
-
-        // Histogram
-        double hist = dif - dea;
-
-        difValues[i] = dif;
-        deaValues[i] = dea;
-        histValues[i] = hist;
-    }
-
-    return (difValues, deaValues, histValues);
-}
-            
-            
-            
-             */
+            return (difValues, deaValues, histValues);
         }
 
 
 
         //--- Write Here ---//
 
+
+
+
     }
 }
+
+
+
+
+
+
+
+
+//////// 唸書時的 MACD 版本 (未完成)
+//////public static (double[] DIF, double[] MACD, double[] DIF_MACD) CalculateMACD(StockData[] sd,
+//////    int period = 12, int ema_s = 12, int ema_l = 26, int ema = 5)
+//////{
+//////    double sngEMA_S;
+//////    double sngEMA_L;
+//////    double sngPreEMA_S;
+//////    double sngPreEMA_L;
+//////    double sngPreMACD;
+//////    double sngMACD;
+//////    double sngDIF;
+//////    double sngDIF_MACD;
+//////    double sngDI;
+//////    int i;
+//////    int j;
+
+//////    double[] difValues = new double[sd.Length];
+//////    double[] macdValues = new double[sd.Length];
+//////    double[] dif_macdValues = new double[sd.Length];
+
+//////    sngPreEMA_S = sd[0].EndPrice;
+//////    sngPreEMA_L = sd[0].EndPrice;
+//////    sngPreMACD = 0;
+//////    j = 1;
+
+//////    while (j <= sd.Length) 
+//////    {
+//////        sngDI = (sd[j].HighPrice + sd[j].LowPrice + sd[j].EndPrice * 2) / 4;
+//////        sngEMA_S = sngPreEMA_S + (2 * (sngDI - sngPreEMA_S) / (1 + ema_s));
+//////        sngEMA_L = sngPreEMA_L + (2 * (sngDI - sngPreEMA_L) / (1 + ema_l));
+//////        sngDIF = sngEMA_S - sngEMA_L;
+//////        //sngMACD = sngPreMACD + (2 * (sngDIF - sngPreMACD) / (1 + period));
+//////        sngMACD = sngPreMACD + (2 * (sngDIF - sngPreMACD) / (1 + period));
+//////        sngDIF_MACD = sngDIF - sngMACD;
+
+//////        difValues[j] = sngDIF;
+//////        macdValues[j] = sngMACD;
+//////        dif_macdValues[j] = sngDIF_MACD;
+
+//////        sngPreEMA_S = sngEMA_S;
+//////        sngPreEMA_L = sngEMA_L;
+//////        sngPreMACD = sngMACD;
+//////        j++;
+//////    }
+
+//////    return (difValues, macdValues, dif_macdValues);
+//////    /*
+
+//////        sngPreEMA_S = udtStock(1).sngEndprice
+//////        sngPreEMA_L = udtStock(1).sngEndprice
+//////        sngPreMACD = 0
+//////        j = 1
+//////        While j <= intStockNo
+//////            sngDI = (udtStock(j).sngHighPrice + udtStock(j).sngLowPrice + udtStock(j).sngEndprice * 2) / 4
+//////            sngEMA_S = sngPreEMA_S + (2 * (sngDI - sngPreEMA_S) / (1 + intSEMANo))
+//////            sngEMA_L = sngPreEMA_L + (2 * (sngDI - sngPreEMA_L) / (1 + intLEMANo))
+//////            sngDIF = sngEMA_S - sngEMA_L
+//////            sngMACD = sngPreMACD + (2 * (sngDIF - sngPreMACD) / (1 + intMACDNo))
+//////            sngDIF_MACD = sngDIF - sngMACD
+
+//////            udtIndex(j).sngDIF = sngDIF
+//////            udtIndex(j).sngMACD = sngMACD
+//////            udtIndex(j).sngDIF_MACD = sngDIF_MACD
+
+//////            sngPreEMA_S = sngEMA_S
+//////            sngPreEMA_L = sngEMA_L
+//////            sngPreMACD = sngMACD
+//////            j = j + 1
+//////        Wend
+
+
+//////     * 標準 MACD 的寫法應該類似
+//////        for (int i = 1; i < sd.Length; i++)
+//////        {
+//////            double close = sd[i].EndPrice;
+
+//////            ema12 = ema12 + (close - ema12) * 2.0 / 13.0;
+//////            ema26 = ema26 + (close - ema26) * 2.0 / 27.0;
+
+//////            dif = ema12 - ema26;
+
+//////            dea = dea + (dif - dea) * 2.0 / 10.0;
+
+//////            hist = dif - dea;
+
+//////            difValues[i] = dif;
+//////            macdValues[i] = dea;
+//////            dif_macdValues[i] = hist;
+//////        }
+//////    *-------------------------------
+
+
+//////     */
+//////}
+
+
 
 
 
