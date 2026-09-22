@@ -1129,9 +1129,415 @@ namespace EarvinStocksPGM
 
 
 
+        private void Chalk_MAP_MACD_LINE(Graphics g, int framePos, int frameNum, int mapType1, int mapType2)
+        {
+            if (framePos <= 0 || framePos > frameNum)
+                return;
+
+            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;    // 儲存要繪製指標柱狀圖的X軸長度
+            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
+            float yDistance = yAxisHeight / 4;
+
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType1);
+            Debug.WriteLine("最高/低價(LINE)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+
+            // 劃虛線 (劃3條)
+            using (Pen pen = new Pen(Color.Black, 1))
+            {
+                pen.DashStyle = DashStyle.Dash;
+                pen.DashPattern = new float[] { 7, 3 };
+                for (int i = 1; i <= 3; i++)
+                {
+                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
+                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
+                    g.DrawLine(pen, pl, pr);
+                    // 顯示Frame最左側的標籤
+                    g.DrawString($"{(highLowValues.highValue * i / 4)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
+                }
+            }
+
+            // Draw Index Values
+            float xWidth = xAxisLength / DisplayCount;
+            float yHeight = yAxisHeight / 100f;
+            Debug.WriteLine("Index -- xWidth= " + xWidth + ", yHeight= " + yHeight);
+
+            float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
+            float yCoord = FrameLeftPoints[framePos].frameY;
+            //Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
+            //    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
+            //    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
+            //    ", xCoord= " + xCoord + ", yCoord= " + yCoord);
+
+            //-----------------------//
+            /*-- Draw Double Lines --*/
+            //-----------------------//
+            PointF[] points1 = new PointF[DisplayCount];
+            PointF[] points2 = new PointF[DisplayCount];
+            double[] values1 = new double[DisplayCount];
+            double[] values2 = new double[DisplayCount];
+            double[] values3 = new double[DisplayCount];
+
+            switch (mapType1)
+            {
+                case GeneralModule.MAP_WMS:
+                    values1 = IdxData.Select(d => d.WMS).ToArray();
+                    break;
+                case GeneralModule.MAP_PSY:
+                    values1 = IdxData.Select(d => d.PSY).ToArray();
+                    break;
+                case GeneralModule.MAP_SRSI:
+                    values1 = IdxData.Select(d => d.SRSI).ToArray();
+                    break;
+                case GeneralModule.MAP_LRSI:
+                    values1 = IdxData.Select(d => d.LRSI).ToArray();
+                    break;
+                case GeneralModule.MAP_RSI:
+                    values1 = IdxData.Select(d => d.SRSI).ToArray();
+                    values2 = IdxData.Select(d => d.LRSI).ToArray();
+                    break;
+                case GeneralModule.MAP_K:
+                    values1 = IdxData.Select(d => d.K).ToArray();
+                    break;
+                case GeneralModule.MAP_D:
+                    values1 = IdxData.Select(d => d.D).ToArray();
+                    break;
+                case GeneralModule.MAP_KD:
+                    values1 = IdxData.Select(d => d.K).ToArray();
+                    values2 = IdxData.Select(d => d.D).ToArray();
+                    break;
+                case GeneralModule.MAP_MACD:
+                    values1 = IdxData.Select(d => d.DIF).ToArray();
+                    values2 = IdxData.Select(d => d.DEA).ToArray();
+                    values3 = IdxData.Select(d => d.HIST).ToArray();
+                    break;
+            }
+            switch (mapType2)
+            {
+                case GeneralModule.MAP_WMS:
+                    values2 = IdxData.Select(d => d.WMS).ToArray();
+                    break;
+                case GeneralModule.MAP_PSY:
+                    values2 = IdxData.Select(d => d.PSY).ToArray();
+                    break;
+                case GeneralModule.MAP_SRSI:
+                    values2 = IdxData.Select(d => d.SRSI).ToArray();
+                    break;
+                case GeneralModule.MAP_LRSI:
+                    values2 = IdxData.Select(d => d.LRSI).ToArray();
+                    break;
+                case GeneralModule.MAP_K:
+                    values2 = IdxData.Select(d => d.K).ToArray();
+                    break;
+                case GeneralModule.MAP_D:
+                    values2 = IdxData.Select(d => d.D).ToArray();
+                    break;
+                case GeneralModule.MAP_KD:
+                    values1 = IdxData.Select(d => d.K).ToArray();
+                    values2 = IdxData.Select(d => d.D).ToArray();
+                    break;
+                case GeneralModule.MAP_MACD:
+                    values1 = IdxData.Select(d => d.DIF).ToArray();
+                    values2 = IdxData.Select(d => d.DEA).ToArray();
+                    values3 = IdxData.Select(d => d.HIST).ToArray();
+                    break;
+            }
+
+            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
+            {
+                float ii = 0;
+                if (i == StartIndex)
+                {
+                    // 1st line
+                    ii = yHeight * ((float)values1[i]);
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points1[0] = new PointF(xCoord, yCoord);
+                    // 2nd line
+                    ii = yHeight * ((float)values2[i]);
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points2[0] = new PointF(xCoord, yCoord);
+                }
+                else
+                {
+                    // 1st line
+                    xCoord += xWidth;
+                    ii = yHeight * ((float)values1[i]);
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points1[i - StartIndex] = new PointF(xCoord, yCoord);
+                    // 2nd line
+                    ii = yHeight * ((float)values2[i]);
+                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+                    points2[i - StartIndex] = new PointF(xCoord, yCoord);
+                }
+                Debug.WriteLine("DoubleLine-Baseline -- framePos= " + framePos +
+                    ", poin1[" + framePos + "].X= " + points1[framePos].X +
+                    ", poin1[" + framePos + "].Y= " + points1[framePos].Y +
+                    ", point2[" + framePos + "].X= " + points2[framePos].X +
+                    ", point2[" + framePos + "].Y= " + points2[framePos].Y);
+            }
+
+            using (Pen pen1 = new Pen(Color.Green, 1))
+            {
+                g.DrawLines(pen1, points1);
+            }
+            using (Pen pen2 = new Pen(Color.RosyBrown, 1))
+            {
+                pen2.DashStyle = DashStyle.Dash;
+                pen2.DashPattern = new float[] { 6, 2 };
+                g.DrawLines(pen2, points2);
+            }
+            Debug.WriteLine("Chalk_MAP_DOUBLE_LINE() END!!!!!");
+        }
+
+
 
         //-- Write Next Here --//
 
 
     }
 }
+
+/*
+ 
+private void Chalk_MAP_MACD(
+    Graphics g,
+    int framePos,
+    int frameNum)
+{
+    if (framePos <= 0 || framePos > frameNum)
+        return;
+
+    float leftX = FrameLeftPoints[framePos].frameX;
+    float rightX = FrameMiddlePoints[framePos].frameX;
+    float bottomY = FrameLeftPoints[framePos].frameY;
+    float topY = FrameLeftPoints[framePos - 1].frameY;
+
+    float chartWidth = rightX - leftX;
+    float chartHeight = bottomY - topY;
+
+    //------------------------------------
+    // MACD Data
+    //------------------------------------
+    double[] difValues =
+        IdxData.Select(d => d.DIF).ToArray();
+
+    double[] macdValues =
+        IdxData.Select(d => d.MACD).ToArray();
+
+    double[] oscValues =
+        IdxData.Select(d => d.OSC).ToArray();
+
+    //------------------------------------
+    // Max / Min
+    //------------------------------------
+    double maxValue =
+        Math.Max(
+            difValues.Max(),
+            Math.Max(
+                macdValues.Max(),
+                oscValues.Max()));
+
+    double minValue =
+        Math.Min(
+            difValues.Min(),
+            Math.Min(
+                macdValues.Min(),
+                oscValues.Min()));
+
+    if (Math.Abs(maxValue - minValue) < 0.000001)
+    {
+        maxValue += 1;
+        minValue -= 1;
+    }
+
+    //------------------------------------
+    // Y Convert
+    //------------------------------------
+    Func<double, float> ToY = value =>
+    {
+        return bottomY -
+            (float)(
+                (value - minValue) /
+                (maxValue - minValue)
+                * chartHeight);
+    };
+
+    //------------------------------------
+    // Zero Line Position
+    //------------------------------------
+    float zeroY = ToY(0);
+
+    //------------------------------------
+    // Grid
+    //------------------------------------
+    using (Pen gridPen = new Pen(Color.LightGray, 1))
+    {
+        gridPen.DashStyle = DashStyle.Dash;
+
+        for (int i = 1; i <= 3; i++)
+        {
+            float y = topY + chartHeight * i / 4f;
+
+            g.DrawLine(
+                gridPen,
+                leftX,
+                y,
+                rightX,
+                y);
+        }
+    }
+
+    //------------------------------------
+    // Zero Line
+    //------------------------------------
+    using (Pen zeroPen = new Pen(Color.Black, 1))
+    {
+        g.DrawLine(
+            zeroPen,
+            leftX,
+            zeroY,
+            rightX,
+            zeroY);
+    }
+
+    //------------------------------------
+    // 左側刻度
+    //------------------------------------
+    using (Font font = new Font(this.Font.FontFamily, 6))
+    {
+        for (int i = 0; i <= 4; i++)
+        {
+            double value =
+                maxValue -
+                (maxValue - minValue) * i / 4.0;
+
+            float y =
+                topY +
+                chartHeight * i / 4f;
+
+            g.DrawString(
+                value.ToString("0.00"),
+                font,
+                Brushes.Black,
+                2,
+                y - 6);
+        }
+    }
+
+    //------------------------------------
+    // X Width
+    //------------------------------------
+    float xWidth = chartWidth / DisplayCount;
+
+    PointF[] difPoints =
+        new PointF[DisplayCount];
+
+    PointF[] macdPoints =
+        new PointF[DisplayCount];
+
+    //------------------------------------
+    // Build DIF / MACD Points
+    //------------------------------------
+    for (int i = 0; i < DisplayCount; i++)
+    {
+        int idx = StartIndex + i;
+
+        float x =
+            leftX +
+            (i + 0.5f) * xWidth;
+
+        difPoints[i] =
+            new PointF(
+                x,
+                ToY(difValues[idx]));
+
+        macdPoints[i] =
+            new PointF(
+                x,
+                ToY(macdValues[idx]));
+    }
+
+    //------------------------------------
+    // OSC Histogram
+    //------------------------------------
+    for (int i = 0; i < DisplayCount; i++)
+    {
+        int idx = StartIndex + i;
+
+        float x =
+            leftX +
+            (i + 0.5f) * xWidth;
+
+        float y =
+            ToY(oscValues[idx]);
+
+        float rectTop =
+            Math.Min(y, zeroY);
+
+        float rectHeight =
+            Math.Abs(y - zeroY);
+
+        Color barColor =
+            oscValues[idx] >= 0
+                ? Color.Red
+                : Color.Green;
+
+        using (SolidBrush brush =
+            new SolidBrush(barColor))
+        {
+            g.FillRectangle(
+                brush,
+                x - xWidth * 0.35f,
+                rectTop,
+                xWidth * 0.7f,
+                Math.Max(rectHeight, 1));
+        }
+    }
+
+    //------------------------------------
+    // DIF Line
+    //------------------------------------
+    using (Pen difPen =
+        new Pen(Color.LimeGreen, 1))
+    {
+        g.DrawLines(
+            difPen,
+            difPoints);
+    }
+
+    //------------------------------------
+    // MACD Line
+    //------------------------------------
+    using (Pen macdPen =
+        new Pen(Color.Gold, 1))
+    {
+        g.DrawLines(
+            macdPen,
+            macdPoints);
+    }
+
+    //------------------------------------
+    // Legend
+    //------------------------------------
+    using (Font font = new Font(this.Font.FontFamily, 7))
+    {
+        g.DrawString(
+            "DIF",
+            font,
+            Brushes.LimeGreen,
+            rightX - 80,
+            topY + 2);
+
+        g.DrawString(
+            "MACD",
+            font,
+            Brushes.Goldenrod,
+            rightX - 50,
+            topY + 2);
+    }
+
+    Debug.WriteLine(
+        $"MACD Draw End. Max={maxValue}, Min={minValue}");
+} 
+ 
+ 
+ */

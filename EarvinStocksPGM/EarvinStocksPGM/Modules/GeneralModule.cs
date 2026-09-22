@@ -102,6 +102,15 @@ namespace EarvinStocksPGM.Modules
                     break;
 
                 case MAP_MACD:
+                    for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
+                    {
+
+                    }
+                    double[] difValues = idx.Select(d => d.DIF).ToArray();
+                    double[] macdValues = idx.Select(d => d.DEA).ToArray();
+                    double[] oscValues = idx.Select(d => d.HIST).ToArray();
+                    highValue = Math.Max(difValues.Max(), Math.Max(macdValues.Max(),oscValues.Max()));
+                    lowValue = Math.Min(difValues.Min(), Math.Min(macdValues.Min(),oscValues.Min()));
                     ////for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
                     ////{
                     ////    if (highValue < idx[i].MACD)
