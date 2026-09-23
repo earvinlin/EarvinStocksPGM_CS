@@ -278,7 +278,7 @@
             cboFrameNum.Name = "cboFrameNum";
             cboFrameNum.Size = new Size(42, 38);
             cboFrameNum.TabIndex = 11;
-            cboFrameNum.Text = "5";
+            cboFrameNum.Text = "4";
             cboFrameNum.SelectedIndexChanged += cboFrameNum_SelectedIndexChanged;
             // 
             // label2
@@ -525,13 +525,13 @@
             cntMenuStrip.ImageScalingSize = new Size(24, 24);
             cntMenuStrip.Items.AddRange(new ToolStripItem[] { k線ToolStripMenuItem, 量能指標ToolStripMenuItem, 熱門指標ToolStripMenuItem, dFTSToolStripMenuItem, 灰聚類模型ToolStripMenuItem });
             cntMenuStrip.Name = "cntMenuStrip";
-            cntMenuStrip.Size = new Size(241, 187);
+            cntMenuStrip.Size = new Size(171, 154);
             // 
             // k線ToolStripMenuItem
             // 
             k線ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { 移動平均線ToolStripMenuItem });
             k線ToolStripMenuItem.Name = "k線ToolStripMenuItem";
-            k線ToolStripMenuItem.Size = new Size(240, 30);
+            k線ToolStripMenuItem.Size = new Size(170, 30);
             k線ToolStripMenuItem.Text = "K線";
             // 
             // 移動平均線ToolStripMenuItem
@@ -544,7 +544,7 @@
             // 
             量能指標ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { VolumeToolStripMenuItem, 融資餘額ToolStripMenuItem, 融資增減ToolStripMenuItem, 融券餘額ToolStripMenuItem, 法人庫存ToolStripMenuItem, 自營商庫存ToolStripMenuItem, 投信庫存ToolStripMenuItem, 外資庫存ToolStripMenuItem });
             量能指標ToolStripMenuItem.Name = "量能指標ToolStripMenuItem";
-            量能指標ToolStripMenuItem.Size = new Size(240, 30);
+            量能指標ToolStripMenuItem.Size = new Size(170, 30);
             量能指標ToolStripMenuItem.Text = "量能指標";
             // 
             // VolumeToolStripMenuItem
@@ -600,72 +600,72 @@
             // 
             熱門指標ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { KDToolStripMenuItem, MACDToolStripMenuItem, RSIToolStripMenuItem, stochRSIToolStripMenuItem, wildersRSIToolStripMenuItem, WMSToolStripMenuItem, WMSCToolStripMenuItem, EMAToolStripMenuItem, BIASToolStripMenuItem, PSYToolStripMenuItem });
             熱門指標ToolStripMenuItem.Name = "熱門指標ToolStripMenuItem";
-            熱門指標ToolStripMenuItem.Size = new Size(240, 30);
+            熱門指標ToolStripMenuItem.Size = new Size(170, 30);
             熱門指標ToolStripMenuItem.Text = "熱門指標";
             // 
             // KDToolStripMenuItem
             // 
             KDToolStripMenuItem.Name = "KDToolStripMenuItem";
-            KDToolStripMenuItem.Size = new Size(270, 34);
+            KDToolStripMenuItem.Size = new Size(210, 34);
             KDToolStripMenuItem.Text = "KD";
             KDToolStripMenuItem.Click += KDToolStripMenuItem_Click;
             // 
             // MACDToolStripMenuItem
             // 
             MACDToolStripMenuItem.Name = "MACDToolStripMenuItem";
-            MACDToolStripMenuItem.Size = new Size(270, 34);
+            MACDToolStripMenuItem.Size = new Size(210, 34);
             MACDToolStripMenuItem.Text = "MACD";
             MACDToolStripMenuItem.Click += MACDToolStripMenuItem_Click;
             // 
             // RSIToolStripMenuItem
             // 
             RSIToolStripMenuItem.Name = "RSIToolStripMenuItem";
-            RSIToolStripMenuItem.Size = new Size(270, 34);
+            RSIToolStripMenuItem.Size = new Size(210, 34);
             RSIToolStripMenuItem.Text = "RSI";
             RSIToolStripMenuItem.Click += RSIToolStripMenuItem_Click;
             // 
             // stochRSIToolStripMenuItem
             // 
             stochRSIToolStripMenuItem.Name = "stochRSIToolStripMenuItem";
-            stochRSIToolStripMenuItem.Size = new Size(270, 34);
+            stochRSIToolStripMenuItem.Size = new Size(210, 34);
             stochRSIToolStripMenuItem.Text = "Stoch RSI";
             // 
             // wildersRSIToolStripMenuItem
             // 
             wildersRSIToolStripMenuItem.Name = "wildersRSIToolStripMenuItem";
-            wildersRSIToolStripMenuItem.Size = new Size(270, 34);
+            wildersRSIToolStripMenuItem.Size = new Size(210, 34);
             wildersRSIToolStripMenuItem.Text = "Wilder's RSI";
             // 
             // WMSToolStripMenuItem
             // 
             WMSToolStripMenuItem.Name = "WMSToolStripMenuItem";
-            WMSToolStripMenuItem.Size = new Size(270, 34);
+            WMSToolStripMenuItem.Size = new Size(210, 34);
             WMSToolStripMenuItem.Text = "WMS";
             WMSToolStripMenuItem.Click += WMSToolStripMenuItem_Click;
             // 
             // WMSCToolStripMenuItem
             // 
             WMSCToolStripMenuItem.Name = "WMSCToolStripMenuItem";
-            WMSCToolStripMenuItem.Size = new Size(270, 34);
+            WMSCToolStripMenuItem.Size = new Size(210, 34);
             WMSCToolStripMenuItem.Text = "WMSC";
             // 
             // EMAToolStripMenuItem
             // 
             EMAToolStripMenuItem.Name = "EMAToolStripMenuItem";
-            EMAToolStripMenuItem.Size = new Size(270, 34);
+            EMAToolStripMenuItem.Size = new Size(210, 34);
             EMAToolStripMenuItem.Text = "EMA";
             // 
             // BIASToolStripMenuItem
             // 
             BIASToolStripMenuItem.Name = "BIASToolStripMenuItem";
-            BIASToolStripMenuItem.Size = new Size(270, 34);
+            BIASToolStripMenuItem.Size = new Size(210, 34);
             BIASToolStripMenuItem.Text = "BIAS";
             BIASToolStripMenuItem.Click += BIASToolStripMenuItem_Click;
             // 
             // PSYToolStripMenuItem
             // 
             PSYToolStripMenuItem.Name = "PSYToolStripMenuItem";
-            PSYToolStripMenuItem.Size = new Size(270, 34);
+            PSYToolStripMenuItem.Size = new Size(210, 34);
             PSYToolStripMenuItem.Text = "PSY";
             PSYToolStripMenuItem.Click += PSYToolStripMenuItem_Click;
             // 
@@ -673,7 +673,7 @@
             // 
             dFTSToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { trendToolStripMenuItem, qMToolStripMenuItem, wLSTToolStripMenuItem, wCYToolStripMenuItem, wLWToolStripMenuItem, dIFFToolStripMenuItem, dCToolStripMenuItem, holdToolStripMenuItem, profitToolStripMenuItem, cYToolStripMenuItem, signalsToolStripMenuItem });
             dFTSToolStripMenuItem.Name = "dFTSToolStripMenuItem";
-            dFTSToolStripMenuItem.Size = new Size(240, 30);
+            dFTSToolStripMenuItem.Size = new Size(170, 30);
             dFTSToolStripMenuItem.Text = "DFTS";
             // 
             // trendToolStripMenuItem
@@ -746,7 +746,7 @@
             // 
             灰聚類模型ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { 切割區間ToolStripMenuItem, 聚類結果ToolStripMenuItem });
             灰聚類模型ToolStripMenuItem.Name = "灰聚類模型ToolStripMenuItem";
-            灰聚類模型ToolStripMenuItem.Size = new Size(240, 30);
+            灰聚類模型ToolStripMenuItem.Size = new Size(170, 30);
             灰聚類模型ToolStripMenuItem.Text = "灰聚類模型";
             // 
             // 切割區間ToolStripMenuItem
