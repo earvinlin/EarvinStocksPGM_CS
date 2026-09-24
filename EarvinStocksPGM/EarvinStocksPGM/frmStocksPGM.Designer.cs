@@ -107,7 +107,7 @@
             cYToolStripMenuItem = new ToolStripMenuItem();
             signalsToolStripMenuItem = new ToolStripMenuItem();
             灰聚類模型ToolStripMenuItem = new ToolStripMenuItem();
-            切割區間ToolStripMenuItem = new ToolStripMenuItem();
+            SectorsToolStripMenuItem = new ToolStripMenuItem();
             聚類結果ToolStripMenuItem = new ToolStripMenuItem();
             mnuStocksList.SuspendLayout();
             pnlStocksBar.SuspendLayout();
@@ -744,21 +744,22 @@
             // 
             // 灰聚類模型ToolStripMenuItem
             // 
-            灰聚類模型ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { 切割區間ToolStripMenuItem, 聚類結果ToolStripMenuItem });
+            灰聚類模型ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { SectorsToolStripMenuItem, 聚類結果ToolStripMenuItem });
             灰聚類模型ToolStripMenuItem.Name = "灰聚類模型ToolStripMenuItem";
             灰聚類模型ToolStripMenuItem.Size = new Size(170, 30);
             灰聚類模型ToolStripMenuItem.Text = "灰聚類模型";
             // 
-            // 切割區間ToolStripMenuItem
+            // SectorsToolStripMenuItem
             // 
-            切割區間ToolStripMenuItem.Name = "切割區間ToolStripMenuItem";
-            切割區間ToolStripMenuItem.Size = new Size(182, 34);
-            切割區間ToolStripMenuItem.Text = "切割區間";
+            SectorsToolStripMenuItem.Name = "SectorsToolStripMenuItem";
+            SectorsToolStripMenuItem.Size = new Size(270, 34);
+            SectorsToolStripMenuItem.Text = "切割區間";
+            SectorsToolStripMenuItem.Click += SectorsToolStripMenuItem_Click;
             // 
             // 聚類結果ToolStripMenuItem
             // 
             聚類結果ToolStripMenuItem.Name = "聚類結果ToolStripMenuItem";
-            聚類結果ToolStripMenuItem.Size = new Size(182, 34);
+            聚類結果ToolStripMenuItem.Size = new Size(270, 34);
             聚類結果ToolStripMenuItem.Text = "聚類結果";
             // 
             // frmStocksPGM
@@ -875,8 +876,9 @@
         private ToolStripMenuItem profitToolStripMenuItem;
         private ToolStripMenuItem cYToolStripMenuItem;
         private ToolStripMenuItem signalsToolStripMenuItem;
-        private ToolStripMenuItem 切割區間ToolStripMenuItem;
+        private ToolStripMenuItem SectorsToolStripMenuItem;
         private ToolStripMenuItem 聚類結果ToolStripMenuItem;
         private ToolStripMenuItem PSYToolStripMenuItem;
+        //private ToolStripMenuItem SectorsToolStripMenuItem;
     }
 }

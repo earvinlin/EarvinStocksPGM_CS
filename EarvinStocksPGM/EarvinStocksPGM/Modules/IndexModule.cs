@@ -34,6 +34,7 @@ namespace EarvinStocksPGM.Modules
         public double DIF { get; set; }
         public double DEA { get; set; }
         public double HIST { get; set; }
+        public double SECTORS { get; set; }
     }
 
     public static class IndexModule
@@ -62,6 +63,7 @@ namespace EarvinStocksPGM.Modules
             double[] dblDIF = new double[sd.Length];
             double[] dblDEA = new double[sd.Length]; 
             double[] dblHIST = new double[sd.Length];
+            double[] dblSectors = new double[sd.Length];
 
 
             dblMAPValues5 = CalculateAverage(sd, 5, true);
@@ -82,6 +84,7 @@ namespace EarvinStocksPGM.Modules
             dblLRSI = CalculateRSI(sd, 20);
             (dblK, dblD) = CalculateKD(sd, 9);
             (dblDIF, dblDEA, dblHIST) = CalculateMACD(sd, 12, 26, 9);
+            dblSectors = CalculateSectors(sd, idx);
 
             for (int i = 0; i < sd.Length; i++)
             {
@@ -107,6 +110,7 @@ namespace EarvinStocksPGM.Modules
                 idx[i].DIF = dblDIF[i];
                 idx[i].DEA = dblDEA[i];
                 idx[i].HIST = dblHIST[i];
+                idx[i].SECTORS = dblSectors[i];
             }
             return idx;
         }
@@ -397,7 +401,6 @@ namespace EarvinStocksPGM.Modules
             //{
             //    Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", K= " + Math.Round(kValues[i], 2) + ", D= " + Math.Round(dValues[i], 2));
             //}
-
             return (kValues, dValues);
         }
 
@@ -455,17 +458,46 @@ namespace EarvinStocksPGM.Modules
                 deaValues[i] = dea;     // MACD
                 histValues[i] = hist;   // OSC (MACD Bar)
             }
-            // DEBUG : Display the MACD values for verification
-            for (int i = 0; i < sd.Length; i++)
-            {
-                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate +
-                    ", dif= " + Math.Round(difValues[i], 5) +
-                    ", dea= " + Math.Round(deaValues[i], 5) +
-                    ", hist= " + Math.Round(histValues[i], 5));
-            }
-
+            //// DEBUG : Display the MACD values for verification
+            //for (int i = 0; i < sd.Length; i++)
+            //{
+            //    Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate +
+            //        ", dif= " + Math.Round(difValues[i], 5) +
+            //        ", dea= " + Math.Round(deaValues[i], 5) +
+            //        ", hist= " + Math.Round(histValues[i], 5));
+            //}
             return (difValues, deaValues, histValues);
         }
+
+        public static double[] CalculateSectors(StockData[] sd, IndexData[] idx)
+        {
+            int i = 0;
+            //double dblUpValue = 0, dblDownValue = 0, dblDiff = 0;
+            //double dblAverage;
+            double[] dblValues = new double[sd.Length];
+
+            Debug.WriteLine("sd.Length= " + sd.Length);
+            while (i < sd.Length)
+            {
+                if (i < 50)
+                    dblValues[i] = 1.0;
+                else if (i < 100)
+                    dblValues[i] = -1.0;
+                else
+                    dblValues[i] = 1.0;
+
+                i++;
+            }
+            // DEBUG : Display the PSY values for verification
+            for (i = 0; i < sd.Length; i++)
+            {
+                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", SECTORS= " + dblValues[i]);
+            }
+            return dblValues;
+        }
+
+
+
 
 
 
