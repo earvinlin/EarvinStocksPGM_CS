@@ -1,7 +1,9 @@
 using EarvinStocksPGM.Modules;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
+using static DbHelper;
 using static EarvinStocksPGM.Modules.GeneralModule;
+using StockData = EarvinStocksPGM.Modules.StockData; // 指定 StockData 代表哪個類別
 
 namespace EarvinStocksPGM
 {
@@ -423,7 +425,8 @@ namespace EarvinStocksPGM
                             Chalk_MAP_VOLUME(e.Graphics, i, FrameNum);
                             break;
                         case GeneralModule.MAP_BIAS:
-                            Chalk_MAP_BIAS(e.Graphics, i, FrameNum);
+                            //Chalk_MAP_BIAS(e.Graphics, i, FrameNum);
+                            Chalk_MAP_CENTER_SINGLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_BIAS);
                             break;
                         case GeneralModule.MAP_WMS:
                             //Chalk_MAP_WMS(e.Graphics, i, FrameNum);
@@ -805,13 +808,7 @@ namespace EarvinStocksPGM
             Debug.WriteLine("Chalk_MAP_VOLUME() END!!!!!");
         }
 
-        /**
-         * 以BIAS為中線，向上 > 0、向下 < 0
-         * g        繪圖物件
-         * framePos 目前選擇的 frame 的位置
-         * frameNum 目前 frame 的總數量
-         */
-        private void Chalk_MAP_BIAS(Graphics g, int framePos, int frameNum)
+        private void Chalk_MAP_CENTER_SINGLE_LINE(Graphics g, int framePos, int frameNum, int mapType)
         {
             //========================================//
             //=== 顯示「乖離率」(MAP_BIAS) START   ===// 
@@ -896,430 +893,253 @@ namespace EarvinStocksPGM
             Debug.WriteLine("Chalk_MAP_BIAS() END!!!!!");
         }
 
+
         private void Chalk_MAP_SINGLE_LINE(Graphics g, int framePos, int frameNum, int mapType)
         {
-            //=======================================//
-            //=== 顯示「威廉指標」(MAP_WMS) START ===// 
-            //=======================================//
-            if (framePos <= 0 || framePos > frameNum)
+            if (framePos <= 0 || framePos > frameNum || DisplayCount <= 0)
                 return;
 
-            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;    // 儲存要繪製指標柱狀圖的X軸長度
-            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
-            float yDistance = yAxisHeight / 4;
+            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;
+            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;
+            float yDistance = yAxisHeight / 4f;
 
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType);
-            Debug.WriteLine("最高/低價(LINE)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
-
-            // 劃虛線 (劃3條)
-            using (Pen pen = new Pen(Color.Black, 1))
+            // 1. 繪製 0~100 指標常見的 25%, 50%, 75% 參考虛線與標籤
+            using (Pen pen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
+            using (Font font = new Font(this.Font.FontFamily, 6))
             {
-                pen.DashStyle = DashStyle.Dash;
                 for (int i = 1; i <= 3; i++)
                 {
-                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
-                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
+                    float yPos = FrameLeftPoints[framePos].frameY - yDistance * i;
+                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, yPos);
+                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, yPos);
                     g.DrawLine(pen, pl, pr);
-                    // 顯示Frame最左側的標籤
-                    g.DrawString($"{(highLowValues.highValue * i / 4)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
+
+                    // 固定顯示 25, 50, 75 刻度（因總高為 100）
+                    int labelValue = i * 25;
+                    g.DrawString(labelValue.ToString(), font, Brushes.Black, 10, yPos - 6);
                 }
             }
 
-            // Draw Index Values
+            // 2. 獲取指標數據
+            double[] values = mapType switch
+            {
+                GeneralModule.MAP_WMS => IdxData.Select(d => d.WMS).ToArray(),
+                GeneralModule.MAP_PSY => IdxData.Select(d => d.PSY).ToArray(),
+                GeneralModule.MAP_SRSI => IdxData.Select(d => d.SRSI).ToArray(),
+                _ => new double[IdxData.Count()]
+            };
+
+            // 3. 計算各數據點座標
             PointF[] points = new PointF[DisplayCount];
             float xWidth = xAxisLength / DisplayCount;
-            float yHeight = yAxisHeight / 100f;
-            Debug.WriteLine("Index -- xWidth= " + xWidth + ", yHeight= " + yHeight);
+            float yHeight = yAxisHeight / 100f; // 100 分制轉換比率
+            float startX = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
+            float baseFrameY = FrameLeftPoints[framePos].frameY;
 
-            float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
-            float yCoord = FrameLeftPoints[framePos].frameY;
-            //Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
-            //    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
-            //    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
-            //    ", xCoord= " + xCoord + ", yCoord= " + yCoord);
-            double[] values = new double[DisplayCount];
-            switch (mapType)
+            for (int i = 0; i < DisplayCount; i++)
             {
-                case GeneralModule.MAP_WMS:
-                    //Debug.WriteLine("WMS[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
-                    //    ", IdxData[i].WMS= " + IdxData[i].WMS + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
-                    values = IdxData.Select(d => d.WMS).ToArray();
-                    break;
-                case GeneralModule.MAP_PSY:
-                    //Debug.WriteLine("PSY[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
-                    //    ", IdxData[i].PSY= " + IdxData[i].PSY + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
-                    values = IdxData.Select(d => d.PSY).ToArray();
-                    break;
-                case GeneralModule.MAP_SRSI:
-                    //Debug.WriteLine("PSY[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
-                    //    ", IdxData[i].PSY= " + IdxData[i].PSY + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
-                    values = IdxData.Select(d => d.SRSI).ToArray();
-                    break;
+                int dataIdx = StartIndex + i;
+                if (dataIdx >= values.Length) break;
+
+                float xCoord = startX + (i * xWidth);
+                float yCoord = baseFrameY - (float)(values[dataIdx] * yHeight);
+                points[i] = new PointF(xCoord, yCoord);
             }
 
-            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
-            {
-                //Debug.WriteLine("i= " + i + ", StartIndex= " + StartIndex + ", DisplayCount= " + DisplayCount);
-                float ii = 0;
-                if (i == StartIndex)
-                {
-                    ii = yHeight * ((float)values[i]);
-                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-                    points[0] = new PointF(xCoord, yCoord);
-                }
-                else
-                {
-                    xCoord += xWidth;
-                    ii = yHeight * ((float)values[i]);
-                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-                    points[i - StartIndex] = new PointF(xCoord, yCoord);
-                }
-                Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
-                    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
-                    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
-                ", xCoord= " + xCoord + ", yCoord= " + yCoord);
-            }
-
+            // 4. 繪製折線
             using (Pen pen = new Pen(Color.Green, 1))
             {
                 g.DrawLines(pen, points);
             }
-            Debug.WriteLine("Chalk_MAP_LINE() END!!!!!");
         }
 
         private void Chalk_MAP_DOUBLE_LINE(Graphics g, int framePos, int frameNum, int mapType1, int mapType2)
         {
-            if (framePos <= 0 || framePos > frameNum)
+            if (framePos <= 0 || framePos > frameNum || DisplayCount <= 0)
                 return;
 
-            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;    // 儲存要繪製指標柱狀圖的X軸長度
-            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
-            float yDistance = yAxisHeight / 4;
+            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;
+            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;
+            float yDistance = yAxisHeight / 4f;
 
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType1);
-            Debug.WriteLine("最高/低價(LINE)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
-
-            // 劃虛線 (劃3條)
-            using (Pen pen = new Pen(Color.Black, 1))
+            // 1. 繪製參考虛線
+            using (Pen pen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
+            using (Font font = new Font(this.Font.FontFamily, 6))
             {
-                pen.DashStyle = DashStyle.Dash;
-                pen.DashPattern = new float[] { 7, 3 };
                 for (int i = 1; i <= 3; i++)
                 {
-                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
-                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
+                    float yPos = FrameLeftPoints[framePos].frameY - yDistance * i;
+                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, yPos);
+                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, yPos);
                     g.DrawLine(pen, pl, pr);
-                    // 顯示Frame最左側的標籤
-                    g.DrawString($"{(highLowValues.highValue * i / 4)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
+                    g.DrawString((i * 25).ToString(), font, Brushes.Black, 10, yPos - 6);
                 }
             }
 
-            // Draw Index Values
-            float xWidth = xAxisLength / DisplayCount;
-            float yHeight = yAxisHeight / 100f;
-            Debug.WriteLine("Index -- xWidth= " + xWidth + ", yHeight= " + yHeight);
+            // 2. 獲取雙線數據
+            double[] values1 = new double[IdxData.Count()];
+            double[] values2 = new double[IdxData.Count()];
 
-            float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
-            float yCoord = FrameLeftPoints[framePos].frameY;
-            //Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
-            //    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
-            //    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
-            //    ", xCoord= " + xCoord + ", yCoord= " + yCoord);
-
-            //-----------------------//
-            /*-- Draw Double Lines --*/
-            //-----------------------//
-            PointF[] points1 = new PointF[DisplayCount];
-            PointF[] points2 = new PointF[DisplayCount];
-            double[] values1 = new double[DisplayCount];
-            double[] values2 = new double[DisplayCount];
-            switch (mapType1)
+            if (mapType1 == GeneralModule.MAP_KD || mapType2 == GeneralModule.MAP_KD)
             {
-                case GeneralModule.MAP_WMS:
-                    values1 = IdxData.Select(d => d.WMS).ToArray();
-                    break;
-                case GeneralModule.MAP_PSY:
-                    values1 = IdxData.Select(d => d.PSY).ToArray();
-                    break;
-                case GeneralModule.MAP_SRSI:
-                    values1 = IdxData.Select(d => d.SRSI).ToArray();
-                    break;
-                case GeneralModule.MAP_LRSI:
-                    values1 = IdxData.Select(d => d.LRSI).ToArray();
-                    break;
-                case GeneralModule.MAP_RSI:
-                    values1 = IdxData.Select(d => d.SRSI).ToArray();
-                    values2 = IdxData.Select(d => d.LRSI).ToArray();
-                    break;
-                case GeneralModule.MAP_K:
-                    values1 = IdxData.Select(d => d.K).ToArray();
-                    break;
-                case GeneralModule.MAP_D:
-                    values1 = IdxData.Select(d => d.D).ToArray();
-                    break;
-                case GeneralModule.MAP_KD:
-                    values1 = IdxData.Select(d => d.K).ToArray();
-                    values2 = IdxData.Select(d => d.D).ToArray();
-                    break;
+                values1 = IdxData.Select(d => d.K).ToArray();
+                values2 = IdxData.Select(d => d.D).ToArray();
             }
-            switch (mapType2)
+            else if (mapType1 == GeneralModule.MAP_RSI || mapType2 == GeneralModule.MAP_RSI)
             {
-                case GeneralModule.MAP_WMS:
-                    values2 = IdxData.Select(d => d.WMS).ToArray();
-                    break;
-                case GeneralModule.MAP_PSY:
-                    values2 = IdxData.Select(d => d.PSY).ToArray();
-                    break;
-                case GeneralModule.MAP_SRSI:
-                    values2 = IdxData.Select(d => d.SRSI).ToArray();
-                    break;
-                case GeneralModule.MAP_LRSI:
-                    values2 = IdxData.Select(d => d.LRSI).ToArray();
-                    break;
-                case GeneralModule.MAP_K:
-                    values2 = IdxData.Select(d => d.K).ToArray();
-                    break;
-                case GeneralModule.MAP_D:
-                    values2 = IdxData.Select(d => d.D).ToArray();
-                    break;
-                case GeneralModule.MAP_KD:
-                    values1 = IdxData.Select(d => d.K).ToArray();
-                    values2 = IdxData.Select(d => d.D).ToArray();
-                    break;
-            }
-
-            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
-            {
-                float ii = 0;
-                if (i == StartIndex)
-                {
-                    // 1st line
-                    ii = yHeight * ((float)values1[i]);
-                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-                    points1[0] = new PointF(xCoord, yCoord);
-                    // 2nd line
-                    ii = yHeight * ((float)values2[i]);
-                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-                    points2[0] = new PointF(xCoord, yCoord);
-                }
-                else
-                {
-                    // 1st line
-                    xCoord += xWidth;
-                    ii = yHeight * ((float)values1[i]);
-                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-                    points1[i - StartIndex] = new PointF(xCoord, yCoord);
-                    // 2nd line
-                    ii = yHeight * ((float)values2[i]);
-                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-                    points2[i - StartIndex] = new PointF(xCoord, yCoord);
-                }
-                Debug.WriteLine("DoubleLine-Baseline -- framePos= " + framePos +
-                    ", poin1[" + framePos + "].X= " + points1[framePos].X +
-                    ", poin1[" + framePos + "].Y= " + points1[framePos].Y +
-                    ", point2[" + framePos + "].X= " + points2[framePos].X +
-                    ", point2[" + framePos + "].Y= " + points2[framePos].Y);
-            }
-
-            using (Pen pen1 = new Pen(Color.Green, 1))
-            {
-                g.DrawLines(pen1, points1);
-            }
-            using (Pen pen2 = new Pen(Color.RosyBrown, 1))
-            {
-                pen2.DashStyle = DashStyle.Dash;
-                pen2.DashPattern = new float[] { 6, 2 };
-                g.DrawLines(pen2, points2);
-            }
-            Debug.WriteLine("Chalk_MAP_DOUBLE_LINE() END!!!!!");
-        }
-
-
-
-        private void Chalk_MAP_MACD_LINE(Graphics g, int framePos, int frameNum, int mapType1)
-        {
-            if (framePos <= 0 || framePos > frameNum)
-                return;
-
-            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;    // 儲存要繪製指標柱狀圖的X軸長度
-            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
-            float yDistance = yAxisHeight / 4;
-
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType1);
-            Debug.WriteLine("最高/低價(MACD)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
-            double[] LV = new double[3];
-            double maxV = 0;
-            if (Math.Abs(highLowValues.highValue) > Math.Abs(highLowValues.lowValue))
-            {
-                LV[2] = Math.Abs(highLowValues.highValue) / 2.0;
-                LV[1] = 0;
-                LV[0] = -(Math.Abs(highLowValues.highValue)) / 2.0;
-                maxV = Math.Abs(highLowValues.highValue);
+                values1 = IdxData.Select(d => d.SRSI).ToArray();
+                values2 = IdxData.Select(d => d.LRSI).ToArray();
             }
             else
             {
-                LV[2] = Math.Abs(highLowValues.lowValue) / 2.0;
-                LV[1] = 0;
-                LV[0] = -(Math.Abs(highLowValues.lowValue)) / 2.0;
-                maxV = Math.Abs(highLowValues.lowValue);
+                values1 = GetSingleIndicatorArray(mapType1);
+                values2 = GetSingleIndicatorArray(mapType2);
             }
 
-            // 劃虛線 (劃3條)
-            using (Pen pen = new Pen(Color.Black, 1))
-            {
-                pen.DashStyle = DashStyle.Dash;
-                pen.DashPattern = new float[] { 7, 3 };
-                for (int i = 1; i <= 3; i++)
-                {
-                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
-                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
-                    g.DrawLine(pen, pl, pr);
-                    // 顯示Frame最左側的標籤
-                    double values = highLowValues.highValue - (highLowValues.highValue - highLowValues.lowValue) * i / 4.0;
-                    g.DrawString(LV[i-1].ToString("0.00"), new Font(this.Font.FontFamily, 6), Brushes.Black, 
-                        10, (int)(pl.Y));
-                }
-            }
-
-            // Draw Index Values
-            float xWidth = xAxisLength / DisplayCount;
-            float yHeight = yAxisHeight / (float)(maxV * 2.0);
-            Debug.WriteLine("Index -- xWidth= " + xWidth + ", yHeight= " + yHeight);
-
-            float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
-            float yCoord = FrameLeftPoints[framePos].frameY;
-            //Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
-            //    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
-            //    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
-            //    ", xCoord= " + xCoord + ", yCoord= " + yCoord);
-
-            //-----------------------//
-            /*-- Draw Double Lines --*/
-            //-----------------------//
+            // 3. 計算兩條折線節點
             PointF[] points1 = new PointF[DisplayCount];
             PointF[] points2 = new PointF[DisplayCount];
-            PointF[] histPoints = new PointF[DisplayCount];
+            float xWidth = xAxisLength / DisplayCount;
+            float yHeight = yAxisHeight / 100f;
+            float startX = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
+            float baseFrameY = FrameLeftPoints[framePos].frameY;
 
-            double[] values1 = new double[DisplayCount];
-            double[] values2 = new double[DisplayCount];
-            double[] histValues = new double[DisplayCount];
-
-            switch (mapType1)
+            for (int i = 0; i < DisplayCount; i++)
             {
-                case GeneralModule.MAP_WMS:
-                    values1 = IdxData.Select(d => d.WMS).ToArray();
-                    break;
-                case GeneralModule.MAP_PSY:
-                    values1 = IdxData.Select(d => d.PSY).ToArray();
-                    break;
-                case GeneralModule.MAP_SRSI:
-                    values1 = IdxData.Select(d => d.SRSI).ToArray();
-                    break;
-                case GeneralModule.MAP_LRSI:
-                    values1 = IdxData.Select(d => d.LRSI).ToArray();
-                    break;
-                case GeneralModule.MAP_RSI:
-                    values1 = IdxData.Select(d => d.SRSI).ToArray();
-                    values2 = IdxData.Select(d => d.LRSI).ToArray();
-                    break;
-                case GeneralModule.MAP_K:
-                    values1 = IdxData.Select(d => d.K).ToArray();
-                    break;
-                case GeneralModule.MAP_D:
-                    values1 = IdxData.Select(d => d.D).ToArray();
-                    break;
-                case GeneralModule.MAP_KD:
-                    values1 = IdxData.Select(d => d.K).ToArray();
-                    values2 = IdxData.Select(d => d.D).ToArray();
-                    break;
-                case GeneralModule.MAP_MACD:
-                    values1 = IdxData.Select(d => d.DIF).ToArray();
-                    values2 = IdxData.Select(d => d.DEA).ToArray();
-                    histValues = IdxData.Select(d => d.HIST).ToArray();
-                    break;
+                int dataIdx = StartIndex + i;
+                if (dataIdx >= IdxData.Count()) break;
+
+                float xCoord = startX + (i * xWidth);
+                float y1 = baseFrameY - (float)(values1[dataIdx] * yHeight);
+                float y2 = baseFrameY - (float)(values2[dataIdx] * yHeight);
+
+                points1[i] = new PointF(xCoord, y1);
+                points2[i] = new PointF(xCoord, y2);
             }
 
-            // Draw DEF, DEA Lines
-            double aaa = FrameLeftPoints[framePos].frameY - (FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos-1].frameY) / 2.0;
-            // Draw Hist-Bar
-            float xCord4Hist = (float)FrameLeftPoints[framePos].frameX;
-            float yCord4Hist = (float)(FrameLeftPoints[framePos].frameY - (FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY) / 2.0);
-
-            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
-            {
-                float ii = 0;
-                if (i == StartIndex)
-                {
-                    // 1st line
-                    ii = yHeight * ((float)values1[i]);
-                    //yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-                    yCoord = (float)aaa - ii;
-                    points1[0] = new PointF(xCoord, yCoord);
-                    // 2nd line
-                    ii = yHeight * ((float)values2[i]);
-//                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-                    yCoord = (float)aaa - ii;
-                    points2[0] = new PointF(xCoord, yCoord);
-                    // Hist Bar
-                    histPoints[0] = new PointF(xCord4Hist, yCord4Hist);
-                }
-                else
-                {
-                    // 1st line
-                    xCoord += xWidth;
-                    ii = yHeight * ((float)values1[i]);
-//                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-                    yCoord = (float)aaa - ii;
-                    points1[i - StartIndex] = new PointF(xCoord, yCoord);
-                    // 2nd line
-                    ii = yHeight * ((float)values2[i]);
-//                    yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
-                    yCoord = (float)aaa - ii;
-                    points2[i - StartIndex] = new PointF(xCoord, yCoord);
-                    // Hist Bar
-                    xCord4Hist += xWidth;
-                    histPoints[i - StartIndex] = new PointF(xCord4Hist, yCord4Hist);
-                }
-                Debug.WriteLine("MACDLine-Baseline -- framePos= " + i +
-                    ", poin1[" + i + "].X= " + points1[i].X.ToString("0.00") + "\t" +
-                    ", poin1[" + i + "].Y= " + points1[i].Y.ToString("0.00") + "\t" +
-                    ", point2[" + i + "].X= " + points2[i].X.ToString("0.00") + "\t" +
-                    ", point2[" + i + "].Y= " + points2[i].Y.ToString("0.00") + "\t" +
-                    ", histPoints[" + i + "].X= " + histPoints[i].X.ToString("0.00") + "\t" +
-                    ", histPoints[" + i + "].Y= " + histPoints[i].Y.ToString("0.00"));
-        }
-
+            // 4. 畫線
             using (Pen pen1 = new Pen(Color.Green, 1))
             {
                 g.DrawLines(pen1, points1);
             }
-
-            using (Pen pen2 = new Pen(Color.RosyBrown, 1))
+            using (Pen pen2 = new Pen(Color.RosyBrown, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 6, 2 } })
             {
-                pen2.DashStyle = DashStyle.Dash;
-                pen2.DashPattern = new float[] { 6, 2 };
                 g.DrawLines(pen2, points2);
             }
+        }
 
-            Brush brush = new SolidBrush(Color.Black);
-            using (brush)
+        // 輔助方法：根據指標類型取得單一數值陣列
+        private double[] GetSingleIndicatorArray(int mapType)
+        {
+            return mapType switch
             {
-                for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
+                GeneralModule.MAP_WMS => IdxData.Select(d => d.WMS).ToArray(),
+                GeneralModule.MAP_PSY => IdxData.Select(d => d.PSY).ToArray(),
+                GeneralModule.MAP_SRSI => IdxData.Select(d => d.SRSI).ToArray(),
+                GeneralModule.MAP_LRSI => IdxData.Select(d => d.LRSI).ToArray(),
+                GeneralModule.MAP_K => IdxData.Select(d => d.K).ToArray(),
+                GeneralModule.MAP_D => IdxData.Select(d => d.D).ToArray(),
+                _ => new double[IdxData.Count()]
+            };
+        }
+
+        private void Chalk_MAP_MACD_LINE(Graphics g, int framePos, int frameNum, int mapType)
+        {
+            if (framePos <= 0 || framePos > frameNum || DisplayCount <= 0)
+                return;
+
+            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;
+            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;
+            float yDistance = yAxisHeight / 4f;
+
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType);
+
+            // 計算對稱零軸的最大絕對值
+            double maxV = Math.Max(Math.Abs(highLowValues.highValue), Math.Abs(highLowValues.lowValue));
+            if (maxV == 0) maxV = 1.0; // 防止除以零
+
+            double[] LV = new double[3] { maxV / 2.0, 0, -maxV / 2.0 }; // 從上到下: 正、零、負
+
+            // 1. 劃 3 條參考虛線與 Y 軸文字
+            using (Font font = new Font(this.Font.FontFamily, 6))
+            using (Pen dashPen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
+            {
+                for (int i = 1; i <= 3; i++)
                 {
-                    float ii = yHeight * ((float)histValues[i]);
-                    if (histValues[i] >= 0)
+                    float yPos = FrameLeftPoints[framePos].frameY - yDistance * i;
+                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, yPos);
+                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, yPos);
+
+                    g.DrawLine(dashPen, pl, pr);
+                    g.DrawString(LV[i - 1].ToString("0.00"), font, Brushes.Black, 10, yPos - 6);
+                }
+            }
+
+            // 2. 比例轉換與數據準備
+            float xWidth = xAxisLength / DisplayCount;
+            float yHeight = yAxisHeight / (float)(maxV * 2.0); // 數值到像素的轉換比率
+            float zeroY = FrameLeftPoints[framePos].frameY - (yAxisHeight / 2.0f); // 零軸 Y 座標 (畫布中央)
+
+            double[] difValues = IdxData.Select(d => d.DIF).ToArray();
+            double[] deaValues = IdxData.Select(d => d.DEA).ToArray();
+            double[] histValues = IdxData.Select(d => d.HIST).ToArray();
+
+            PointF[] difPoints = new PointF[DisplayCount];
+            PointF[] deaPoints = new PointF[DisplayCount];
+
+            // 3. 計算折線點座標
+            for (int i = 0; i < DisplayCount; i++)
+            {
+                int dataIdx = StartIndex + i;
+                if (dataIdx >= IdxData.Count()) break;
+
+                float currentX = FrameLeftPoints[framePos].frameX + (i * xWidth) + (xWidth / 2f);
+
+                float difY = zeroY - (float)(difValues[dataIdx] * yHeight);
+                float deaY = zeroY - (float)(deaValues[dataIdx] * yHeight);
+
+                difPoints[i] = new PointF(currentX, difY);
+                deaPoints[i] = new PointF(currentX, deaY);
+            }
+
+            // 4. 繪製 MACD 柱狀圖 (Histogram)
+            for (int i = 0; i < DisplayCount; i++)
+            {
+                int dataIdx = StartIndex + i;
+                if (dataIdx >= IdxData.Count()) break;
+
+                double val = histValues[dataIdx];
+                float barHeight = (float)(Math.Abs(val) * yHeight);
+                float xPos = FrameLeftPoints[framePos].frameX + (i * xWidth);
+
+                if (val >= 0)
+                {
+                    // 正值：由零軸往上畫
+                    using (Brush redBrush = new SolidBrush(Color.Red))
                     {
-                        ((SolidBrush)brush).Color = Color.Red;
-                        g.FillRectangle(brush, histPoints[i - StartIndex].X, (histPoints[i - StartIndex].Y - ii), xWidth, ii);
+                        g.FillRectangle(redBrush, xPos, zeroY - barHeight, xWidth - 1, barHeight);
                     }
-                    else
+                }
+                else
+                {
+                    // 負值：由零軸往下畫
+                    using (Brush greenBrush = new SolidBrush(Color.Green))
                     {
-                        ((SolidBrush)brush).Color = Color.Green;
-                        g.FillRectangle(brush, histPoints[i - StartIndex].X, (histPoints[i - StartIndex].Y + ii), xWidth, ii);
+                        g.FillRectangle(greenBrush, xPos, zeroY, xWidth - 1, barHeight);
                     }
                 }
             }
-            Debug.WriteLine("Chalk_MAP_MACD_LINE() END!!!!!");
+
+            // 5. 繪製 DIF 與 DEA 兩條線
+            using (Pen penDIF = new Pen(Color.Green, 1))
+            {
+                g.DrawLines(penDIF, difPoints);
+            }
+
+            using (Pen penDEA = new Pen(Color.RosyBrown, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 6, 2 } })
+            {
+                g.DrawLines(penDEA, deaPoints);
+            }
         }
 
 
@@ -1333,3 +1153,338 @@ namespace EarvinStocksPGM
 }
 
 
+
+
+
+
+
+
+
+//////private void Chalk_MAP_SINGLE_LINE(Graphics g, int framePos, int frameNum, int mapType)
+//////{
+//////    //=======================================//
+//////    //=== 顯示「威廉指標」(MAP_WMS) START ===// 
+//////    //=======================================//
+//////    if (framePos <= 0 || framePos > frameNum)
+//////        return;
+
+//////    float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;    // 儲存要繪製指標柱狀圖的X軸長度
+//////    float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
+//////    float yDistance = yAxisHeight / 4;
+
+//////    HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType);
+//////    Debug.WriteLine("最高/低價(LINE)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+
+//////    // 劃虛線 (劃3條)
+//////    using (Pen pen = new Pen(Color.Black, 1))
+//////    {
+//////        pen.DashStyle = DashStyle.Dash;
+//////        for (int i = 1; i <= 3; i++)
+//////        {
+//////            PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
+//////            PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
+//////            g.DrawLine(pen, pl, pr);
+//////            // 顯示Frame最左側的標籤
+//////            g.DrawString($"{(highLowValues.highValue * i / 4)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
+//////        }
+//////    }
+
+//////    // Draw Index Values
+//////    PointF[] points = new PointF[DisplayCount];
+//////    float xWidth = xAxisLength / DisplayCount;
+//////    float yHeight = yAxisHeight / 100f;
+//////    Debug.WriteLine("Index -- xWidth= " + xWidth + ", yHeight= " + yHeight);
+
+//////    float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
+//////    float yCoord = FrameLeftPoints[framePos].frameY;
+//////    //Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
+//////    //    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
+//////    //    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
+//////    //    ", xCoord= " + xCoord + ", yCoord= " + yCoord);
+//////    double[] values = new double[DisplayCount];
+//////    switch (mapType)
+//////    {
+//////        case GeneralModule.MAP_WMS:
+//////            //Debug.WriteLine("WMS[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
+//////            //    ", IdxData[i].WMS= " + IdxData[i].WMS + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
+//////            values = IdxData.Select(d => d.WMS).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_PSY:
+//////            //Debug.WriteLine("PSY[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
+//////            //    ", IdxData[i].PSY= " + IdxData[i].PSY + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
+//////            values = IdxData.Select(d => d.PSY).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_SRSI:
+//////            //Debug.WriteLine("PSY[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
+//////            //    ", IdxData[i].PSY= " + IdxData[i].PSY + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
+//////            values = IdxData.Select(d => d.SRSI).ToArray();
+//////            break;
+//////    }
+
+//////    for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
+//////    {
+//////        //Debug.WriteLine("i= " + i + ", StartIndex= " + StartIndex + ", DisplayCount= " + DisplayCount);
+//////        float ii = 0;
+//////        if (i == StartIndex)
+//////        {
+//////            ii = yHeight * ((float)values[i]);
+//////            yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+//////            points[0] = new PointF(xCoord, yCoord);
+//////        }
+//////        else
+//////        {
+//////            xCoord += xWidth;
+//////            ii = yHeight * ((float)values[i]);
+//////            yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+//////            points[i - StartIndex] = new PointF(xCoord, yCoord);
+//////        }
+//////        Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
+//////            ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
+//////            ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
+//////        ", xCoord= " + xCoord + ", yCoord= " + yCoord);
+//////    }
+
+//////    using (Pen pen = new Pen(Color.Green, 1))
+//////    {
+//////        g.DrawLines(pen, points);
+//////    }
+//////    Debug.WriteLine("Chalk_MAP_LINE() END!!!!!");
+//////}
+
+//////private void Chalk_MAP_DOUBLE_LINE(Graphics g, int framePos, int frameNum, int mapType1, int mapType2)
+//////{
+//////    if (framePos <= 0 || framePos > frameNum)
+//////        return;
+
+//////    float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;    // 儲存要繪製指標柱狀圖的X軸長度
+//////    float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
+//////    float yDistance = yAxisHeight / 4;
+
+//////    HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType1);
+//////    Debug.WriteLine("最高/低價(LINE)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+
+//////    // 劃虛線 (劃3條)
+//////    using (Pen pen = new Pen(Color.Black, 1))
+//////    {
+//////        pen.DashStyle = DashStyle.Dash;
+//////        pen.DashPattern = new float[] { 7, 3 };
+//////        for (int i = 1; i <= 3; i++)
+//////        {
+//////            PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
+//////            PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
+//////            g.DrawLine(pen, pl, pr);
+//////            // 顯示Frame最左側的標籤
+//////            g.DrawString($"{(highLowValues.highValue * i / 4)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
+//////        }
+//////    }
+
+//////    // Draw Index Values
+//////    float xWidth = xAxisLength / DisplayCount;
+//////    float yHeight = yAxisHeight / 100f;
+//////    Debug.WriteLine("Index -- xWidth= " + xWidth + ", yHeight= " + yHeight);
+
+//////    float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
+//////    float yCoord = FrameLeftPoints[framePos].frameY;
+//////    //Debug.WriteLine("WMS-Baseline -- framePos= " + framePos +
+//////    //    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
+//////    //    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
+//////    //    ", xCoord= " + xCoord + ", yCoord= " + yCoord);
+
+//////    //-----------------------//
+//////    /*-- Draw Double Lines --*/
+//////    //-----------------------//
+//////    PointF[] points1 = new PointF[DisplayCount];
+//////    PointF[] points2 = new PointF[DisplayCount];
+//////    double[] values1 = new double[DisplayCount];
+//////    double[] values2 = new double[DisplayCount];
+//////    switch (mapType1)
+//////    {
+//////        case GeneralModule.MAP_WMS:
+//////            values1 = IdxData.Select(d => d.WMS).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_PSY:
+//////            values1 = IdxData.Select(d => d.PSY).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_SRSI:
+//////            values1 = IdxData.Select(d => d.SRSI).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_LRSI:
+//////            values1 = IdxData.Select(d => d.LRSI).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_RSI:
+//////            values1 = IdxData.Select(d => d.SRSI).ToArray();
+//////            values2 = IdxData.Select(d => d.LRSI).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_K:
+//////            values1 = IdxData.Select(d => d.K).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_D:
+//////            values1 = IdxData.Select(d => d.D).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_KD:
+//////            values1 = IdxData.Select(d => d.K).ToArray();
+//////            values2 = IdxData.Select(d => d.D).ToArray();
+//////            break;
+//////    }
+//////    switch (mapType2)
+//////    {
+//////        case GeneralModule.MAP_WMS:
+//////            values2 = IdxData.Select(d => d.WMS).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_PSY:
+//////            values2 = IdxData.Select(d => d.PSY).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_SRSI:
+//////            values2 = IdxData.Select(d => d.SRSI).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_LRSI:
+//////            values2 = IdxData.Select(d => d.LRSI).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_K:
+//////            values2 = IdxData.Select(d => d.K).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_D:
+//////            values2 = IdxData.Select(d => d.D).ToArray();
+//////            break;
+//////        case GeneralModule.MAP_KD:
+//////            values1 = IdxData.Select(d => d.K).ToArray();
+//////            values2 = IdxData.Select(d => d.D).ToArray();
+//////            break;
+//////    }
+
+//////    for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
+//////    {
+//////        float ii = 0;
+//////        if (i == StartIndex)
+//////        {
+//////            // 1st line
+//////            ii = yHeight * ((float)values1[i]);
+//////            yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+//////            points1[0] = new PointF(xCoord, yCoord);
+//////            // 2nd line
+//////            ii = yHeight * ((float)values2[i]);
+//////            yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+//////            points2[0] = new PointF(xCoord, yCoord);
+//////        }
+//////        else
+//////        {
+//////            // 1st line
+//////            xCoord += xWidth;
+//////            ii = yHeight * ((float)values1[i]);
+//////            yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+//////            points1[i - StartIndex] = new PointF(xCoord, yCoord);
+//////            // 2nd line
+//////            ii = yHeight * ((float)values2[i]);
+//////            yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+//////            points2[i - StartIndex] = new PointF(xCoord, yCoord);
+//////        }
+//////        Debug.WriteLine("DoubleLine-Baseline -- framePos= " + framePos +
+//////            ", poin1[" + framePos + "].X= " + points1[framePos].X +
+//////            ", poin1[" + framePos + "].Y= " + points1[framePos].Y +
+//////            ", point2[" + framePos + "].X= " + points2[framePos].X +
+//////            ", point2[" + framePos + "].Y= " + points2[framePos].Y);
+//////    }
+
+//////    using (Pen pen1 = new Pen(Color.Green, 1))
+//////    {
+//////        g.DrawLines(pen1, points1);
+//////    }
+//////    using (Pen pen2 = new Pen(Color.RosyBrown, 1))
+//////    {
+//////        pen2.DashStyle = DashStyle.Dash;
+//////        pen2.DashPattern = new float[] { 6, 2 };
+//////        g.DrawLines(pen2, points2);
+//////    }
+//////    Debug.WriteLine("Chalk_MAP_DOUBLE_LINE() END!!!!!");
+//////}
+
+/**
+ * 以BIAS為中線，向上 > 0、向下 < 0
+ * g        繪圖物件
+ * framePos 目前選擇的 frame 的位置
+ * frameNum 目前 frame 的總數量
+ */
+////private void Chalk_MAP_BIAS(Graphics g, int framePos, int frameNum)
+////{
+////    //========================================//
+////    //=== 顯示「乖離率」(MAP_BIAS) START   ===// 
+////    //========================================//
+////    if (framePos <= 0 || framePos > frameNum)
+////        return;
+
+////    float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;      // 儲存要繪製指標柱狀圖的X軸長度
+////    float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
+////    float yDistance = yAxisHeight / 4;
+
+////    HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_BIAS);
+////    Debug.WriteLine("最高/低價(BIAS)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+
+////    // 劃虛線 (劃3條)
+////    using (Pen pen = new Pen(Color.Black, 1))
+////    {
+////        pen.DashStyle = DashStyle.Dash;
+////        int p = -1;
+////        float ff = (float)highLowValues.highValue / 2f;
+////        for (int i = 1; i <= 3; i++)
+////        {
+////            PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yDistance * i);
+////            PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
+////            g.DrawLine(pen, pl, pr);
+////            Debug.WriteLine("LABEL (BIAS)：" + $"{pl}, {pr}");
+////            g.DrawString($"{(ff * (p++))}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
+////        }
+////    }
+
+////    // Draw Index Values
+////    PointF[] points = new PointF[DisplayCount];
+////    float xWidth = xAxisLength / DisplayCount;
+////    float yHeight = yAxisHeight / (Math.Abs((float)highLowValues.highValue) * 2f);
+////    Debug.WriteLine("xWidth= " + xWidth + ", yHeight= " + yHeight);
+
+////    float xCoord = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
+////    float yCoord = FrameLeftPoints[framePos].frameY;
+////    //Debug.WriteLine("Baseline -- framePos= " + framePos +
+////    //    ", frame[" + framePos + "].X= " + FrameLeftPoints[framePos].frameX +
+////    //    ", frame[" + framePos + "].Y= " + FrameLeftPoints[framePos].frameY +
+////    //    ", xCoord= " + xCoord + ", yCoord= " + yCoord);
+
+////    for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
+////    {
+////        float ii = 0;
+////        if (i == StartIndex)
+////        {
+////            if (IdxData[StartIndex].BIAS >= 0)
+////            {
+////                ii = ((float)IdxData[StartIndex].BIAS + Math.Abs((float)highLowValues.highValue)) * yHeight;
+////            }
+////            else
+////            {
+////                ii = Math.Abs((float)IdxData[StartIndex].BIAS) * yHeight;
+////            }
+////            yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+////            points[0] = new PointF(xCoord, yCoord);
+////        }
+////        else
+////        {
+////            xCoord += xWidth;
+////            if (IdxData[i].BIAS >= 0)
+////            {
+////                ii = ((float)IdxData[i].BIAS + Math.Abs((float)highLowValues.highValue)) * yHeight;
+////            }
+////            else
+////            {
+////                ii = Math.Abs((float)IdxData[i].BIAS) * yHeight;
+////            }
+////            yCoord = (float)FrameLeftPoints[framePos].frameY - ii;
+////            points[i - StartIndex] = new PointF(xCoord, yCoord);
+////        }
+////        Debug.WriteLine("BIAS[" + i + "] -- xCoord= " + xCoord + ", yCoord= " + yCoord +
+////            ", IdxData[i].BIAS= " + IdxData[i].BIAS + ", frameY= " + (float)FrameLeftPoints[framePos].frameY);
+////    }
+
+////    using (Pen pen = new Pen(Color.Blue, 1))
+////    {
+////        g.DrawLines(pen, points);
+////    }
+////    Debug.WriteLine("Chalk_MAP_BIAS() END!!!!!");
+////}
