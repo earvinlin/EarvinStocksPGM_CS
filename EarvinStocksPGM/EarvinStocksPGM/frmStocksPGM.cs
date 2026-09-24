@@ -743,68 +743,76 @@ namespace EarvinStocksPGM
 
         private void Chalk_MAP_VOLUME(Graphics g, int framePos, int frameNum)
         {
-            //========================================//
-            //=== 顯示「成交量」(MAP_VOLUME) START ===// 
-            //========================================//
-            if (framePos <= 0 || framePos > frameNum)
+            // 1. 邊界與參數安全檢查
+            if (framePos <= 0 || framePos > frameNum || DisplayCount <= 0)
                 return;
 
-            float yAxisLength = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
-            float barHeight = 0;                            // 要繪製指標柱狀圖高度
-            float barXCoord = FrameLeftPoints[0].frameX;    // 要繪製指標柱狀圖X座標(最左邊的位置FrameLeftPoints[0]一定會存在)
-            float barYCoord = 0;                            // 要繪製指標柱狀圖Y座標
+            // Y 軸高度 (注意：GDI+ 座標系頂端 Y 較小，底端 Y 較大)
+            float frameTopY = FrameLeftPoints[framePos - 1].frameY;
+            float frameBottomY = FrameLeftPoints[framePos].frameY;
+            float yAxisLength = frameBottomY - frameTopY;
 
+            // 取得最高/最低成交量
             HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_VOLUME);
-            Debug.WriteLine("最高/低價(Vol.)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+            double maxVol = highLowValues.highValue;
+            double minVol = highLowValues.lowValue;
+            double volRange = Math.Abs(maxVol - minVol);
 
-            float yDistance = yAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
+            if (volRange == 0) volRange = 1.0; // 防止除以零
 
-            g.DrawString($"{(highLowValues.highValue)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)FrameLeftPoints[framePos - 1].frameY);
-            g.DrawString($"{(highLowValues.lowValue)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)FrameLeftPoints[framePos].frameY);
+            float yDistance = yAxisLength / (float)volRange;
 
-
-            // 劃虛線 (劃3條)
-            using (Pen pen = new Pen(Color.Black, 1))
+            // 2. 繪製最頂部與最底部的刻度文字
+            using (Font font = new Font(this.Font.FontFamily, 6))
             {
-                pen.DashStyle = DashStyle.Dash;
-                int p = 3;
-                float ff = (float)(highLowValues.highValue - highLowValues.lowValue) / 4f;
-                Debug.WriteLine("VOLUME /4：" + $"{ff}");
-                for (int i = 1; i <= 3; i++)
+                g.DrawString(maxVol.ToString("N0"), font, Brushes.Black, 10, (int)frameTopY);
+                g.DrawString(minVol.ToString("N0"), font, Brushes.Black, 10, (int)frameBottomY - 10);
+
+                // 3. 繪製 3 條參考虛線與 Y 軸標籤
+                using (Pen dashPen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash })
                 {
-                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yAxisLength * i / 4);
-                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yAxisLength * i / 4);
-                    g.DrawLine(pen, pl, pr);
+                    double stepVol = volRange / 4.0;
+                    for (int i = 1; i <= 3; i++)
+                    {
+                        float yPos = frameBottomY - (yAxisLength * i / 4f);
+                        PointF pl = new PointF(FrameLeftPoints[framePos].frameX, yPos);
+                        PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, yPos);
 
-                    //Debug.WriteLine("LABEL (VOLUME)：" + $"{pl}, {pr}, {ff}, {p}, {(ff * (p))}, {(highLowValues.highValue - ff * (p))}");
-                    g.DrawString($"{(highLowValues.highValue - ff * (p--))}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
+                        g.DrawLine(dashPen, pl, pr);
 
+                        double labelVol = minVol + (stepVol * i);
+                        g.DrawString(labelVol.ToString("N0"), font, Brushes.Black, 10, (int)yPos - 6);
+                    }
                 }
             }
 
-            for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
+            // 4. 準備繪製成交量柱狀圖 (共用 Brush 避免記憶體洩漏)
+            using (Brush redBrush = new SolidBrush(Color.Red))
+            using (Brush greenBrush = new SolidBrush(Color.Green))
             {
-                // X 座標
-                if (i != StartIndex)
+                // 修正 X 座標起始位置，使用對應 framePos 的邊界
+                float barXCoord = FrameLeftPoints[framePos].frameX;
+
+                for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
                 {
-                    barXCoord += FrameBarWidth;
-                }
-                // Y 座標
-                barYCoord = (float)FrameLeftPoints[framePos - 1].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - StkData[i].Volume));
-                // 計算 K-Bar 的高度
-                barHeight = yDistance * (float)Math.Abs(StkData[i].Volume - highLowValues.lowValue);
-                // 繪製 K-Bar
-                if (StkData[i].StartPrice > StkData[i].EndPrice)
-                {
-                    Brush brush = new SolidBrush(Color.Green);
-                    g.FillRectangle(brush, barXCoord, barYCoord, FrameBarWidth, barHeight);
-                }
-                else
-                {
-                    Brush brush = new SolidBrush(Color.Red);
-                    g.FillRectangle(brush, barXCoord, barYCoord, FrameBarWidth, barHeight);
+                    if (i >= StkData.Length) break;
+
+                    if (i != StartIndex)
+                    {
+                        barXCoord += FrameBarWidth;
+                    }
+
+                    double currentVol = StkData[i].Volume;
+                    float barHeight = (float)((currentVol - minVol) * yDistance);
+                    float barYCoord = frameBottomY - barHeight;
+
+                    // 開盤 > 收盤 為跌(綠)，否則為漲/平(紅)
+                    Brush currentBrush = (StkData[i].StartPrice > StkData[i].EndPrice) ? greenBrush : redBrush;
+
+                    g.FillRectangle(currentBrush, barXCoord, barYCoord, FrameBarWidth - 1, barHeight);
                 }
             }
+
             Debug.WriteLine("Chalk_MAP_VOLUME() END!!!!!");
         }
 
@@ -1488,3 +1496,72 @@ namespace EarvinStocksPGM
 ////    }
 ////    Debug.WriteLine("Chalk_MAP_BIAS() END!!!!!");
 ////}
+
+
+
+//////private void Chalk_MAP_VOLUME(Graphics g, int framePos, int frameNum)
+//////{
+//////    //========================================//
+//////    //=== 顯示「成交量」(MAP_VOLUME) START ===// 
+//////    //========================================//
+//////    if (framePos <= 0 || framePos > frameNum)
+//////        return;
+
+//////    float yAxisLength = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;    // 儲存要繪製指標柱狀圖的Y軸長度
+//////    float barHeight = 0;                            // 要繪製指標柱狀圖高度
+//////    float barXCoord = FrameLeftPoints[0].frameX;    // 要繪製指標柱狀圖X座標(最左邊的位置FrameLeftPoints[0]一定會存在)
+//////    float barYCoord = 0;                            // 要繪製指標柱狀圖Y座標
+
+//////    HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_VOLUME);
+//////    Debug.WriteLine("最高/低價(Vol.)：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+
+//////    float yDistance = yAxisLength / (float)Math.Abs(highLowValues.highValue - highLowValues.lowValue); // 取得每個價格對應的Y軸距離
+
+//////    g.DrawString($"{(highLowValues.highValue)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)FrameLeftPoints[framePos - 1].frameY);
+//////    g.DrawString($"{(highLowValues.lowValue)}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)FrameLeftPoints[framePos].frameY);
+
+
+//////    // 劃虛線 (劃3條)
+//////    using (Pen pen = new Pen(Color.Black, 1))
+//////    {
+//////        pen.DashStyle = DashStyle.Dash;
+//////        int p = 3;
+//////        float ff = (float)(highLowValues.highValue - highLowValues.lowValue) / 4f;
+//////        Debug.WriteLine("VOLUME /4：" + $"{ff}");
+//////        for (int i = 1; i <= 3; i++)
+//////        {
+//////            PointF pl = new PointF(FrameLeftPoints[framePos].frameX, FrameLeftPoints[framePos].frameY - yAxisLength * i / 4);
+//////            PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yAxisLength * i / 4);
+//////            g.DrawLine(pen, pl, pr);
+
+//////            //Debug.WriteLine("LABEL (VOLUME)：" + $"{pl}, {pr}, {ff}, {p}, {(ff * (p))}, {(highLowValues.highValue - ff * (p))}");
+//////            g.DrawString($"{(highLowValues.highValue - ff * (p--))}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
+
+//////        }
+//////    }
+
+//////    for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
+//////    {
+//////        // X 座標
+//////        if (i != StartIndex)
+//////        {
+//////            barXCoord += FrameBarWidth;
+//////        }
+//////        // Y 座標
+//////        barYCoord = (float)FrameLeftPoints[framePos - 1].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - StkData[i].Volume));
+//////        // 計算 K-Bar 的高度
+//////        barHeight = yDistance * (float)Math.Abs(StkData[i].Volume - highLowValues.lowValue);
+//////        // 繪製 K-Bar
+//////        if (StkData[i].StartPrice > StkData[i].EndPrice)
+//////        {
+//////            Brush brush = new SolidBrush(Color.Green);
+//////            g.FillRectangle(brush, barXCoord, barYCoord, FrameBarWidth, barHeight);
+//////        }
+//////        else
+//////        {
+//////            Brush brush = new SolidBrush(Color.Red);
+//////            g.FillRectangle(brush, barXCoord, barYCoord, FrameBarWidth, barHeight);
+//////        }
+//////    }
+//////    Debug.WriteLine("Chalk_MAP_VOLUME() END!!!!!");
+//////}        
