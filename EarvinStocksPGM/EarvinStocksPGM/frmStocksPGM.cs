@@ -454,6 +454,9 @@ namespace EarvinStocksPGM
                         case GeneralModule.MAP_MACD:
                             Chalk_MAP_MACD_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_MACD);
                             break;
+                        case GeneralModule.MAP_SECTORS:
+                            Chalk_MAP_CENTER_BAR(e.Graphics, i, FrameNum, GeneralModule.MAP_SECTORS);
+                            break;
                     }
                 }
             }
@@ -744,10 +747,9 @@ namespace EarvinStocksPGM
         private void SectorsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SelectFramePos = GetSelectFrame(FrameLeftPoints, FrameRightPoints, CursorPosition, FrameNum);
-            SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_MACD;
+            SelectShowMapOnFrames[SelectFramePos] = GeneralModule.MAP_SECTORS;
             Debug.WriteLine($"CLICK SectorsToolStripMenuItem_Click() : SelectFramePos={SelectFramePos}");
             this.Invalidate();
-
         }
 
         private void Chalk_MAP_VOLUME(Graphics g, int framePos, int frameNum)
@@ -1156,78 +1158,98 @@ namespace EarvinStocksPGM
             }
         }
 
-        private void Chalk_MAP_CENTER_BAR(Graphics g, int framePos, int frameNum)
+        private void Chalk_MAP_CENTER_BAR(Graphics g, int framePos, int frameNum, int mapType)
         {
             // 1. 邊界與參數安全檢查
             if (framePos <= 0 || framePos > frameNum || DisplayCount <= 0)
                 return;
 
-            // Y 軸高度 (注意：GDI+ 座標系頂端 Y 較小，底端 Y 較大)
-            float frameTopY = FrameLeftPoints[framePos - 1].frameY;
-            float frameBottomY = FrameLeftPoints[framePos].frameY;
-            float yAxisLength = frameBottomY - frameTopY;
+            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;
+            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;
+            float yDistance = yAxisHeight / 4f;
 
-            // 取得最高/最低成交量
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_SECTORS);
-            double maxVol = highLowValues.highValue;
-            double minVol = highLowValues.lowValue;
-            double volRange = Math.Abs(maxVol - minVol);
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType);
 
-            if (volRange == 0) volRange = 1.0; // 防止除以零
+            // 計算對稱零軸的最大絕對值
+            double maxV = Math.Max(Math.Abs(highLowValues.highValue), Math.Abs(highLowValues.lowValue));
+            if (maxV == 0) maxV = 1.0; // 防止除以零
 
-            float yDistance = yAxisLength / (float)volRange;
+            double[] LV = new double[3] { maxV / 2.0, 0, -maxV / 2.0 }; // 從上到下: 正、零、負
 
-            // 2. 繪製最頂部與最底部的刻度文字
+            // 1. 劃 3 條參考虛線與 Y 軸文字
             using (Font font = new Font(this.Font.FontFamily, 6))
+            using (Pen dashPen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
             {
-                g.DrawString(maxVol.ToString("N0"), font, Brushes.Black, 10, (int)frameTopY);
-                g.DrawString(minVol.ToString("N0"), font, Brushes.Black, 10, (int)frameBottomY - 10);
-
-                // 3. 繪製 3 條參考虛線與 Y 軸標籤
-                using (Pen dashPen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash })
+                for (int i = 1; i <= 3; i++)
                 {
-                    double stepVol = volRange / 4.0;
-                    for (int i = 1; i <= 3; i++)
+                    float yPos = FrameLeftPoints[framePos].frameY - yDistance * i;
+                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, yPos);
+                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, yPos);
+
+                    g.DrawLine(dashPen, pl, pr);
+                    g.DrawString(LV[i - 1].ToString("0.00"), font, Brushes.Black, 10, yPos - 6);
+                }
+            }
+
+            // 2. 比例轉換與數據準備
+            float xWidth = xAxisLength / DisplayCount;
+            float yHeight = yAxisHeight / (float)(maxV * 2.0); // 數值到像素的轉換比率
+            float zeroY = FrameLeftPoints[framePos].frameY - (yAxisHeight / 2.0f); // 零軸 Y 座標 (畫布中央)
+
+            double[] values = IdxData.Select(d => d.SECTORS).ToArray();
+
+            //PointF[] difPoints = new PointF[DisplayCount];
+            //PointF[] deaPoints = new PointF[DisplayCount];
+
+            //// 3. 計算折線點座標
+            //for (int i = 0; i < DisplayCount; i++)
+            //{
+            //    int dataIdx = StartIndex + i;
+            //    if (dataIdx >= IdxData.Count()) break;
+
+            //    float currentX = FrameLeftPoints[framePos].frameX + (i * xWidth) + (xWidth / 2f);
+
+
+            //}
+
+            // 4. 繪製 MACD 柱狀圖 (Histogram)
+            for (int i = 0; i < DisplayCount; i++)
+            {
+                int dataIdx = StartIndex + i;
+                if (dataIdx >= IdxData.Count()) break;
+
+                double val = values[dataIdx];
+                float barHeight = (float)(Math.Abs(val) * yHeight);
+                float xPos = FrameLeftPoints[framePos].frameX + (i * xWidth);
+
+                if (val >= 0)
+                {
+                    // 正值：由零軸往上畫
+                    using (Brush redBrush = new SolidBrush(Color.Red))
                     {
-                        float yPos = frameBottomY - (yAxisLength * i / 4f);
-                        PointF pl = new PointF(FrameLeftPoints[framePos].frameX, yPos);
-                        PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, yPos);
-
-                        g.DrawLine(dashPen, pl, pr);
-
-                        double labelVol = minVol + (stepVol * i);
-                        g.DrawString(labelVol.ToString("N0"), font, Brushes.Black, 10, (int)yPos - 6);
+                        g.FillRectangle(redBrush, xPos, zeroY - barHeight, xWidth - 1, barHeight);
+                    }
+                }
+                else
+                {
+                    // 負值：由零軸往下畫
+                    using (Brush greenBrush = new SolidBrush(Color.Green))
+                    {
+                        g.FillRectangle(greenBrush, xPos, zeroY, xWidth - 1, barHeight);
                     }
                 }
             }
 
-            // 4. 準備繪製成交量柱狀圖 (共用 Brush 避免記憶體洩漏)
-            using (Brush redBrush = new SolidBrush(Color.Red))
-            using (Brush greenBrush = new SolidBrush(Color.Green))
-            {
-                // 修正 X 座標起始位置，使用對應 framePos 的邊界
-                float barXCoord = FrameLeftPoints[framePos].frameX;
+            //// 5. 繪製 DIF 與 DEA 兩條線
+            //using (Pen penDIF = new Pen(Color.Green, 1))
+            //{
+            //    g.DrawLines(penDIF, difPoints);
+            //}
 
-                for (int i = StartIndex; i < (StartIndex + DisplayCount); i++)
-                {
-                    if (i >= StkData.Length) break;
-
-                    if (i != StartIndex)
-                    {
-                        barXCoord += FrameBarWidth;
-                    }
-
-                    double currentVol = StkData[i].Volume;
-                    float barHeight = (float)((currentVol - minVol) * yDistance);
-                    float barYCoord = frameBottomY - barHeight;
-
-                    // 開盤 > 收盤 為跌(綠)，否則為漲/平(紅)
-                    Brush currentBrush = (StkData[i].StartPrice > StkData[i].EndPrice) ? greenBrush : redBrush;
-
-                    g.FillRectangle(currentBrush, barXCoord, barYCoord, FrameBarWidth - 1, barHeight);
-                }
-            }
-
+            //using (Pen penDEA = new Pen(Color.RosyBrown, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 6, 2 } })
+            //{
+            //    g.DrawLines(penDEA, deaPoints);
+            //}
             Debug.WriteLine("Chalk_MAP_VOLUME() END!!!!!");
         }
 
