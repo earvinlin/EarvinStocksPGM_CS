@@ -32,8 +32,8 @@ namespace EarvinStocksPGM.Modules
         public double K { get; set; }
         public double D { get; set; }
         public double DIF { get; set; }
-        public double DEA { get; set; }
-        public double HIST { get; set; }
+        public double MACD { get; set; }
+        public double OSC { get; set; }
         public double SECTORS { get; set; }
     }
 
@@ -61,8 +61,8 @@ namespace EarvinStocksPGM.Modules
             double[] dblK = new double[sd.Length];
             double[] dblD = new double[sd.Length];
             double[] dblDIF = new double[sd.Length];
-            double[] dblDEA = new double[sd.Length]; 
-            double[] dblHIST = new double[sd.Length];
+            double[] dblMACD = new double[sd.Length]; 
+            double[] dblOSC = new double[sd.Length];
             double[] dblSectors = new double[sd.Length];
 
 
@@ -83,7 +83,7 @@ namespace EarvinStocksPGM.Modules
             dblSRSI = CalculateRSI(sd, 6);
             dblLRSI = CalculateRSI(sd, 20);
             (dblK, dblD) = CalculateKD(sd, 9);
-            (dblDIF, dblDEA, dblHIST) = CalculateMACD(sd, 12, 26, 9);
+            (dblDIF, dblMACD, dblOSC) = CalculateMACD(sd, 12, 26, 9);
             dblSectors = CalculateSectors(sd, idx);
 
             for (int i = 0; i < sd.Length; i++)
@@ -108,8 +108,8 @@ namespace EarvinStocksPGM.Modules
                 idx[i].K = dblK[i];
                 idx[i].D = dblD[i];
                 idx[i].DIF = dblDIF[i];
-                idx[i].DEA = dblDEA[i];
-                idx[i].HIST = dblHIST[i];
+                idx[i].MACD = dblMACD[i];
+                idx[i].OSC = dblOSC[i];
                 idx[i].SECTORS = dblSectors[i];
             }
             return idx;
@@ -405,7 +405,7 @@ namespace EarvinStocksPGM.Modules
         }
 
 
-        public static (double[] DIF, double[] DEA, double[] Histogram) CalculateMACD(
+        public static (double[] DIF, double[] MACD, double[] OSC) CalculateMACD(
         StockData[] sd, int emaShort = 12, int emaLong = 26,int emaSignal = 9)
         {
             if (sd == null)
@@ -419,17 +419,17 @@ namespace EarvinStocksPGM.Modules
             int count = sd.Length;
 
             double[] difValues = new double[count];
-            double[] deaValues = new double[count];
-            double[] histValues = new double[count];
+            double[] macdValues = new double[count];
+            double[] oscValues = new double[count];
 
             // EMA初始值使用第一筆收盤價
             double emaS = sd[0].EndPrice;
             double emaL = sd[0].EndPrice;
-            double dea = 0.0;
+            double macd = 0.0;
 
             difValues[0] = 0.0;
-            deaValues[0] = 0.0;
-            histValues[0] = 0.0;
+            macdValues[0] = 0.0;
+            oscValues[0] = 0.0;
 
             double shortFactor = 2.0 / (emaShort + 1);
             double longFactor = 2.0 / (emaLong + 1);
@@ -448,32 +448,30 @@ namespace EarvinStocksPGM.Modules
                 // DIF
                 double dif = emaS - emaL;
 
-                // DEA (Signal)
-                dea = dea + (dif - dea) * signalFactor;
+                // MACD (Signal)
+                macd = macd + (dif - macd) * signalFactor;
 
                 // Histogram
-                double hist = dif - dea;
+                double osc = dif - macd;
 
                 difValues[i] = dif;
-                deaValues[i] = dea;     // MACD
-                histValues[i] = hist;   // OSC (MACD Bar)
+                macdValues[i] = macd;     // MACD
+                oscValues[i] = osc;   // OSC (MACD Bar)
             }
             //// DEBUG : Display the MACD values for verification
             //for (int i = 0; i < sd.Length; i++)
             //{
             //    Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate +
             //        ", dif= " + Math.Round(difValues[i], 5) +
-            //        ", dea= " + Math.Round(deaValues[i], 5) +
-            //        ", hist= " + Math.Round(histValues[i], 5));
+            //        ", macd= " + Math.Round(macdValues[i], 5) +
+            //        ", osc= " + Math.Round(oscValues[i], 5));
             //}
-            return (difValues, deaValues, histValues);
+            return (difValues, macdValues, oscValues);
         }
 
         public static double[] CalculateSectors(StockData[] sd, IndexData[] idx)
         {
             int i = 0;
-            //double dblUpValue = 0, dblDownValue = 0, dblDiff = 0;
-            //double dblAverage;
             double[] dblValues = new double[sd.Length];
 
             Debug.WriteLine("sd.Length= " + sd.Length);

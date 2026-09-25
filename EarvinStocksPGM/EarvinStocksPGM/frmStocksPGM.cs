@@ -526,40 +526,43 @@ namespace EarvinStocksPGM
                 {
                     switch (GeneralModule.SelectShowMapOnFrames[i])
                     {
-                        case GeneralModule.MAP_UNSELECTED:
+                        case GeneralModule.MAP_UNSELECTED :
                             break;
-                        case GeneralModule.MAP_K:
+                        case GeneralModule.MAP_K :
                             break;
-                        case GeneralModule.MAP_VOLUME:
+                        case GeneralModule.MAP_VOLUME :
                             g.DrawString("VOL : " + $"{StkData[curIndex].Volume}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
-                        case GeneralModule.MAP_BIAS:
+                        case GeneralModule.MAP_BIAS :
                             g.DrawString("BIAS : " + $"{IdxData[curIndex].BIAS.ToString("F2")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
-                        case GeneralModule.MAP_WMS:
+                        case GeneralModule.MAP_WMS :
                             g.DrawString("WMS : " + $"{IdxData[curIndex].WMS.ToString("F")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
-                        case GeneralModule.MAP_PSY:
+                        case GeneralModule.MAP_PSY :
                             g.DrawString("PSY : " + $"{IdxData[curIndex].PSY.ToString("F0")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
-                        case GeneralModule.MAP_RSI:
+                        case GeneralModule.MAP_RSI :
                             Font f = new Font(this.Font.FontFamily, 6);
                             int lineHeight = f.Height;
                             g.DrawString($"SRSI : {IdxData[curIndex].SRSI:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             g.DrawString($"LRSI : {IdxData[curIndex].LRSI:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight);
                             break;
-                        case GeneralModule.MAP_KD:
+                        case GeneralModule.MAP_KD :
                             f = new Font(this.Font.FontFamily, 6);
                             lineHeight = f.Height;
                             g.DrawString($"K : {IdxData[curIndex].K:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             g.DrawString($"D : {IdxData[curIndex].D:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight);
                             break;
-                        case GeneralModule.MAP_MACD:
+                        case GeneralModule.MAP_MACD :
                             f = new Font(this.Font.FontFamily, 6);
                             lineHeight = f.Height;
                             g.DrawString($"DIF : {IdxData[curIndex].DIF:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
-                            g.DrawString($"DEA : {IdxData[curIndex].DEA:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight);
-                            g.DrawString($"Hist : {IdxData[curIndex].HIST:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight * 2);
+                            g.DrawString($"MACD : {IdxData[curIndex].MACD:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight);
+                            g.DrawString($"OSC : {IdxData[curIndex].OSC:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight * 2);
+                            break;
+                        case GeneralModule.MAP_SECTORS :
+                            g.DrawString("SECTORS : " + $"{IdxData[curIndex].SECTORS.ToString("F0")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
                     }
                 }
@@ -568,18 +571,6 @@ namespace EarvinStocksPGM
             {
                 MessageBox.Show(ex.ToString());
             }
-            //---------------------------------------//
-            //=== 最右側的各項指標數值顯示( END ) ===//
-            //---------------------------------------//
-
-
-            ////-- FOR DEBUG : Display Frame's 端點指標 --//
-            //for (int i = 0; i < (FrameNum + 1); i++)
-            //{
-            //    Debug.WriteLine("FramePoint[" + i + "], Left.X= " + FrameLeftPoints[i].frameY + ", Left.Y= " + FrameLeftPoints[i].frameY
-            //                    + ", Right.X= " + FrameRightPoints[i].frameY + ", Right.Y= " + FrameRightPoints[i].frameY
-            //                    + ", Mid.X= " + FrameMiddlePoints[i].frameY + ", Mid.Y= " + FrameMiddlePoints[i].frameY);
-            //}
         }
 
         private void cboFrameNum_SelectedIndexChanged(object sender, EventArgs e)
@@ -754,7 +745,7 @@ namespace EarvinStocksPGM
 
         private void Chalk_MAP_VOLUME(Graphics g, int framePos, int frameNum)
         {
-            // 1. 邊界與參數安全檢查
+            // 邊界與參數安全檢查
             if (framePos <= 0 || framePos > frameNum || DisplayCount <= 0)
                 return;
 
@@ -773,13 +764,13 @@ namespace EarvinStocksPGM
 
             float yDistance = yAxisLength / (float)volRange;
 
-            // 2. 繪製最頂部與最底部的刻度文字
+            // 繪製最頂部與最底部的刻度文字
             using (Font font = new Font(this.Font.FontFamily, 6))
             {
                 g.DrawString(maxVol.ToString("N0"), font, Brushes.Black, 10, (int)frameTopY);
                 g.DrawString(minVol.ToString("N0"), font, Brushes.Black, 10, (int)frameBottomY - 10);
 
-                // 3. 繪製 3 條參考虛線與 Y 軸標籤
+                // 繪製 3 條參考虛線與 Y 軸標籤
                 using (Pen dashPen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash })
                 {
                     double stepVol = volRange / 4.0;
@@ -797,7 +788,7 @@ namespace EarvinStocksPGM
                 }
             }
 
-            // 4. 準備繪製成交量柱狀圖 (共用 Brush 避免記憶體洩漏)
+            // 準備繪製成交量柱狀圖 (共用 Brush 避免記憶體洩漏)
             using (Brush redBrush = new SolidBrush(Color.Red))
             using (Brush greenBrush = new SolidBrush(Color.Green))
             {
@@ -919,7 +910,7 @@ namespace EarvinStocksPGM
             float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;
             float yDistance = yAxisHeight / 4f;
 
-            // 1. 繪製 0~100 指標常見的 25%, 50%, 75% 參考虛線與標籤
+            // 繪製 0~100 指標常見的 25%, 50%, 75% 參考虛線與標籤
             using (Pen pen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
             using (Font font = new Font(this.Font.FontFamily, 6))
             {
@@ -936,7 +927,7 @@ namespace EarvinStocksPGM
                 }
             }
 
-            // 2. 獲取指標數據
+            // 獲取指標數據
             double[] values = mapType switch
             {
                 GeneralModule.MAP_WMS => IdxData.Select(d => d.WMS).ToArray(),
@@ -945,7 +936,7 @@ namespace EarvinStocksPGM
                 _ => new double[IdxData.Count()]
             };
 
-            // 3. 計算各數據點座標
+            // 計算各數據點座標
             PointF[] points = new PointF[DisplayCount];
             float xWidth = xAxisLength / DisplayCount;
             float yHeight = yAxisHeight / 100f; // 100 分制轉換比率
@@ -962,7 +953,7 @@ namespace EarvinStocksPGM
                 points[i] = new PointF(xCoord, yCoord);
             }
 
-            // 4. 繪製折線
+            // 繪製折線
             using (Pen pen = new Pen(Color.Green, 1))
             {
                 g.DrawLines(pen, points);
@@ -978,7 +969,7 @@ namespace EarvinStocksPGM
             float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;
             float yDistance = yAxisHeight / 4f;
 
-            // 1. 繪製參考虛線
+            // 繪製參考虛線
             using (Pen pen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
             using (Font font = new Font(this.Font.FontFamily, 6))
             {
@@ -992,7 +983,7 @@ namespace EarvinStocksPGM
                 }
             }
 
-            // 2. 獲取雙線數據
+            // 獲取雙線數據
             double[] values1 = new double[IdxData.Count()];
             double[] values2 = new double[IdxData.Count()];
 
@@ -1012,7 +1003,7 @@ namespace EarvinStocksPGM
                 values2 = GetSingleIndicatorArray(mapType2);
             }
 
-            // 3. 計算兩條折線節點
+            // 計算兩條折線節點
             PointF[] points1 = new PointF[DisplayCount];
             PointF[] points2 = new PointF[DisplayCount];
             float xWidth = xAxisLength / DisplayCount;
@@ -1033,7 +1024,7 @@ namespace EarvinStocksPGM
                 points2[i] = new PointF(xCoord, y2);
             }
 
-            // 4. 畫線
+            // 畫線
             using (Pen pen1 = new Pen(Color.Green, 1))
             {
                 g.DrawLines(pen1, points1);
@@ -1076,7 +1067,7 @@ namespace EarvinStocksPGM
 
             double[] LV = new double[3] { maxV / 2.0, 0, -maxV / 2.0 }; // 從上到下: 正、零、負
 
-            // 1. 劃 3 條參考虛線與 Y 軸文字
+            // 劃 3 條參考虛線與 Y 軸文字
             using (Font font = new Font(this.Font.FontFamily, 6))
             using (Pen dashPen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
             {
@@ -1091,19 +1082,19 @@ namespace EarvinStocksPGM
                 }
             }
 
-            // 2. 比例轉換與數據準備
+            // 比例轉換與數據準備
             float xWidth = xAxisLength / DisplayCount;
             float yHeight = yAxisHeight / (float)(maxV * 2.0); // 數值到像素的轉換比率
             float zeroY = FrameLeftPoints[framePos].frameY - (yAxisHeight / 2.0f); // 零軸 Y 座標 (畫布中央)
 
             double[] difValues = IdxData.Select(d => d.DIF).ToArray();
-            double[] deaValues = IdxData.Select(d => d.DEA).ToArray();
-            double[] histValues = IdxData.Select(d => d.HIST).ToArray();
+            double[] macdValues = IdxData.Select(d => d.MACD).ToArray();
+            double[] oscValues = IdxData.Select(d => d.OSC).ToArray();
 
             PointF[] difPoints = new PointF[DisplayCount];
-            PointF[] deaPoints = new PointF[DisplayCount];
+            PointF[] macdPoints = new PointF[DisplayCount];
 
-            // 3. 計算折線點座標
+            // 計算折線點座標
             for (int i = 0; i < DisplayCount; i++)
             {
                 int dataIdx = StartIndex + i;
@@ -1112,19 +1103,19 @@ namespace EarvinStocksPGM
                 float currentX = FrameLeftPoints[framePos].frameX + (i * xWidth) + (xWidth / 2f);
 
                 float difY = zeroY - (float)(difValues[dataIdx] * yHeight);
-                float deaY = zeroY - (float)(deaValues[dataIdx] * yHeight);
+                float macdY = zeroY - (float)(macdValues[dataIdx] * yHeight);
 
                 difPoints[i] = new PointF(currentX, difY);
-                deaPoints[i] = new PointF(currentX, deaY);
+                macdPoints[i] = new PointF(currentX, macdY);
             }
 
-            // 4. 繪製 MACD 柱狀圖 (Histogram)
+            // 繪製 MACD 柱狀圖 (Oscillator / Histogram)
             for (int i = 0; i < DisplayCount; i++)
             {
                 int dataIdx = StartIndex + i;
                 if (dataIdx >= IdxData.Count()) break;
 
-                double val = histValues[dataIdx];
+                double val = oscValues[dataIdx];
                 float barHeight = (float)(Math.Abs(val) * yHeight);
                 float xPos = FrameLeftPoints[framePos].frameX + (i * xWidth);
 
@@ -1146,21 +1137,21 @@ namespace EarvinStocksPGM
                 }
             }
 
-            // 5. 繪製 DIF 與 DEA 兩條線
+            // 繪製 DIF 與 DEA 兩條線
             using (Pen penDIF = new Pen(Color.Green, 1))
             {
                 g.DrawLines(penDIF, difPoints);
             }
 
-            using (Pen penDEA = new Pen(Color.RosyBrown, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 6, 2 } })
+            using (Pen penMACD = new Pen(Color.RosyBrown, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 6, 2 } })
             {
-                g.DrawLines(penDEA, deaPoints);
+                g.DrawLines(penMACD, macdPoints);
             }
         }
 
         private void Chalk_MAP_CENTER_BAR(Graphics g, int framePos, int frameNum, int mapType)
         {
-            // 1. 邊界與參數安全檢查
+            // 邊界與參數安全檢查
             if (framePos <= 0 || framePos > frameNum || DisplayCount <= 0)
                 return;
 
@@ -1176,7 +1167,7 @@ namespace EarvinStocksPGM
 
             double[] LV = new double[3] { maxV / 2.0, 0, -maxV / 2.0 }; // 從上到下: 正、零、負
 
-            // 1. 劃 3 條參考虛線與 Y 軸文字
+            // 劃 3 條參考虛線與 Y 軸文字
             using (Font font = new Font(this.Font.FontFamily, 6))
             using (Pen dashPen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
             {
@@ -1191,28 +1182,13 @@ namespace EarvinStocksPGM
                 }
             }
 
-            // 2. 比例轉換與數據準備
+            // 比例轉換與數據準備
             float xWidth = xAxisLength / DisplayCount;
             float yHeight = yAxisHeight / (float)(maxV * 2.0); // 數值到像素的轉換比率
             float zeroY = FrameLeftPoints[framePos].frameY - (yAxisHeight / 2.0f); // 零軸 Y 座標 (畫布中央)
-
             double[] values = IdxData.Select(d => d.SECTORS).ToArray();
 
-            //PointF[] difPoints = new PointF[DisplayCount];
-            //PointF[] deaPoints = new PointF[DisplayCount];
-
-            //// 3. 計算折線點座標
-            //for (int i = 0; i < DisplayCount; i++)
-            //{
-            //    int dataIdx = StartIndex + i;
-            //    if (dataIdx >= IdxData.Count()) break;
-
-            //    float currentX = FrameLeftPoints[framePos].frameX + (i * xWidth) + (xWidth / 2f);
-
-
-            //}
-
-            // 4. 繪製 MACD 柱狀圖 (Histogram)
+            // 繪製 MACD 柱狀圖 (Histogram)
             for (int i = 0; i < DisplayCount; i++)
             {
                 int dataIdx = StartIndex + i;
@@ -1239,17 +1215,6 @@ namespace EarvinStocksPGM
                     }
                 }
             }
-
-            //// 5. 繪製 DIF 與 DEA 兩條線
-            //using (Pen penDIF = new Pen(Color.Green, 1))
-            //{
-            //    g.DrawLines(penDIF, difPoints);
-            //}
-
-            //using (Pen penDEA = new Pen(Color.RosyBrown, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 6, 2 } })
-            //{
-            //    g.DrawLines(penDEA, deaPoints);
-            //}
             Debug.WriteLine("Chalk_MAP_VOLUME() END!!!!!");
         }
 

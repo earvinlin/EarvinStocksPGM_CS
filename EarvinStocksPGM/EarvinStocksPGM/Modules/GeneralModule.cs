@@ -41,13 +41,13 @@ namespace EarvinStocksPGM.Modules
 
         public static HighLowValues GetHighLowValue(StockData[] sd, IndexData[] idx, int startIndex, int displayCount, int type)
         {
-            double highValue = 0;
-            double lowValue = 99999;
+            double highValue = double.MinValue;
+            double lowValue = double.MaxValue;
 
             switch (type)
             {
                 case MAP_KBAR :
-                    for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
+                    for (int i = startIndex; i < (startIndex + displayCount); i++)
                     {
                         if (highValue < sd[i].HighPrice)
                             highValue = sd[i].HighPrice;
@@ -55,8 +55,9 @@ namespace EarvinStocksPGM.Modules
                             lowValue = sd[i].LowPrice;
                     }
                     break;
+
                 case MAP_VOLUME :
-                    for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
+                    for (int i = startIndex; i < (startIndex + displayCount); i++)
                     {
                         if (highValue < sd[i].Volume)
                             highValue = sd[i].Volume;
@@ -64,8 +65,9 @@ namespace EarvinStocksPGM.Modules
                             lowValue = sd[i].Volume;
                     }
                     break;
+
                 case MAP_BIAS :
-                    for (int i = startIndex; i < (startIndex + displayCount - 1); i++)
+                    for (int i = startIndex; i < (startIndex + displayCount); i++)
                     {
                         if (highValue < idx[i].BIAS)
                             highValue = idx[i].BIAS;
@@ -95,8 +97,6 @@ namespace EarvinStocksPGM.Modules
                     }
                     else 
                     {
-                        //lowValue = Math.Floor(Math.Abs(lowValue));
-                        //highValue = -lowValue;
                         highValue = Math.Ceiling(Math.Abs(lowValue));
                         lowValue = -highValue;
                     }
@@ -104,40 +104,23 @@ namespace EarvinStocksPGM.Modules
 
                 case MAP_MACD:
                     double[] difValues = idx[startIndex..(startIndex + displayCount - 1)].Select(d => d.DIF).ToArray();
-                    double[] macdValues = idx[startIndex..(startIndex + displayCount - 1)].Select(d => d.DEA).ToArray();
-                    double[] oscValues = idx[startIndex..(startIndex + displayCount - 1)].Select(d => d.HIST).ToArray();
+                    double[] macdValues = idx[startIndex..(startIndex + displayCount - 1)].Select(d => d.MACD).ToArray();
+                    double[] oscValues = idx[startIndex..(startIndex + displayCount - 1)].Select(d => d.OSC).ToArray();
                     highValue = Math.Max(difValues.Max(), Math.Max(macdValues.Max(),oscValues.Max()));
                     lowValue = Math.Min(difValues.Min(), Math.Min(macdValues.Min(),oscValues.Min()));
                     break;
 
                 case MAP_WMS:
-                    highValue = 100;
-                    lowValue = 0;
-                    break;
                 case MAP_PSY:
-                    highValue = 100;
-                    lowValue = 0;
-                    break;
                 case MAP_SRSI:
-                    highValue = 100;
-                    lowValue = 0;
-                    break;
                 case MAP_LRSI:
-                    highValue = 100;
-                    lowValue = 0;
-                    break;
                 case MAP_K:
-                    highValue = 100;
-                    lowValue = 0;
-                    break;
                 case MAP_D:
-                    highValue = 100;
-                    lowValue = 0;
-                    break;
                 case MAP_KD:
                     highValue = 100;
                     lowValue = 0;
                     break;
+
                 case MAP_SECTORS:
                     highValue = 1;
                     lowValue = -1;
@@ -153,15 +136,6 @@ namespace EarvinStocksPGM.Modules
         public static int GetSelectFrame(FramePoints[] frmLeft, FramePoints[] frmRight, Point cursorPos, int frameNum)
         {
             int selectFrame = 0;
-
-            Debug.WriteLine("GetSelectFrame()_INT--selectFrame= " + selectFrame);
-            ////-- FOR DEBUG : Display Frame's 端點指標 --//
-            //for (int i = 0; i < (frameNum + 1); i++)
-            //{
-            //    Debug.WriteLine("FramePoint[" + i + "], Left.X= " + frmLeft[i].frameX + ", Left.Y= " + frmLeft[i].frameY
-            //                    + ", Right.X= " + frmRight[i].frameX + ", Right.Y= " + frmRight[i].frameY
-            //                    + ", cursorPos.X= " + cursorPos.X + ", cursorPos.Y= " + cursorPos.Y);
-            //}
 
             for (int i = 0; i < frameNum; i++)
             {
@@ -179,8 +153,6 @@ namespace EarvinStocksPGM.Modules
                     break;
                 }
             }
-            Debug.WriteLine("GetSelectFrame()_FIN--selectFrame= " + selectFrame);
-
             return selectFrame;
         }
     }
