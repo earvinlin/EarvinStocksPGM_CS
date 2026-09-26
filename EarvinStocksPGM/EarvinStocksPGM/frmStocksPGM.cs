@@ -14,16 +14,16 @@ namespace EarvinStocksPGM
         private Label lblHighPrice;             // 動態新增label元件：顯示股票最高價
         private Label lblLowPrice;              // 動態新增label元件：顯示股票最低價
 
+        static int STOCKYM_CNTS = 36;
         private Label[] lblStockYM = new Label[STOCKYM_CNTS];
 
         private bool _initialized = false;
-        static int STOCKYM_CNTS = 36;
 
         private static int FrameNum = 5;            // 要顯示的frame數量
         private static int SelectFramePos = 0;      // 選擇的frame位置(1~FrameNum)
         private float XWidthBorder = 20;            // frame左、右兩邊預留的空間
         private float YHeightBorder = 30;           // frame最下面預留的空間
-                                                    //        private float FrameXTop = 30;               // frame最左上角的X座標
+//        private float FrameXTop = 30;               // frame最左上角的X座標
         private float FrameXTop = 40;               // frame最左上角的X座標
         private float FrameRightBorder = 150;       // frame最左上角的Y座標
         private Boolean IsShowFocusLine = false;    // 是否顯示焦點線段
@@ -73,6 +73,18 @@ namespace EarvinStocksPGM
 
         private void frmStocksPGM_Load(object sender, EventArgs e)
         {
+            // Setting Index's Days
+            BIASDay = 10;
+            WMSDay = 10;
+            PSYDay = 5;
+            SRSIDay = 6;
+            LRSIDay = 20;
+            KDay = 9;
+            DDay = 9;
+            DIFDay = 12;
+            MACDDay = 26;
+            OSCDay = 9;
+
             this.ContextMenuStrip = cntMenuStrip;
 
             pnlStocksBar.Width = this.Width;

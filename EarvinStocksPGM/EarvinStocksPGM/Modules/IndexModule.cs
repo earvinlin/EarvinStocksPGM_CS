@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using static System.Net.Mime.MediaTypeNames;
+using static EarvinStocksPGM.Modules.GeneralModule;
+
 
 namespace EarvinStocksPGM.Modules
 {
@@ -77,13 +79,21 @@ namespace EarvinStocksPGM.Modules
             dblMAVValues20 = CalculateAverage(sd, 20, false);
             dblMAVValues60 = CalculateAverage(sd, 60, false);
             dblMAVValues120 = CalculateAverage(sd, 120, false);
-            dblBIAS = CalculateBIAS(sd, 10);
-            dblWMS = CalculateWMS(sd, 10);
-            dblPSY = CalculatePSY(sd, 10);
-            dblSRSI = CalculateRSI(sd, 6);
-            dblLRSI = CalculateRSI(sd, 20);
-            (dblK, dblD) = CalculateKD(sd, 9);
-            (dblDIF, dblMACD, dblOSC) = CalculateMACD(sd, 12, 26, 9);
+            //dblBIAS = CalculateBIAS(sd, 10);
+            //dblWMS = CalculateWMS(sd, 10);
+            //dblPSY = CalculatePSY(sd, 10);
+            //dblSRSI = CalculateRSI(sd, 6);
+            //dblLRSI = CalculateRSI(sd, 20);
+            //(dblK, dblD) = CalculateKD(sd, 9);
+            //(dblDIF, dblMACD, dblOSC) = CalculateMACD(sd, 12, 26, 9);
+            dblBIAS = CalculateBIAS(sd, BIASDay);
+            dblWMS = CalculateWMS(sd, WMSDay);
+            dblPSY = CalculatePSY(sd, PSYDay);
+            dblSRSI = CalculateRSI(sd, SRSIDay);
+            dblLRSI = CalculateRSI(sd, LRSIDay);
+            (dblK, dblD) = CalculateKD(sd, KDay);
+            (dblDIF, dblMACD, dblOSC) = CalculateMACD(sd, DIFDay, MACDDay, OSCDay);
+
             dblSectors = CalculateSectors(sd, idx);
 
             for (int i = 0; i < sd.Length; i++)

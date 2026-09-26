@@ -48,6 +48,18 @@ namespace EarvinStocksPGM.Modules
         public const int MAP_MACD = 14;
         public const int MAP_SECTORS = 15;
 
+        //-- Keep the Index's Days --//
+        public static int BIASDay = 10;
+        public static int WMSDay = 10;
+        public static int PSYDay = 10;
+        public static int SRSIDay = 6;
+        public static int LRSIDay = 20;
+        public static int KDay = 9;
+        public static int DDay = 9;
+        public static int DIFDay = 12;
+        public static int MACDDay = 26;
+        public static int OSCDay = 9;
+
         // 記錄每個FRAME選擇顯示的資料(最多只能選9個；第1個一定是MAP_K)
         public static int[] SelectShowMapOnFrames = new int[9];
 
