@@ -492,6 +492,19 @@ namespace EarvinStocksPGM.Modules
                 Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", SECTORS= " + dblValues[i]);
             }
             return dblValues;
+            /*
+                         '--------------------------------------------------------------------
+                        '* 記錄該點是屬於高點或低點
+                        '--------------------------------------------------------------------
+                        If (nowIndex1 > nowIndex2) Or _
+                            ((nowIndex1 = nowIndex2) And (prevIndex1 < prevIndex2)) Then
+                            signalFlag = HIGH_SIGNAL     ' 高點
+                        Else
+                            signalFlag = LOW_SIGNAL   ' 低點
+                        End If
+                        .sngSector = signalFlag
+
+             */
         }
 
 
