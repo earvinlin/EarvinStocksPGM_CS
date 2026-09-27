@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Security.Cryptography;
 using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 using static EarvinStocksPGM.Modules.GeneralModule;
+using static System.Net.Mime.MediaTypeNames;
 
 
 namespace EarvinStocksPGM.Modules
@@ -79,22 +80,15 @@ namespace EarvinStocksPGM.Modules
             dblMAVValues20 = CalculateAverage(sd, 20, false);
             dblMAVValues60 = CalculateAverage(sd, 60, false);
             dblMAVValues120 = CalculateAverage(sd, 120, false);
-            //dblBIAS = CalculateBIAS(sd, 10);
-            //dblWMS = CalculateWMS(sd, 10);
-            //dblPSY = CalculatePSY(sd, 10);
-            //dblSRSI = CalculateRSI(sd, 6);
-            //dblLRSI = CalculateRSI(sd, 20);
-            //(dblK, dblD) = CalculateKD(sd, 9);
-            //(dblDIF, dblMACD, dblOSC) = CalculateMACD(sd, 12, 26, 9);
-            dblBIAS = CalculateBIAS(sd, BIASDay);
-            dblWMS = CalculateWMS(sd, WMSDay);
-            dblPSY = CalculatePSY(sd, PSYDay);
-            dblSRSI = CalculateRSI(sd, SRSIDay);
-            dblLRSI = CalculateRSI(sd, LRSIDay);
-            (dblK, dblD) = CalculateKD(sd, KDay);
-            (dblDIF, dblMACD, dblOSC) = CalculateMACD(sd, DIFDay, MACDDay, OSCDay);
+            dblBIAS = CalculateBIAS(sd, BIASDay);   // default 10
+            dblWMS = CalculateWMS(sd, WMSDay);      // default 10
+            dblPSY = CalculatePSY(sd, PSYDay);      // default 10
+            dblSRSI = CalculateRSI(sd, SRSIDay);    // default 6
+            dblLRSI = CalculateRSI(sd, LRSIDay);    // default 20
+            (dblK, dblD) = CalculateKD(sd, KDay);   // default 9
+            (dblDIF, dblMACD, dblOSC) = CalculateMACD(sd, DIFDay, MACDDay, OSCDay); // default 12, 26, 9
 
-            dblSectors = CalculateSectors(sd, idx);
+            dblSectors = CalculateSectors(sd.Length, MAP_MAP20, MAP_MAP60);
 
             for (int i = 0; i < sd.Length; i++)
             {
@@ -479,13 +473,13 @@ namespace EarvinStocksPGM.Modules
             return (difValues, macdValues, oscValues);
         }
 
-        public static double[] CalculateSectors(StockData[] sd, IndexData[] idx)
+        public static double[] CalculateSectors(int counts, int index1, int index2)
         {
             int i = 0;
-            double[] dblValues = new double[sd.Length];
+            double[] dblValues = new double[counts];
 
-            Debug.WriteLine("sd.Length= " + sd.Length);
-            while (i < sd.Length)
+            Debug.WriteLine("sd.Length= " + counts);
+            while (i < counts)
             {
                 if (i < 50)
                     dblValues[i] = 1.0;
@@ -497,9 +491,9 @@ namespace EarvinStocksPGM.Modules
                 i++;
             }
             // DEBUG : Display the PSY values for verification
-            for (i = 0; i < sd.Length; i++)
+            for (i = 0; i < counts; i++)
             {
-                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", SECTORS= " + dblValues[i]);
+                Debug.WriteLine("SECTORS= " + dblValues[i]);
             }
             return dblValues;
             /*
@@ -518,7 +512,14 @@ namespace EarvinStocksPGM.Modules
         }
 
 
+        public static double[] GetIndexValues(int counts, int index)
+        {
+            double[] dblValues = new double[counts];
 
+
+
+            return dblValues;
+        }
 
 
 

@@ -31,7 +31,23 @@ namespace EarvinStocksPGM.Modules
             public float frameY;
         }
 
+        //-----------------------//
+        //-- MAP of Index Name --//
+        //-----------------------//
         public const int MAP_UNSELECTED = 0;
+        public const int MAP_MAP5 = 1005;
+        public const int MAP_MAP10 = 1010;
+        public const int MAP_MAP20 = 1020;
+        public const int MAP_MAP60 = 1060;
+        public const int MAP_MAP120 = 1120;
+        public const int MAP_MAP240 = 1240;
+        public const int MAP_MAV5 = 2005;
+        public const int MAP_MAV10 = 2010;
+        public const int MAP_MAV20 = 2020;
+        public const int MAP_MAV60 = 2060;
+        public const int MAP_MAV120 = 2120;
+        public const int MAP_MAV240 = 2240;
+
         public const int MAP_KBAR = 1;
         public const int MAP_VOLUME = 2;
         public const int MAP_BIAS = 3;
@@ -48,7 +64,9 @@ namespace EarvinStocksPGM.Modules
         public const int MAP_MACD = 14;
         public const int MAP_SECTORS = 15;
 
+        //---------------------------//
         //-- Keep the Index's Days --//
+        //---------------------------//
         public static int BIASDay = 10;
         public static int WMSDay = 10;
         public static int PSYDay = 10;
