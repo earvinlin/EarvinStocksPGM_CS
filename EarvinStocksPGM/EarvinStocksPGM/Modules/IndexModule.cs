@@ -477,6 +477,8 @@ namespace EarvinStocksPGM.Modules
         {
             int i = 0;
             double[] dblValues = new double[counts];
+            double[] dblIndex1 = GetIndexValues(counts, index1);
+            double[] dblIndex2 = GetIndexValues(counts, index2);
 
             Debug.WriteLine("sd.Length= " + counts);
             while (i < counts)
