@@ -8,6 +8,7 @@ using StockData = EarvinStocksPGM.Modules.StockData; // 指定 StockData 代表�
 
 namespace EarvinStocksPGM
 {
+
     public partial class frmStocksPGM : Form
     {
         //-- 動態元件 --//
@@ -54,6 +55,16 @@ namespace EarvinStocksPGM
             pnlStocksBar.Width = this.Width;
             _initialized = true;
         }
+
+        private void DrawMAPLine(Graphics g, Pen pen, float xPrev, float xCurr,
+            float frameTopY, float yDistance, double highValue, double prevMAP, double currMAP)
+        {
+            float yPrev = frameTopY + yDistance * (float)(highValue - prevMAP);
+            float yCurr = frameTopY + yDistance * (float)(highValue - currMAP);
+
+            g.DrawLine(pen, xPrev, yPrev, xCurr, yCurr);
+        }
+
 
         private void cboStocks_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -255,26 +266,26 @@ namespace EarvinStocksPGM
             //-- 繪製 K-Map (最上方 Frame) 的橫(虛)線段 --//
             //--------------------------------------------//
             int dashLineCounts = 5; // 虛線的段數
-            float hh = FrameLeftPoints[1].frameY - FrameLeftPoints[0].frameY;
+            float frameHeight = FrameLeftPoints[1].frameY - FrameLeftPoints[0].frameY;  // K線圖的frame高度
 
             using (Pen pen = new Pen(Color.Black, 1))
             {
                 pen.DashStyle = DashStyle.Dash;
                 pen.DashPattern = new float[] { 4, 2 }; // 畫 4px，空 2px
                 using System.Drawing.Font labelFont = new System.Drawing.Font(this.Font.FontFamily, 6);
+                float valuesHeight = (float) (highLowValues.highValue - highLowValues.lowValue) / dashLineCounts;
 
-                float ff = (float) (highLowValues.highValue - highLowValues.lowValue) / dashLineCounts;
                 g.DrawString(highLowValues.highValue.ToString("F2"), labelFont, Brushes.Black, 10, FrameLeftPoints[0].frameY);
                 for (int i = 1; i < dashLineCounts; i++)
                 {
                     // Draw Dash Lines
                     float x0 = FrameLeftPoints[0].frameX;
-                    float y0 = FrameLeftPoints[0].frameY + (hh / dashLineCounts) * i;
+                    float y0 = FrameLeftPoints[0].frameY + (frameHeight / dashLineCounts) * i;
                     float x1 = FrameMiddlePoints[0].frameX;
-                    float y1 = FrameMiddlePoints[0].frameY + (hh / dashLineCounts) * i;
+                    float y1 = FrameMiddlePoints[0].frameY + (frameHeight / dashLineCounts) * i;
                     g.DrawLine(pen, x0, y0, x1, y1);
                     // Show value of each dash-line
-                    float labelValue = (float) highLowValues.highValue - (float) ff * i;
+                    float labelValue = (float) (highLowValues.highValue - valuesHeight * i);
                     g.DrawString(labelValue.ToString("F2"), labelFont, Brushes.Black, 10, y0 - 6);
                 }
                 g.DrawString(highLowValues.lowValue.ToString("F2"), labelFont, Brushes.Black, 10, FrameLeftPoints[1].frameY - 10);
@@ -326,12 +337,14 @@ namespace EarvinStocksPGM
                 {
                     if (StkData[i].StartPrice > StkData[i].EndPrice)
                     {
-                        Brush brush = new SolidBrush(Color.Green);
+                        //Brush brush = new SolidBrush(Color.Green);
+                        using Brush brush = new SolidBrush(Color.Green);
                         g.FillRectangle(brush, barXCoord, barYCoord, barWidth, barHeight);
                     }
                     else
                     {
-                        Brush brush = new SolidBrush(Color.Red);
+                        //Brush brush = new SolidBrush(Color.Red);
+                        using Brush brush = new SolidBrush(Color.Red);
                         g.FillRectangle(brush, barXCoord, barYCoord, barWidth, barHeight);
                     }
                 }
@@ -353,48 +366,27 @@ namespace EarvinStocksPGM
                 // 顯示股價均線 (MAP) 的線段
                 if (i > StartIndex)
                 {
-                    Pen pen4MAP = new Pen(Color.Blue, 2);
-                    // MAP5
-                    float x2 = (barXCoord - barWidth + barWidth / 2);
-                    float y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i - 1].MAP5));
-                    float x3 = (barXCoord + barWidth / 2);
-                    float y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i].MAP5));
-                    g.DrawLine(pen4MAP, x2, y2, x3, y3);
-                    // MAP10
-                    pen4MAP = new Pen(Color.Black, 2);
-                    x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i - 1].MAP10));
-                    x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i].MAP10));
-                    g.DrawLine(pen4MAP, x2, y2, x3, y3);
-                    // MAP20
-                    pen4MAP = new Pen(Color.Orange, 2);
-                    x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i - 1].MAP20));
-                    x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i].MAP20));
-                    g.DrawLine(pen4MAP, x2, y2, x3, y3);
-                    // MAP60
-                    pen4MAP = new Pen(Color.Green, 2);
-                    x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i - 1].MAP60));
-                    x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i].MAP60));
-                    g.DrawLine(pen4MAP, x2, y2, x3, y3);
-                    // MAP120
-                    pen4MAP = new Pen(Color.Brown, 2);
-                    x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i - 1].MAP120));
-                    x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i].MAP120));
-                    g.DrawLine(pen4MAP, x2, y2, x3, y3);
-                    // MAP240
-                    pen4MAP = new Pen(Color.Violet, 2);
-                    x2 = (barXCoord - barWidth + barWidth / 2);
-                    y2 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i - 1].MAP240));
-                    x3 = (barXCoord + barWidth / 2);
-                    y3 = (float)FrameLeftPoints[0].frameY + (yDistance * (float)Math.Abs(highLowValues.highValue - IdxData[i].MAP240));
-                    g.DrawLine(pen4MAP, x2, y2, x3, y3);
+                    var prev = IdxData[i - 1];
+                    var curr = IdxData[i];
+
+                    float frameTopY = FrameLeftPoints[0].frameY;
+
+                    float xPrev = barXCoord - barWidth / 2;
+                    float xCurr = barXCoord + barWidth / 2;
+
+                    using Pen penMAP5 = new Pen(Color.Blue, 2);
+                    using Pen penMAP10 = new Pen(Color.Black, 2);
+                    using Pen penMAP20 = new Pen(Color.Orange, 2);
+                    using Pen penMAP60 = new Pen(Color.Green, 2);
+                    using Pen penMAP120 = new Pen(Color.Brown, 2);
+                    using Pen penMAP240 = new Pen(Color.Violet, 2);
+
+                    DrawMAPLine(g, penMAP5, xPrev, xCurr, frameTopY, yDistance, highLowValues.highValue, prev.MAP5, curr.MAP5);
+                    DrawMAPLine(g, penMAP10, xPrev, xCurr, frameTopY, yDistance, highLowValues.highValue, prev.MAP10, curr.MAP10);
+                    DrawMAPLine(g, penMAP20, xPrev, xCurr, frameTopY, yDistance, highLowValues.highValue, prev.MAP20, curr.MAP20);
+                    DrawMAPLine(g, penMAP60, xPrev, xCurr, frameTopY, yDistance, highLowValues.highValue, prev.MAP60, curr.MAP60);
+                    DrawMAPLine(g, penMAP120, xPrev, xCurr, frameTopY, yDistance, highLowValues.highValue, prev.MAP120, curr.MAP120);
+                    DrawMAPLine(g, penMAP240, xPrev, xCurr, frameTopY, yDistance, highLowValues.highValue, prev.MAP240, curr.MAP240);
                 }
             }
 
