@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using static DbHelper;
 using static EarvinStocksPGM.Modules.GeneralModule;
+using static System.Net.Mime.MediaTypeNames;
 using StockData = EarvinStocksPGM.Modules.StockData; // 指定 StockData 代表哪個類別
 
 namespace EarvinStocksPGM
@@ -11,8 +12,8 @@ namespace EarvinStocksPGM
     {
         //-- 動態元件 --//
         private Label lblStokInfo;              // 動態新增label元件：顯示股票資訊用
-        private Label lblHighPrice;             // 動態新增label元件：顯示股票最高價
-        private Label lblLowPrice;              // 動態新增label元件：顯示股票最低價
+        //private Label lblHighPrice;             // 動態新增label元件：顯示股票最高價
+        //private Label lblLowPrice;              // 動態新增label元件：顯示股票最低價
 
         static int STOCKYM_CNTS = 36;
         private Label[] lblStockYM = new Label[STOCKYM_CNTS];
@@ -104,25 +105,25 @@ namespace EarvinStocksPGM
             };
             this.Controls.Add(lblStokInfo);
 
-            // 新增顯示股票資訊的標籤
-            lblHighPrice = new Label()
-            {
-                Name = "lblHighPrice",
-                Text = "high",
-                AutoSize = true,
-                Font = new Font(this.Font.FontFamily, 6),
-            };
-            this.Controls.Add(lblHighPrice);
+            ////// 新增顯示股票資訊的標籤
+            ////lblHighPrice = new Label()
+            ////{
+            ////    Name = "lblHighPrice",
+            ////    Text = "high",
+            ////    AutoSize = true,
+            ////    Font = new Font(this.Font.FontFamily, 6),
+            ////};
+            ////this.Controls.Add(lblHighPrice);
 
-            // 新增顯示股票資訊的標籤
-            lblLowPrice = new Label()
-            {
-                Name = "lblLowPrice",
-                Text = "low",
-                AutoSize = true,
-                Font = new Font(this.Font.FontFamily, 6),
-            };
-            this.Controls.Add(lblLowPrice);
+            ////// 新增顯示股票資訊的標籤
+            ////lblLowPrice = new Label()
+            ////{
+            ////    Name = "lblLowPrice",
+            ////    Text = "low",
+            ////    AutoSize = true,
+            ////    Font = new Font(this.Font.FontFamily, 6),
+            ////};
+            ////this.Controls.Add(lblLowPrice);
 
             // 新增 Label 元件(預設建立 STOCKYM_CNTS 個備用)
             for (int i = 0; i < STOCKYM_CNTS; i++)
@@ -132,7 +133,7 @@ namespace EarvinStocksPGM
                     Name = $"lblStockYM{i}",
                     Text = "YYMM",
                     AutoSize = true,
-                    Font = new Font(this.Font.FontFamily, 8),
+                    Font = new System.Drawing.Font(this.Font.FontFamily, 8),
                 };
                 this.Controls.Add(lblStockYM[i]);
             }
@@ -245,22 +246,38 @@ namespace EarvinStocksPGM
                 g.DrawLine(Pens.Brown, FrameLeftPoints[i].frameX, FrameLeftPoints[i].frameY, FrameRightPoints[i].frameX, FrameRightPoints[i].frameY);
             }
 
+            // (20260927 CODING)
+            // 顯示畫面筆數之最高/最低價 (因為資料庫的資料型態為 decimal，為了便於計算故宣告為 decimal)
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_KBAR);
+            Debug.WriteLine("最高/低價：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
+
             //--------------------------------------------//
             //-- 繪製 K-Map (最上方 Frame) 的橫(虛)線段 --//
             //--------------------------------------------//
             int dashLineCounts = 5; // 虛線的段數
             float hh = FrameLeftPoints[1].frameY - FrameLeftPoints[0].frameY;
 
-            Pen pen = new Pen(Color.Black, 1);
-            pen.DashStyle = DashStyle.Dash;
-            pen.DashPattern = new float[] { 4, 2 }; // 畫 4px，空 2px
-            for (int i = 1; i < dashLineCounts; i++)
+            using (Pen pen = new Pen(Color.Black, 1))
             {
-                float x0 = FrameLeftPoints[0].frameX;
-                float y0 = FrameLeftPoints[0].frameY + (hh / dashLineCounts) * i;
-                float x1 = FrameMiddlePoints[0].frameX;
-                float y1 = FrameMiddlePoints[0].frameY + (hh / dashLineCounts) * i;
-                g.DrawLine(pen, x0, y0, x1, y1);
+                pen.DashStyle = DashStyle.Dash;
+                pen.DashPattern = new float[] { 4, 2 }; // 畫 4px，空 2px
+                using System.Drawing.Font labelFont = new System.Drawing.Font(this.Font.FontFamily, 6);
+
+                float ff = (float) (highLowValues.highValue - highLowValues.lowValue) / dashLineCounts;
+                g.DrawString(highLowValues.highValue.ToString("F2"), labelFont, Brushes.Black, 10, FrameLeftPoints[0].frameY);
+                for (int i = 1; i < dashLineCounts; i++)
+                {
+                    // Draw Dash Lines
+                    float x0 = FrameLeftPoints[0].frameX;
+                    float y0 = FrameLeftPoints[0].frameY + (hh / dashLineCounts) * i;
+                    float x1 = FrameMiddlePoints[0].frameX;
+                    float y1 = FrameMiddlePoints[0].frameY + (hh / dashLineCounts) * i;
+                    g.DrawLine(pen, x0, y0, x1, y1);
+                    // Show value of each dash-line
+                    float labelValue = (float) highLowValues.highValue - (float) ff * i;
+                    g.DrawString(labelValue.ToString("F2"), labelFont, Brushes.Black, 10, y0 - 6);
+                }
+                g.DrawString(highLowValues.lowValue.ToString("F2"), labelFont, Brushes.Black, 10, FrameLeftPoints[1].frameY - 10);
             }
 
             // 取得要顯示的股票資料
@@ -277,12 +294,6 @@ namespace EarvinStocksPGM
             {
                 StartIndex = 0;
             }
-
-            // 顯示畫面筆數之最高/最低價 (因為資料庫的資料型態為 decimal，為了便於計算故宣告為 decimal)
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_KBAR);
-            lblHighPrice.Text = highLowValues.highValue.ToString("F2");
-            lblLowPrice.Text = highLowValues.lowValue.ToString("F2");
-            Debug.WriteLine("最高/低價：" + $"{highLowValues.highValue}, {highLowValues.lowValue}");
 
             //--------------------------------------//
             //-- 顯示 K-Map (最上方 Frame) 柱狀圖 --//
@@ -411,6 +422,7 @@ namespace EarvinStocksPGM
                     float x1 = x0;
                     //                    float y1 = FrameLeftPoints[1].frameY;
                     float y1 = FrameLeftPoints[FrameNum].frameY;
+                    Pen pen = new Pen(Color.Black, 1);
                     g.DrawLine(pen, x0, y0, x1, y1);
                     // 顯示交易日期(年月)
                     string strnum = StkData[i].TradeDate.ToString();
@@ -502,8 +514,6 @@ namespace EarvinStocksPGM
 
             // Y-Length : 顯示frame的Y軸長度
             lblStokInfo.Text = "日期：" + StkData[curIndex].TradeDate + " 開 " + StkData[curIndex].StartPrice + " 高 " + StkData[curIndex].HighPrice + " 低 " + StkData[curIndex].LowPrice + " 收 " + StkData[curIndex].EndPrice;
-            lblHighPrice.Location = new System.Drawing.Point((int)FrameLeftPoints[0].frameX - lblHighPrice.Width, (int)FrameLeftPoints[0].frameY);
-            lblLowPrice.Location = new System.Drawing.Point((int)FrameLeftPoints[1].frameX - lblLowPrice.Width, (int)FrameLeftPoints[1].frameY - lblLowPrice.Height);
 
             //---------------------------------------//
             //=== 最右側的各項指標數值顯示(START) ===//
@@ -543,38 +553,38 @@ namespace EarvinStocksPGM
                         case GeneralModule.MAP_K :
                             break;
                         case GeneralModule.MAP_VOLUME :
-                            g.DrawString("VOL : " + $"{StkData[curIndex].Volume}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            g.DrawString("VOL : " + $"{StkData[curIndex].Volume}", new System.Drawing.Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
                         case GeneralModule.MAP_BIAS :
-                            g.DrawString("BIAS : " + $"{IdxData[curIndex].BIAS.ToString("F2")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            g.DrawString("BIAS : " + $"{IdxData[curIndex].BIAS.ToString("F2")}", new System.Drawing.Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
                         case GeneralModule.MAP_WMS :
-                            g.DrawString("WMS : " + $"{IdxData[curIndex].WMS.ToString("F")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            g.DrawString("WMS : " + $"{IdxData[curIndex].WMS.ToString("F")}", new System.Drawing.Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
                         case GeneralModule.MAP_PSY :
-                            g.DrawString("PSY : " + $"{IdxData[curIndex].PSY.ToString("F0")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            g.DrawString("PSY : " + $"{IdxData[curIndex].PSY.ToString("F0")}", new System.Drawing.Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
                         case GeneralModule.MAP_RSI :
-                            Font f = new Font(this.Font.FontFamily, 6);
+                            System.Drawing.Font f = new System.Drawing.Font(this.Font.FontFamily, 6);
                             int lineHeight = f.Height;
                             g.DrawString($"SRSI : {IdxData[curIndex].SRSI:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             g.DrawString($"LRSI : {IdxData[curIndex].LRSI:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight);
                             break;
                         case GeneralModule.MAP_KD :
-                            f = new Font(this.Font.FontFamily, 6);
+                            f = new System.Drawing.Font(this.Font.FontFamily, 6);
                             lineHeight = f.Height;
                             g.DrawString($"K : {IdxData[curIndex].K:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             g.DrawString($"D : {IdxData[curIndex].D:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight);
                             break;
                         case GeneralModule.MAP_MACD :
-                            f = new Font(this.Font.FontFamily, 6);
+                            f = new System.Drawing.Font(this.Font.FontFamily, 6);
                             lineHeight = f.Height;
                             g.DrawString($"DIF : {IdxData[curIndex].DIF:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             g.DrawString($"MACD : {IdxData[curIndex].MACD:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight);
                             g.DrawString($"OSC : {IdxData[curIndex].OSC:F2}", f, Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2 + lineHeight * 2);
                             break;
                         case GeneralModule.MAP_SECTORS :
-                            g.DrawString("SECTORS : " + $"{IdxData[curIndex].SECTORS.ToString("F0")}", new Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            g.DrawString("SECTORS : " + $"{IdxData[curIndex].SECTORS.ToString("F0")}", new System.Drawing.Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
                     }
                 }
@@ -777,7 +787,7 @@ namespace EarvinStocksPGM
             float yDistance = yAxisLength / (float)volRange;
 
             // 繪製最頂部與最底部的刻度文字
-            using (Font font = new Font(this.Font.FontFamily, 6))
+            using (System.Drawing.Font font = new System.Drawing.Font(this.Font.FontFamily, 6))
             {
                 g.DrawString(maxVol.ToString("N0"), font, Brushes.Black, 10, (int)frameTopY);
                 g.DrawString(minVol.ToString("N0"), font, Brushes.Black, 10, (int)frameBottomY - 10);
@@ -854,7 +864,7 @@ namespace EarvinStocksPGM
                     PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, FrameMiddlePoints[framePos].frameY - yDistance * i);
                     g.DrawLine(pen, pl, pr);
                     Debug.WriteLine("LABEL (BIAS)：" + $"{pl}, {pr}");
-                    g.DrawString($"{(ff * (p++))}", new Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
+                    g.DrawString($"{(ff * (p++))}", new System.Drawing.Font(this.Font.FontFamily, 6), Brushes.Black, 10, (int)(pl.Y));
                 }
             }
 
@@ -924,7 +934,7 @@ namespace EarvinStocksPGM
 
             // 繪製 0~100 指標常見的 25%, 50%, 75% 參考虛線與標籤
             using (Pen pen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
-            using (Font font = new Font(this.Font.FontFamily, 6))
+            using (System.Drawing.Font font = new System.Drawing.Font(this.Font.FontFamily, 6))
             {
                 for (int i = 1; i <= 3; i++)
                 {
@@ -983,7 +993,7 @@ namespace EarvinStocksPGM
 
             // 繪製參考虛線
             using (Pen pen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
-            using (Font font = new Font(this.Font.FontFamily, 6))
+            using (System.Drawing.Font font = new System.Drawing.Font(this.Font.FontFamily, 6))
             {
                 for (int i = 1; i <= 3; i++)
                 {
@@ -1080,7 +1090,7 @@ namespace EarvinStocksPGM
             double[] LV = new double[3] { maxV / 2.0, 0, -maxV / 2.0 }; // 從上到下: 正、零、負
 
             // 劃 3 條參考虛線與 Y 軸文字
-            using (Font font = new Font(this.Font.FontFamily, 6))
+            using (System.Drawing.Font font = new System.Drawing.Font(this.Font.FontFamily, 6))
             using (Pen dashPen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
             {
                 for (int i = 1; i <= 3; i++)
@@ -1180,7 +1190,7 @@ namespace EarvinStocksPGM
             double[] LV = new double[3] { maxV / 2.0, 0, -maxV / 2.0 }; // 從上到下: 正、零、負
 
             // 劃 3 條參考虛線與 Y 軸文字
-            using (Font font = new Font(this.Font.FontFamily, 6))
+            using (System.Drawing.Font font = new System.Drawing.Font(this.Font.FontFamily, 6))
             using (Pen dashPen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
             {
                 for (int i = 1; i <= 3; i++)
