@@ -354,3 +354,170 @@ ERR_HANDLE:
 End Sub
 
 
+
+''''''''''''''''''''''''''''''''''''''''''''''''
+''' For IndexModule.cs 版本 (20260928 Moved) '''
+''''''''''''''''''''''''''''''''''''''''''''''''
+//////// 唸書時的 MACD 版本 (未完成)
+//////public static (double[] DIF, double[] MACD, double[] DIF_MACD) CalculateMACD(StockData[] sd,
+//////    int period = 12, int ema_s = 12, int ema_l = 26, int ema = 5)
+//////{
+//////    double sngEMA_S;
+//////    double sngEMA_L;
+//////    double sngPreEMA_S;
+//////    double sngPreEMA_L;
+//////    double sngPreMACD;
+//////    double sngMACD;
+//////    double sngDIF;
+//////    double sngDIF_MACD;
+//////    double sngDI;
+//////    int i;
+//////    int j;
+
+//////    double[] difValues = New double[sd.Length];
+//////    double[] macdValues = New double[sd.Length];
+//////    double[] dif_macdValues = New double[sd.Length];
+
+//////    sngPreEMA_S = sd[0].EndPrice;
+//////    sngPreEMA_L = sd[0].EndPrice;
+//////    sngPreMACD = 0;
+//////    j = 1;
+
+//////    while (j <= sd.Length) 
+//////    {
+//////        sngDI = (sd[j].HighPrice + sd[j].LowPrice + sd[j].EndPrice * 2) / 4;
+//////        sngEMA_S = sngPreEMA_S + (2 * (sngDI - sngPreEMA_S) / (1 + ema_s));
+//////        sngEMA_L = sngPreEMA_L + (2 * (sngDI - sngPreEMA_L) / (1 + ema_l));
+//////        sngDIF = sngEMA_S - sngEMA_L;
+//////        //sngMACD = sngPreMACD + (2 * (sngDIF - sngPreMACD) / (1 + period));
+//////        sngMACD = sngPreMACD + (2 * (sngDIF - sngPreMACD) / (1 + period));
+//////        sngDIF_MACD = sngDIF - sngMACD;
+
+//////        difValues[j] = sngDIF;
+//////        macdValues[j] = sngMACD;
+//////        dif_macdValues[j] = sngDIF_MACD;
+
+//////        sngPreEMA_S = sngEMA_S;
+//////        sngPreEMA_L = sngEMA_L;
+//////        sngPreMACD = sngMACD;
+//////        j++;
+//////    }
+
+//////    return (difValues, macdValues, dif_macdValues);
+//////    /*
+
+//////        sngPreEMA_S = udtStock(1).sngEndprice
+//////        sngPreEMA_L = udtStock(1).sngEndprice
+//////        sngPreMACD = 0
+//////        j = 1
+//////        While j <= intStockNo
+//////            sngDI = (udtStock(j).sngHighPrice + udtStock(j).sngLowPrice + udtStock(j).sngEndprice * 2) / 4
+//////            sngEMA_S = sngPreEMA_S + (2 * (sngDI - sngPreEMA_S) / (1 + intSEMANo))
+//////            sngEMA_L = sngPreEMA_L + (2 * (sngDI - sngPreEMA_L) / (1 + intLEMANo))
+//////            sngDIF = sngEMA_S - sngEMA_L
+//////            sngMACD = sngPreMACD + (2 * (sngDIF - sngPreMACD) / (1 + intMACDNo))
+//////            sngDIF_MACD = sngDIF - sngMACD
+
+//////            udtIndex(j).sngDIF = sngDIF
+//////            udtIndex(j).sngMACD = sngMACD
+//////            udtIndex(j).sngDIF_MACD = sngDIF_MACD
+
+//////            sngPreEMA_S = sngEMA_S
+//////            sngPreEMA_L = sngEMA_L
+//////            sngPreMACD = sngMACD
+//////            j = j + 1
+//////        Wend
+
+
+//////     * 標準 MACD 的寫法應該類似
+//////        for (int i = 1; i < sd.Length; i++)
+//////        {
+//////            double close = sd[i].EndPrice;
+
+//////            ema12 = ema12 + (close - ema12) * 2.0 / 13.0;
+//////            ema26 = ema26 + (close - ema26) * 2.0 / 27.0;
+
+//////            dif = ema12 - ema26;
+
+//////            dea = dea + (dif - dea) * 2.0 / 10.0;
+
+//////            hist = dif - dea;
+
+//////            difValues[i] = dif;
+//////            macdValues[i] = dea;
+//////            dif_macdValues[i] = hist;
+//////        }
+//////    *-------------------------------
+
+
+//////     */
+//////}
+
+
+
+
+
+
+//////        public static (double[] K, double[] D) CalculateKD(StockData[] sd, int intDayNo)
+//////        {
+//////            int i = 0, j = 0;
+//////            double dblPrevK = 50, dblPrevD = 50, dblRsv = 0;
+//////            double dblK = 0, dblD = 0;
+//////            double dblMax = 0, dblMin = 0;
+//////            double[] dblKValues = New double[sd.Length];
+//////            double[] dblDValues = New double[sd.Length];
+
+//////            while (i < sd.Length)
+//////            {
+//////                dblMax = double.MinValue;
+//////                dblMin = double.MaxValue;
+//////                if (i < (intDayNo - 1))
+//////                {
+//////                    dblKValues[i] = double.NaN;
+//////                    dblDValues[i] = double.NaN;
+//////                    i++;
+//////                    continue;
+//////                }
+//////                else
+//////                {
+////////                    for (j = i; j > (i - intDayNo); j--)
+//////                    for (j = i - intDayNo + 1; j <= i; j++)
+//////                    {
+//////                        if (dblMax < sd[j].HighPrice)
+//////                            dblMax = sd[j].HighPrice;
+//////                        if (dblMin > sd[j].LowPrice)
+//////                            dblMin = sd[j].LowPrice;
+//////                    }
+//////                }
+
+//////                if (dblMax != dblMin)
+//////                    dblRsv = (sd[i].EndPrice - dblMin) / (dblMax - dblMin) * 100;
+//////                else
+//////                    dblRsv = 50;
+
+//////                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", dblMax= " + Math.Round(dblMax, 2) +
+//////                    ", dblMin= " + Math.Round(dblMin, 2) + ", EndPrice= " + sd[i].EndPrice + ", dblRsv= " + dblRsv);
+//////                dblK = dblPrevK * 2 / 3 + dblRsv / 3;
+//////                dblD = dblPrevD * 2 / 3 + dblK / 3;
+//////                Debug.WriteLine("dblPrevK= " + dblPrevK + ", dblPrevD= " + dblPrevD + ", dblK= " + dblK + ", dblD= " + dblD);
+
+//////                if (i < (intDayNo - 1))
+//////                {
+//////                    dblKValues[i] = double.NaN;
+//////                    dblDValues[i] = double.NaN;
+//////                } 
+//////                else
+//////                {
+//////                    dblKValues[i] = dblK;
+//////                    dblDValues[i] = dblD;
+//////                }
+//////                i++;
+//////            }
+//////            // DEBUG : Display the PSY values For verification
+//////            for (i = 0; i < sd.Length; i++)
+//////            {
+//////                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", K= " + Math.Round(dblKValues[i], 2) + ", D= " + Math.Round(dblDValues[i], 2));
+//////            }
+
+//////            return (dblKValues, dblDValues);
+//////        }

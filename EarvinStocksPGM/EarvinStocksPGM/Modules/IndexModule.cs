@@ -87,7 +87,7 @@ namespace EarvinStocksPGM.Modules
             dblLRSI = CalculateRSI(sd, LRSIDay);    // default 20
             (dblK, dblD) = CalculateKD(sd, KDay);   // default 9
             (dblDIF, dblMACD, dblOSC) = CalculateMACD(sd, DIFDay, MACDDay, OSCDay); // default 12, 26, 9
-            dblSectors = CalculateSectors(sd.Length, MAP_MAP20, MAP_MAP60);
+            dblSectors = CalculateSectors(sd, MAP_MAP20, MAP_MAP60);
 
             for (int i = 0; i < sd.Length; i++)
             {
@@ -472,16 +472,23 @@ namespace EarvinStocksPGM.Modules
             return (difValues, macdValues, oscValues);
         }
 
-        public static double[] CalculateSectors(int counts, int index1, int index2)
+        public static double[] CalculateSectors(StockData[] sd, int index1, int index2)
         {
             //int i = 0;
-            double[] dblValues = new double[counts];
-            double[] dblIndex1 = GetIndexValues(counts, index1);    // Short-Index
-            double[] dblIndex2 = GetIndexValues(counts, index2);    // Long-Index
+            double[] dblValues = new double[sd.Length];
+            //double[] dblIndex1 = GetIndexValues(idx, index1);    // Short-Index
+            //double[] dblIndex2 = GetIndexValues(idx, index2);    // Long-Index
 
-            Debug.WriteLine("sd.Length= " + counts);
+            double[] dblIndex1 = new double[sd.Length];
+            double[] dblIndex2 = new double[sd.Length];
 
-            for (int i = 1; i < counts; i++)
+
+            dblIndex1 = CalculateAverage(sd, 20, true);
+            dblIndex2 = CalculateAverage(sd, 60, true);
+
+            Debug.WriteLine("[CalculateSectors(...)] sd.Length= " + sd.Length);
+
+            for (int i = 1; i < sd.Length; i++)
             {
                 // map_s >= map_l && map_s < map_l ==> low-signal
                 // map_s <= map_l && map_s > map_l ==> high-signal
@@ -493,24 +500,10 @@ namespace EarvinStocksPGM.Modules
                     dblValues[i] = 0;
             }
 
-            //// 設定signal值
-            //int i = 0;
-            //while (i < counts)
-            //{
-            //    if (i < 50)
-            //        dblValues[i] = 1.0;
-            //    else if (i < 100)
-            //        dblValues[i] = -1.0;
-            //    else
-            //        dblValues[i] = 1.0;
-
-            //    i++;
-            //}
-
             // DEBUG : Display the PSY values for verification
-            for (int j = 0; j < counts; j++)
+            for (int j = 0; j < sd.Length; j++)
             {
-                Debug.WriteLine("SECTORS= " + dblValues[j]);
+                Debug.WriteLine("[CalculateSectors(...)] SECTORS= " + dblValues[j]);
             }
             return dblValues;
             /*
@@ -524,21 +517,31 @@ namespace EarvinStocksPGM.Modules
                             signalFlag = LOW_SIGNAL   ' 低點
                         End If
                         .sngSector = signalFlag
-
              */
         }
 
 
-        public static double[] GetIndexValues(int counts, int index)
+
+
+        public static double[] GetIndexValues(IndexData[] idx, int index)
         {
-            double[] dblValues = new double[counts];
+            double[] values = new double[idx.Length];
 
-
-
-            return dblValues;
+            for (int i = 0; i < idx.Length; i++)
+            {
+                values[i] = index switch
+                {
+                    MAP_MAP5 => idx[i].MAP5,
+                    MAP_MAP10 => idx[i].MAP10,
+                    MAP_MAP20 => idx[i].MAP20,
+                    MAP_MAP60 => idx[i].MAP60,
+                    MAP_MAP120 => idx[i].MAP120,
+                    MAP_MAP240 => idx[i].MAP240,
+                    _ => 0
+                };
+            }
+            return values;
         }
-
-
 
         //--- Write Here ---//
 
@@ -548,173 +551,42 @@ namespace EarvinStocksPGM.Modules
     }
 }
 
+/*
 
+        public static double[] GetIndexValues(int counts, IndexData[] idx, int index)
+        {
+            double[] dblValues = new double[counts];
 
+            switch(index)
+            {
+                case MAP_MAP5:
+                    for (int i = 0; i < idx.Length; i++)
+                        dblValues[i] = idx[i].MAP5;
+                    break;
+                case MAP_MAP10:
+                    for (int i = 0; i < idx.Length; i++)
+                        dblValues[i] = idx[i].MAP10;
+                    break;
+                case MAP_MAP20:
+                    for (int i = 0; i < idx.Length; i++)
+                        dblValues[i] = idx[i].MAP20;
+                    break;
+                case MAP_MAP60:
+                    for (int i = 0; i < idx.Length; i++)
+                        dblValues[i] = idx[i].MAP60;
+                    break;
+                case MAP_MAP120:
+                    for (int i = 0; i < idx.Length; i++)
+                        dblValues[i] = idx[i].MAP120;
+                    break;
+                case MAP_MAP240:
+                    for (int i = 0; i < idx.Length; i++)
+                        dblValues[i] = idx[i].MAP240;
+                    break;
+                default:
+                    break;
+            }
+            return dblValues;
+        }
 
-
-
-
-
-//////// 唸書時的 MACD 版本 (未完成)
-//////public static (double[] DIF, double[] MACD, double[] DIF_MACD) CalculateMACD(StockData[] sd,
-//////    int period = 12, int ema_s = 12, int ema_l = 26, int ema = 5)
-//////{
-//////    double sngEMA_S;
-//////    double sngEMA_L;
-//////    double sngPreEMA_S;
-//////    double sngPreEMA_L;
-//////    double sngPreMACD;
-//////    double sngMACD;
-//////    double sngDIF;
-//////    double sngDIF_MACD;
-//////    double sngDI;
-//////    int i;
-//////    int j;
-
-//////    double[] difValues = new double[sd.Length];
-//////    double[] macdValues = new double[sd.Length];
-//////    double[] dif_macdValues = new double[sd.Length];
-
-//////    sngPreEMA_S = sd[0].EndPrice;
-//////    sngPreEMA_L = sd[0].EndPrice;
-//////    sngPreMACD = 0;
-//////    j = 1;
-
-//////    while (j <= sd.Length) 
-//////    {
-//////        sngDI = (sd[j].HighPrice + sd[j].LowPrice + sd[j].EndPrice * 2) / 4;
-//////        sngEMA_S = sngPreEMA_S + (2 * (sngDI - sngPreEMA_S) / (1 + ema_s));
-//////        sngEMA_L = sngPreEMA_L + (2 * (sngDI - sngPreEMA_L) / (1 + ema_l));
-//////        sngDIF = sngEMA_S - sngEMA_L;
-//////        //sngMACD = sngPreMACD + (2 * (sngDIF - sngPreMACD) / (1 + period));
-//////        sngMACD = sngPreMACD + (2 * (sngDIF - sngPreMACD) / (1 + period));
-//////        sngDIF_MACD = sngDIF - sngMACD;
-
-//////        difValues[j] = sngDIF;
-//////        macdValues[j] = sngMACD;
-//////        dif_macdValues[j] = sngDIF_MACD;
-
-//////        sngPreEMA_S = sngEMA_S;
-//////        sngPreEMA_L = sngEMA_L;
-//////        sngPreMACD = sngMACD;
-//////        j++;
-//////    }
-
-//////    return (difValues, macdValues, dif_macdValues);
-//////    /*
-
-//////        sngPreEMA_S = udtStock(1).sngEndprice
-//////        sngPreEMA_L = udtStock(1).sngEndprice
-//////        sngPreMACD = 0
-//////        j = 1
-//////        While j <= intStockNo
-//////            sngDI = (udtStock(j).sngHighPrice + udtStock(j).sngLowPrice + udtStock(j).sngEndprice * 2) / 4
-//////            sngEMA_S = sngPreEMA_S + (2 * (sngDI - sngPreEMA_S) / (1 + intSEMANo))
-//////            sngEMA_L = sngPreEMA_L + (2 * (sngDI - sngPreEMA_L) / (1 + intLEMANo))
-//////            sngDIF = sngEMA_S - sngEMA_L
-//////            sngMACD = sngPreMACD + (2 * (sngDIF - sngPreMACD) / (1 + intMACDNo))
-//////            sngDIF_MACD = sngDIF - sngMACD
-
-//////            udtIndex(j).sngDIF = sngDIF
-//////            udtIndex(j).sngMACD = sngMACD
-//////            udtIndex(j).sngDIF_MACD = sngDIF_MACD
-
-//////            sngPreEMA_S = sngEMA_S
-//////            sngPreEMA_L = sngEMA_L
-//////            sngPreMACD = sngMACD
-//////            j = j + 1
-//////        Wend
-
-
-//////     * 標準 MACD 的寫法應該類似
-//////        for (int i = 1; i < sd.Length; i++)
-//////        {
-//////            double close = sd[i].EndPrice;
-
-//////            ema12 = ema12 + (close - ema12) * 2.0 / 13.0;
-//////            ema26 = ema26 + (close - ema26) * 2.0 / 27.0;
-
-//////            dif = ema12 - ema26;
-
-//////            dea = dea + (dif - dea) * 2.0 / 10.0;
-
-//////            hist = dif - dea;
-
-//////            difValues[i] = dif;
-//////            macdValues[i] = dea;
-//////            dif_macdValues[i] = hist;
-//////        }
-//////    *-------------------------------
-
-
-//////     */
-//////}
-
-
-
-
-
-
-//////        public static (double[] K, double[] D) CalculateKD(StockData[] sd, int intDayNo)
-//////        {
-//////            int i = 0, j = 0;
-//////            double dblPrevK = 50, dblPrevD = 50, dblRsv = 0;
-//////            double dblK = 0, dblD = 0;
-//////            double dblMax = 0, dblMin = 0;
-//////            double[] dblKValues = new double[sd.Length];
-//////            double[] dblDValues = new double[sd.Length];
-
-//////            while (i < sd.Length)
-//////            {
-//////                dblMax = double.MinValue;
-//////                dblMin = double.MaxValue;
-//////                if (i < (intDayNo - 1))
-//////                {
-//////                    dblKValues[i] = double.NaN;
-//////                    dblDValues[i] = double.NaN;
-//////                    i++;
-//////                    continue;
-//////                }
-//////                else
-//////                {
-////////                    for (j = i; j > (i - intDayNo); j--)
-//////                    for (j = i - intDayNo + 1; j <= i; j++)
-//////                    {
-//////                        if (dblMax < sd[j].HighPrice)
-//////                            dblMax = sd[j].HighPrice;
-//////                        if (dblMin > sd[j].LowPrice)
-//////                            dblMin = sd[j].LowPrice;
-//////                    }
-//////                }
-
-//////                if (dblMax != dblMin)
-//////                    dblRsv = (sd[i].EndPrice - dblMin) / (dblMax - dblMin) * 100;
-//////                else
-//////                    dblRsv = 50;
-
-//////                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", dblMax= " + Math.Round(dblMax, 2) +
-//////                    ", dblMin= " + Math.Round(dblMin, 2) + ", EndPrice= " + sd[i].EndPrice + ", dblRsv= " + dblRsv);
-//////                dblK = dblPrevK * 2 / 3 + dblRsv / 3;
-//////                dblD = dblPrevD * 2 / 3 + dblK / 3;
-//////                Debug.WriteLine("dblPrevK= " + dblPrevK + ", dblPrevD= " + dblPrevD + ", dblK= " + dblK + ", dblD= " + dblD);
-
-//////                if (i < (intDayNo - 1))
-//////                {
-//////                    dblKValues[i] = double.NaN;
-//////                    dblDValues[i] = double.NaN;
-//////                } 
-//////                else
-//////                {
-//////                    dblKValues[i] = dblK;
-//////                    dblDValues[i] = dblD;
-//////                }
-//////                i++;
-//////            }
-//////            // DEBUG : Display the PSY values for verification
-//////            for (i = 0; i < sd.Length; i++)
-//////            {
-//////                Debug.WriteLine("sd[" + i + "].Date= " + sd[i].TradeDate + ", K= " + Math.Round(dblKValues[i], 2) + ", D= " + Math.Round(dblDValues[i], 2));
-//////            }
-
-//////            return (dblKValues, dblDValues);
-//////        }
+ */
