@@ -87,7 +87,6 @@ namespace EarvinStocksPGM.Modules
             dblLRSI = CalculateRSI(sd, LRSIDay);    // default 20
             (dblK, dblD) = CalculateKD(sd, KDay);   // default 9
             (dblDIF, dblMACD, dblOSC) = CalculateMACD(sd, DIFDay, MACDDay, OSCDay); // default 12, 26, 9
-
             dblSectors = CalculateSectors(sd.Length, MAP_MAP20, MAP_MAP60);
 
             for (int i = 0; i < sd.Length; i++)
@@ -509,9 +508,9 @@ namespace EarvinStocksPGM.Modules
             //}
 
             // DEBUG : Display the PSY values for verification
-            for (i = 0; i < counts; i++)
+            for (int j = 0; j < counts; j++)
             {
-                Debug.WriteLine("SECTORS= " + dblValues[i]);
+                Debug.WriteLine("SECTORS= " + dblValues[j]);
             }
             return dblValues;
             /*
