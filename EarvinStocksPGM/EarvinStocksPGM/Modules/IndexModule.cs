@@ -475,23 +475,39 @@ namespace EarvinStocksPGM.Modules
 
         public static double[] CalculateSectors(int counts, int index1, int index2)
         {
-            int i = 0;
+            //int i = 0;
             double[] dblValues = new double[counts];
-            double[] dblIndex1 = GetIndexValues(counts, index1);
-            double[] dblIndex2 = GetIndexValues(counts, index2);
+            double[] dblIndex1 = GetIndexValues(counts, index1);    // Short-Index
+            double[] dblIndex2 = GetIndexValues(counts, index2);    // Long-Index
 
             Debug.WriteLine("sd.Length= " + counts);
-            while (i < counts)
-            {
-                if (i < 50)
-                    dblValues[i] = 1.0;
-                else if (i < 100)
-                    dblValues[i] = -1.0;
-                else
-                    dblValues[i] = 1.0;
 
-                i++;
+            for (int i = 1; i < counts; i++)
+            {
+                // map_s >= map_l && map_s < map_l ==> low-signal
+                // map_s <= map_l && map_s > map_l ==> high-signal
+                if (dblIndex1[i - 1] >= dblIndex2[i - 1] && dblIndex1[i] < dblIndex2[i])
+                    dblValues[i] = -1;
+                else if (dblIndex1[i - 1] <= dblIndex2[i - 1] && dblIndex1[i] > dblIndex2[i])
+                    dblValues[i] = 1;
+                else
+                    dblValues[i] = 0;
             }
+
+            //// 設定signal值
+            //int i = 0;
+            //while (i < counts)
+            //{
+            //    if (i < 50)
+            //        dblValues[i] = 1.0;
+            //    else if (i < 100)
+            //        dblValues[i] = -1.0;
+            //    else
+            //        dblValues[i] = 1.0;
+
+            //    i++;
+            //}
+
             // DEBUG : Display the PSY values for verification
             for (i = 0; i < counts; i++)
             {
