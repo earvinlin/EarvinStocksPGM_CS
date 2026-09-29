@@ -482,10 +482,10 @@ namespace EarvinStocksPGM
                             Chalk_MAP_CENTER_BAR(e.Graphics, i, FrameNum, GeneralModule.MAP_SECTORS);
                             break;
                         case GeneralModule.MAP_MARGIN_PURCHASE:
-                            Chalk_MAP_SINGLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_MARGIN_PURCHASE);
+                            Chalk_MAP_SINGLE_LINE_2(e.Graphics, i, FrameNum, GeneralModule.MAP_MARGIN_PURCHASE);
                             break;
                         case GeneralModule.MAP_SHORT_SELLING:
-                            Chalk_MAP_SINGLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_SHORT_SELLING);
+                            Chalk_MAP_SINGLE_LINE_2(e.Graphics, i, FrameNum, GeneralModule.MAP_SHORT_SELLING);
                             break;
                     }
                 }
@@ -753,6 +753,12 @@ namespace EarvinStocksPGM
 
 
 
+
+
+
+
+
+
         private void Chalk_MAP_VOLUME(Graphics g, int framePos, int frameNum)
         {
             // 邊界與參數安全檢查
@@ -911,7 +917,6 @@ namespace EarvinStocksPGM
             Debug.WriteLine("Chalk_MAP_BIAS() END!!!!!");
         }
 
-
         private void Chalk_MAP_SINGLE_LINE(Graphics g, int framePos, int frameNum, int mapType)
         {
             if (framePos <= 0 || framePos > frameNum || DisplayCount <= 0)
@@ -920,20 +925,6 @@ namespace EarvinStocksPGM
             float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;
             float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;
             float yDistance = yAxisHeight / 4f;
-
-            ////// 20260929 START <<NOT FINISHED!!!>>
-            ////// 取得最高/最低成交量
-            ////HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType);
-            ////double maxVol = highLowValues.highValue;
-            ////double minVol = highLowValues.lowValue;
-            ////double volRange = Math.Abs(maxVol - minVol);
-
-            ////if (volRange == 0) volRange = 1.0; // 防止除以零
-
-            ////float yDistance = yAxisLength / (float)volRange;
-            ////// 20260929 END
-
-
 
             // 繪製 0~100 指標常見的 25%, 50%, 75% 參考虛線與標籤
             using (Pen pen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
@@ -977,6 +968,82 @@ namespace EarvinStocksPGM
 
                 float xCoord = startX + (i * xWidth);
                 float yCoord = baseFrameY - (float)(values[dataIdx] * yHeight);
+                points[i] = new PointF(xCoord, yCoord);
+            }
+
+            // 繪製折線
+            using (Pen pen = new Pen(Color.Green, 1))
+            {
+                g.DrawLines(pen, points);
+            }
+        }
+
+        private void Chalk_MAP_SINGLE_LINE_2(Graphics g, int framePos, int frameNum, int mapType)
+        {
+            if (framePos <= 0 || framePos > frameNum || DisplayCount <= 0)
+                return;
+
+            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;
+            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;
+            //float yDistance = yAxisHeight / 4f;
+
+            // 取得最高/最低成交量
+            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType);
+            double maxValue = highLowValues.highValue;
+            double minValue = highLowValues.lowValue;
+            double theRange = Math.Abs(maxValue - minValue);
+
+            if (theRange == 0) theRange = 1.0; // 防止除以零
+
+            float yDistance = yAxisHeight / (float)theRange;
+
+            // 繪製指標 : 參考虛線與標籤
+            using (Pen pen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
+            using (System.Drawing.Font font = new System.Drawing.Font(this.Font.FontFamily, 6))
+            {
+                int aa = (int)yAxisHeight / 4;
+                for (int i = 1; i <= 3; i++)
+                {
+                    //float yPos = FrameLeftPoints[framePos].frameY - yDistance * i;
+                    float yPos = FrameLeftPoints[framePos].frameY - aa * i;
+                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, yPos);
+                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, yPos);
+                    g.DrawLine(pen, pl, pr);
+
+                    // 固定顯示 25, 50, 75 刻度（因總高為 100）
+                    int labelValue = (int) (maxValue - (theRange / 4) * i);
+                    g.DrawString(labelValue.ToString(), font, Brushes.Black, 10, yPos - 6);
+                }
+            }
+
+            // 獲取指標數據
+            double[] values = mapType switch
+            {
+                GeneralModule.MAP_WMS => IdxData.Select(d => d.WMS).ToArray(),
+                GeneralModule.MAP_PSY => IdxData.Select(d => d.PSY).ToArray(),
+                GeneralModule.MAP_SRSI => IdxData.Select(d => d.SRSI).ToArray(),
+                GeneralModule.MAP_MARGIN_PURCHASE => StkData.Select(d => d.MarginPurchase).ToArray(),
+                GeneralModule.MAP_SHORT_SELLING => StkData.Select(d => d.ShortSelling).ToArray(),
+                _ => new double[IdxData.Count()]
+            };
+
+            // 計算各數據點座標
+            PointF[] points = new PointF[DisplayCount];
+            float xWidth = xAxisLength / DisplayCount;
+            //float yHeight = yAxisHeight / 100f; // 100 分制轉換比率
+            float yHeight = yAxisHeight / (float)theRange;
+
+            float startX = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
+            float baseFrameY = FrameLeftPoints[framePos].frameY;
+
+            for (int i = 0; i < DisplayCount; i++)
+            {
+                int dataIdx = StartIndex + i;
+                if (dataIdx >= values.Length) break;
+
+                float xCoord = startX + (i * xWidth);
+                //float yCoord = baseFrameY - (float)(values[dataIdx] * yHeight);
+                float yCoord = baseFrameY - (float)((values[dataIdx] -minValue) * yHeight);
                 points[i] = new PointF(xCoord, yCoord);
             }
 
@@ -1665,3 +1732,86 @@ namespace EarvinStocksPGM
 //////    }
 //////    Debug.WriteLine("Chalk_MAP_VOLUME() END!!!!!");
 //////}        
+
+
+
+
+/****************************************************************************************
+private void Chalk_MAP_SINGLE_LINE(Graphics g, int framePos, int frameNum, int mapType)
+{
+    if (framePos <= 0 || framePos > frameNum || DisplayCount <= 0)
+        return;
+
+    float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;
+    float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;
+    float yDistance = yAxisHeight / 4f;
+
+    ////// 20260929 START <<NOT FINISHED!!!>>
+    ////// 取得最高/最低成交量
+    ////HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType);
+    ////double maxVol = highLowValues.highValue;
+    ////double minVol = highLowValues.lowValue;
+    ////double volRange = Math.Abs(maxVol - minVol);
+
+    ////if (volRange == 0) volRange = 1.0; // 防止除以零
+
+    ////float yDistance = yAxisLength / (float)volRange;
+    ////// 20260929 END
+
+
+
+    // 繪製 0~100 指標常見的 25%, 50%, 75% 參考虛線與標籤
+    using (Pen pen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
+    using (System.Drawing.Font font = new System.Drawing.Font(this.Font.FontFamily, 6))
+    {
+        for (int i = 1; i <= 3; i++)
+        {
+            float yPos = FrameLeftPoints[framePos].frameY - yDistance * i;
+            PointF pl = new PointF(FrameLeftPoints[framePos].frameX, yPos);
+            PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, yPos);
+            g.DrawLine(pen, pl, pr);
+
+            // 固定顯示 25, 50, 75 刻度（因總高為 100）
+            int labelValue = i * 25;
+            g.DrawString(labelValue.ToString(), font, Brushes.Black, 10, yPos - 6);
+        }
+    }
+
+    // 獲取指標數據
+    double[] values = mapType switch
+    {
+        GeneralModule.MAP_WMS => IdxData.Select(d => d.WMS).ToArray(),
+        GeneralModule.MAP_PSY => IdxData.Select(d => d.PSY).ToArray(),
+        GeneralModule.MAP_SRSI => IdxData.Select(d => d.SRSI).ToArray(),
+        GeneralModule.MAP_MARGIN_PURCHASE => StkData.Select(d => d.MarginPurchase).ToArray(),
+        GeneralModule.MAP_SHORT_SELLING => StkData.Select(d => d.ShortSelling).ToArray(),
+        _ => new double[IdxData.Count()]
+    };
+
+    // 計算各數據點座標
+    PointF[] points = new PointF[DisplayCount];
+    float xWidth = xAxisLength / DisplayCount;
+    float yHeight = yAxisHeight / 100f; // 100 分制轉換比率
+    float startX = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
+    float baseFrameY = FrameLeftPoints[framePos].frameY;
+
+    for (int i = 0; i < DisplayCount; i++)
+    {
+        int dataIdx = StartIndex + i;
+        if (dataIdx >= values.Length) break;
+
+        float xCoord = startX + (i * xWidth);
+        float yCoord = baseFrameY - (float)(values[dataIdx] * yHeight);
+        points[i] = new PointF(xCoord, yCoord);
+    }
+
+    // 繪製折線
+    using (Pen pen = new Pen(Color.Green, 1))
+    {
+        g.DrawLines(pen, points);
+    }
+}
+*****************************************************************************************/
+
+
+
