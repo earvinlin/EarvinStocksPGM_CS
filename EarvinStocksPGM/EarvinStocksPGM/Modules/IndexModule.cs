@@ -87,7 +87,7 @@ namespace EarvinStocksPGM.Modules
             dblLRSI = CalculateRSI(sd, LRSIDay);    // default 20
             (dblK, dblD) = CalculateKD(sd, KDay);   // default 9
             (dblDIF, dblMACD, dblOSC) = CalculateMACD(sd, DIFDay, MACDDay, OSCDay); // default 12, 26, 9
-            dblSectors = CalculateSectors(sd, MAP_MAP20, MAP_MAP60);
+            dblSectors = CalculateMAPSectors(sd, 20, 60);
 
             for (int i = 0; i < sd.Length; i++)
             {
@@ -408,8 +408,7 @@ namespace EarvinStocksPGM.Modules
         }
 
 
-        public static (double[] DIF, double[] MACD, double[] OSC) CalculateMACD(
-        StockData[] sd, int emaShort = 12, int emaLong = 26,int emaSignal = 9)
+        public static (double[] DIF, double[] MACD, double[] OSC) CalculateMACD(StockData[] sd, int emaShort = 12, int emaLong = 26,int emaSignal = 9)
         {
             if (sd == null)
                 throw new ArgumentNullException(nameof(sd));
@@ -458,8 +457,8 @@ namespace EarvinStocksPGM.Modules
                 double osc = dif - macd;
 
                 difValues[i] = dif;
-                macdValues[i] = macd;     // MACD
-                oscValues[i] = osc;   // OSC (MACD Bar)
+                macdValues[i] = macd;   // MACD
+                oscValues[i] = osc;     // OSC (MACD Bar)
             }
             //// DEBUG : Display the MACD values for verification
             //for (int i = 0; i < sd.Length; i++)
@@ -472,56 +471,40 @@ namespace EarvinStocksPGM.Modules
             return (difValues, macdValues, oscValues);
         }
 
-        public static double[] CalculateSectors(StockData[] sd, int index1, int index2)
+        public static double[] CalculateMAPSectors(StockData[] sd, int idx1Day, int idx2Day)
         {
-            //int i = 0;
+            int intHighSec = 1;
+            int intLowSec = -1;
             double[] dblValues = new double[sd.Length];
-            //double[] dblIndex1 = GetIndexValues(idx, index1);    // Short-Index
-            //double[] dblIndex2 = GetIndexValues(idx, index2);    // Long-Index
+            double[] dblIdx1Values = new double[sd.Length]; // Short-Index
+            double[] dblIdx2Values = new double[sd.Length]; // Long-Index
 
-            double[] dblIndex1 = new double[sd.Length];
-            double[] dblIndex2 = new double[sd.Length];
+            dblIdx1Values = CalculateAverage(sd, idx1Day, true);
+            dblIdx2Values = CalculateAverage(sd, idx2Day, true);
 
-
-            dblIndex1 = CalculateAverage(sd, 20, true);
-            dblIndex2 = CalculateAverage(sd, 60, true);
-
-            Debug.WriteLine("[CalculateSectors(...)] sd.Length= " + sd.Length);
+            Debug.WriteLine("[CalculateMAPSectors(...)] sd.Length= " + sd.Length);
 
             for (int i = 1; i < sd.Length; i++)
             {
                 // map_s >= map_l && map_s < map_l ==> low-signal
                 // map_s <= map_l && map_s > map_l ==> high-signal
-                if (dblIndex1[i - 1] >= dblIndex2[i - 1] && dblIndex1[i] < dblIndex2[i])
-                    dblValues[i] = -1;
-                else if (dblIndex1[i - 1] <= dblIndex2[i - 1] && dblIndex1[i] > dblIndex2[i])
-                    dblValues[i] = 1;
+                if (dblIdx1Values[i - 1] >= dblIdx2Values[i - 1] && dblIdx1Values[i] < dblIdx2Values[i])
+                    dblValues[i] = intLowSec;
+                else if (dblIdx1Values[i - 1] <= dblIdx2Values[i - 1] && dblIdx1Values[i] > dblIdx2Values[i])
+                    dblValues[i] = intHighSec;
                 else
-                    dblValues[i] = 0;
+                {
+                    dblValues[i] = dblValues[i-1];
+                }
             }
 
-            // DEBUG : Display the PSY values for verification
+            // DEBUG : Display the SECTOR values for verification
             for (int j = 0; j < sd.Length; j++)
             {
-                Debug.WriteLine("[CalculateSectors(...)] SECTORS= " + dblValues[j]);
+                Debug.WriteLine("[CalculateMAPSectors(...)] SECTORS= " + dblValues[j]);
             }
             return dblValues;
-            /*
-                         '--------------------------------------------------------------------
-                        '* 記錄該點是屬於高點或低點
-                        '--------------------------------------------------------------------
-                        If (nowIndex1 > nowIndex2) Or _
-                            ((nowIndex1 = nowIndex2) And (prevIndex1 < prevIndex2)) Then
-                            signalFlag = HIGH_SIGNAL     ' 高點
-                        Else
-                            signalFlag = LOW_SIGNAL   ' 低點
-                        End If
-                        .sngSector = signalFlag
-             */
         }
-
-
-
 
         public static double[] GetIndexValues(IndexData[] idx, int index)
         {
