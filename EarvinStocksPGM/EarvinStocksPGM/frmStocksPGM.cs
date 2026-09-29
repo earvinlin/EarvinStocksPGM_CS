@@ -84,11 +84,11 @@ private void DrawMAPLine(Graphics g, Pen pen, float xPrev, float xCurr,
 //--------------------------------------------------------------------------------------------------------------//
 
 
-private void cboStocks_SelectedIndexChanged(object sender, EventArgs e)
+private void cboSelectStock_SelectedIndexChanged(object sender, EventArgs e)
 {
     StartIndex = 0;
     // 取得要顯示的股票資料
-    StkData = StockModule.GetStockData(cboStocks.Text);
+    StkData = StockModule.GetStockData(cboSelectStock.Text);
     IdxData = IndexModule.GetIndexData(StkData);
 
     this.Invalidate();
@@ -120,8 +120,25 @@ private void frmStocksPGM_Load(object sender, EventArgs e)
     pnlStocksBar.Width = this.Width;
     FrameNum = int.Parse(cboFrameNum.Text);
 
+    // (20260929) 調整panel上面元件的高度 -- 不確定是否是比較好的做法…因為有時候panel上面的元件高度會跑掉
+    lblFrameNum.Top = (pnlStocksBar.ClientSize.Height - lblFrameNum.Height) / 2;
+    cboFrameNum.Top = (pnlStocksBar.ClientSize.Height - cboFrameNum.Height) / 2;
+    btnFocus.Top = (pnlStocksBar.ClientSize.Height - btnFocus.Height) / 2;
+    cboStocksFrom.Top = (pnlStocksBar.ClientSize.Height - cboStocksFrom.Height) / 2;
+    cboStocksType.Top = (pnlStocksBar.ClientSize.Height - cboStocksType.Height) / 2;
+    lblSelectStock.Top = (pnlStocksBar.ClientSize.Height - lblSelectStock.Height) / 2;
+    cboSelectStock.Top = (pnlStocksBar.ClientSize.Height - cboSelectStock.Height) / 2;
+    btnZoomIn.Top = (pnlStocksBar.ClientSize.Height - btnZoomIn.Height) / 2;
+    btnZoomOut.Top = (pnlStocksBar.ClientSize.Height - btnZoomOut.Height) / 2;
+    btnFore3.Top = (pnlStocksBar.ClientSize.Height - btnFore3.Height) / 2;
+    btnFore2.Top = (pnlStocksBar.ClientSize.Height - btnFore2.Height) / 2;
+    btnFore1.Top = (pnlStocksBar.ClientSize.Height - btnFore1.Height) / 2;
+    btnBack1.Top = (pnlStocksBar.ClientSize.Height - btnBack1.Height) / 2;
+    btnBack2.Top = (pnlStocksBar.ClientSize.Height - btnBack2.Height) / 2;
+    btnBack3.Top = (pnlStocksBar.ClientSize.Height - btnBack3.Height) / 2;
+
     // 取得要顯示的股票資料
-    StkData = StockModule.GetStockData(cboStocks.Text);
+    StkData = StockModule.GetStockData(cboSelectStock.Text);
     IdxData = IndexModule.GetIndexData(StkData);
 
     // 新增顯示股票資訊的標籤
@@ -133,7 +150,8 @@ private void frmStocksPGM_Load(object sender, EventArgs e)
         Location = new Point(10, mnuStocksList.Size.Height + pnlStocksBar.Size.Height)
     };
     this.Controls.Add(lblStokInfo);
-
+    
+    // 20260929 (Wait to Improve, 應該改用string顯示，如此就不需要動態產生label元件)
     // 新增 Label 元件(預設建立 STOCKYM_CNTS 個備用)
     for (int i = 0; i < STOCKYM_CNTS; i++)
     {
