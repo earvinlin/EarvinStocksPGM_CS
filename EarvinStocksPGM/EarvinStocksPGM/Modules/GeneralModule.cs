@@ -63,6 +63,8 @@ namespace EarvinStocksPGM.Modules
         public const int MAP_DIF_MACD = 13;
         public const int MAP_MACD = 14;
         public const int MAP_SECTORS = 15;
+        public const int MAP_MARGIN_PURCHASE = 100;
+        public const int MAP_SHORT_SELLING = 101;
 
         //---------------------------//
         //-- Keep the Index's Days --//
@@ -172,6 +174,26 @@ namespace EarvinStocksPGM.Modules
                 case MAP_SECTORS:
                     highValue = 1;
                     lowValue = -1;
+                    break;
+
+                case MAP_MARGIN_PURCHASE:
+                    for (int i = startIndex; i < (startIndex + displayCount); i++)
+                    {
+                        if (highValue < sd[i].MarginPurchase)
+                            highValue = sd[i].MarginPurchase;
+                        if (lowValue > sd[i].MarginPurchase)
+                            lowValue = sd[i].MarginPurchase;
+                    }
+                    break;
+
+                case MAP_SHORT_SELLING:
+                    for (int i = startIndex; i < (startIndex + displayCount); i++)
+                    {
+                        if (highValue < sd[i].ShortSelling)
+                            highValue = sd[i].ShortSelling;
+                        if (lowValue > sd[i].ShortSelling)
+                            lowValue = sd[i].ShortSelling;
+                    }
                     break;
             }
             HighLowValues values = new HighLowValues();
