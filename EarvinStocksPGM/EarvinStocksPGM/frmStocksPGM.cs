@@ -793,6 +793,7 @@ namespace EarvinStocksPGM
                         g.DrawLine(dashPen, pl, pr);
 
                         double labelVol = minVol + (stepVol * i);
+                        // "N0" : 1234 → 1,234，且不顯示小數
                         g.DrawString(labelVol.ToString("N0"), font, Brushes.Black, 10, (int)yPos - 6);
                     }
                 }
@@ -920,17 +921,17 @@ namespace EarvinStocksPGM
             float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;
             float yDistance = yAxisHeight / 4f;
 
-            //////// 20260929 START <<NOT FINISHED!!!>>
-            //////// 取得最高/最低成交量
-            //////HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, GeneralModule.MAP_VOLUME);
-            //////double maxVol = highLowValues.highValue;
-            //////double minVol = highLowValues.lowValue;
-            //////double volRange = Math.Abs(maxVol - minVol);
+            ////// 20260929 START <<NOT FINISHED!!!>>
+            ////// 取得最高/最低成交量
+            ////HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType);
+            ////double maxVol = highLowValues.highValue;
+            ////double minVol = highLowValues.lowValue;
+            ////double volRange = Math.Abs(maxVol - minVol);
 
-            //////if (volRange == 0) volRange = 1.0; // 防止除以零
+            ////if (volRange == 0) volRange = 1.0; // 防止除以零
 
-            //////float yDistance = yAxisLength / (float)volRange;
-            //////// 20260929 END
+            ////float yDistance = yAxisLength / (float)volRange;
+            ////// 20260929 END
 
 
 
