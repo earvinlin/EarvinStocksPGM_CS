@@ -444,10 +444,14 @@ private void frmStocksPGM_Paint(object sender, PaintEventArgs e)
             float y1 = FrameLeftPoints[FrameNum].frameY;
             //Pen pen = new Pen(Color.Black, 1);
             g.DrawLine(pen, x0, y0, x1, y1);
+            // (20260929!!!) WAIT TO IMPROVE, 改以String方式處理
             // 顯示交易日期(年月)
             string strnum = StkData[i].TradeDate.ToString();
-            lblStockYM[k].Text = strnum.Substring(0, strnum.Length - 2);
-            lblStockYM[k].Location = new System.Drawing.Point((int)(x0 - (lblStockYM[k].Size.Width / 2)), (int)(y1 + 5));
+            //lblStockYM[k].Text = strnum.Substring(0, strnum.Length - 2);
+            //lblStockYM[k].Location = new System.Drawing.Point((int)(x0 - (lblStockYM[k].Size.Width / 2)), (int)(y1 + 5));
+
+            g.DrawString(strnum.Substring(0, strnum.Length - 2), new System.Drawing.Font(this.Font.FontFamily, 6), Brushes.Black, (int)(x0 - (lblStockYM[k].Size.Width / 2)), (int)(y1 + 5));
+
             k = k + 1;
         }
         prevNum = nextNum;
