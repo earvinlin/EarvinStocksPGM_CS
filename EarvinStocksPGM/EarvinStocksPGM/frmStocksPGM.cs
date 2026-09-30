@@ -454,7 +454,8 @@ namespace EarvinStocksPGM
                             break;
                         case GeneralModule.MAP_WMS:
                             //Chalk_MAP_WMS(e.Graphics, i, FrameNum);
-                            Chalk_MAP_SINGLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_WMS);
+                            ////Chalk_MAP_SINGLE_LINE(e.Graphics, i, FrameNum, GeneralModule.MAP_WMS);
+                            Chalk_MAP_SINGLE_LINE_2(e.Graphics, i, FrameNum, GeneralModule.MAP_WMS);
                             break;
                         case GeneralModule.MAP_PSY:
                             //Chalk_MAP_PSY(e.Graphics, i, FrameNum);
@@ -984,81 +985,89 @@ namespace EarvinStocksPGM
             }
         }
 
-        private void Chalk_MAP_SINGLE_LINE_2(Graphics g, int framePos, int frameNum, int mapType)
-        {
-            if (framePos <= 0 || framePos > frameNum || DisplayCount <= 0)
-                return;
+        ////private void Chalk_MAP_SINGLE_LINE_2(Graphics g, int framePos, int frameNum, int mapType)
+        ////{
+        ////    if (framePos <= 0 || framePos > frameNum || DisplayCount <= 0)
+        ////        return;
 
-            float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;
-            float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;
-            //float yDistance = yAxisHeight / 4f;
+        ////    // 指定 Frame's 長度(xAxisLength)與高度(yAxisHeight)
+        ////    float xAxisLength = FrameMiddlePoints[framePos].frameX - FrameLeftPoints[framePos].frameX;
+        ////    float yAxisHeight = FrameLeftPoints[framePos].frameY - FrameLeftPoints[framePos - 1].frameY;
 
-            // 取得最高/最低成交量
-            HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType);
-            double maxValue = highLowValues.highValue;
-            double minValue = highLowValues.lowValue;
-            double theRange = Math.Abs(maxValue - minValue);
+        ////    // 取得要顯示資料之最高/最低成交量
+        ////    HighLowValues highLowValues = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType);
+        ////    double maxValue = highLowValues.highValue;
+        ////    double minValue = highLowValues.lowValue;
+        ////    double classWidth = Math.Abs(maxValue - minValue);  // 組距 (最大值 - 最小值)
 
-            if (theRange == 0) theRange = 1.0; // 防止除以零
+        ////    if (classWidth == 0) classWidth = 1.0; // 防止除以零
 
-            float yDistance = yAxisHeight / (float)theRange;
+        ////    float heightPerPoint = yAxisHeight / (float) classWidth;
 
-            // 繪製指標 : 參考虛線與標籤
-            using (Pen pen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
-            using (System.Drawing.Font font = new System.Drawing.Font(this.Font.FontFamily, 6))
-            {
-                int aa = (int)yAxisHeight / 4;
-                for (int i = 1; i <= 3; i++)
-                {
-                    //float yPos = FrameLeftPoints[framePos].frameY - yDistance * i;
-                    float yPos = FrameLeftPoints[framePos].frameY - aa * i;
-                    PointF pl = new PointF(FrameLeftPoints[framePos].frameX, yPos);
-                    PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, yPos);
-                    g.DrawLine(pen, pl, pr);
+        ////    // 繪製指標 : 參考虛線與標籤
+        ////    using (Pen pen = new Pen(Color.Black, 1) { DashStyle = DashStyle.Dash, DashPattern = new float[] { 7, 3 } })
+        ////    using (System.Drawing.Font font = new System.Drawing.Font(this.Font.FontFamily, 6))
+        ////    {
+        ////        int quarterHeight = (int) yAxisHeight / 4;
 
-                    // 固定顯示 25, 50, 75 刻度（因總高為 100）
-                    int labelValue = (int) (maxValue - (theRange / 4) * (4-i));
-                    g.DrawString(labelValue.ToString(), font, Brushes.Black, 10, yPos - 6);
-                }
-            }
+        ////        // 在 Frame 的最左側顯示數值
+        ////        float yCoord = FrameLeftPoints[framePos].frameY;
+        ////        int labelValue = (int)(minValue);
+        ////        g.DrawString(labelValue.ToString(), font, Brushes.Black, 10, yCoord - 6);
 
-            // 獲取指標數據
-            double[] values = mapType switch
-            {
-                GeneralModule.MAP_WMS => IdxData.Select(d => d.WMS).ToArray(),
-                GeneralModule.MAP_PSY => IdxData.Select(d => d.PSY).ToArray(),
-                GeneralModule.MAP_SRSI => IdxData.Select(d => d.SRSI).ToArray(),
-                GeneralModule.MAP_MARGIN_PURCHASE => StkData.Select(d => d.MarginPurchase).ToArray(),
-                GeneralModule.MAP_SHORT_SELLING => StkData.Select(d => d.ShortSelling).ToArray(),
-                _ => new double[IdxData.Count()]
-            };
+        ////        for (int i = 1; i <= 3; i++)
+        ////        {
+        ////            yCoord = FrameLeftPoints[framePos].frameY - quarterHeight * i;
+        ////            PointF pl = new PointF(FrameLeftPoints[framePos].frameX, yCoord);
+        ////            PointF pr = new PointF(FrameMiddlePoints[framePos].frameX, yCoord);
+        ////            g.DrawLine(pen, pl, pr);
 
-            // 計算各數據點座標
-            PointF[] points = new PointF[DisplayCount];
-            float xWidth = xAxisLength / DisplayCount;
-            //float yHeight = yAxisHeight / 100f; // 100 分制轉換比率
-            float yHeight = yAxisHeight / (float)theRange;
+        ////            // 在 Frame 的最左側顯示數值
+        ////            labelValue = (int) (maxValue - (classWidth / 4) * (4 - i));
+        ////            g.DrawString(labelValue.ToString(), font, Brushes.Black, 10, yCoord - 6);
+        ////        }
+        ////        // 在 Frame 的最左側顯示數值
+        ////        yCoord = FrameLeftPoints[framePos].frameY - quarterHeight * 4;
+        ////        labelValue = (int)(maxValue);
+        ////        g.DrawString(labelValue.ToString(), font, Brushes.Black, 10, yCoord);
+        ////    }
 
-            float startX = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
-            float baseFrameY = FrameLeftPoints[framePos].frameY;
+        ////    // 獲取指標數據
+        ////    double[] values = mapType switch
+        ////    {
+        ////        GeneralModule.MAP_WMS => IdxData.Select(d => d.WMS).ToArray(),
+        ////        GeneralModule.MAP_PSY => IdxData.Select(d => d.PSY).ToArray(),
+        ////        GeneralModule.MAP_SRSI => IdxData.Select(d => d.SRSI).ToArray(),
+        ////        GeneralModule.MAP_MARGIN_PURCHASE => StkData.Select(d => d.MarginPurchase).ToArray(),
+        ////        GeneralModule.MAP_SHORT_SELLING => StkData.Select(d => d.ShortSelling).ToArray(),
+        ////        _ => new double[IdxData.Count()]
+        ////    };
 
-            for (int i = 0; i < DisplayCount; i++)
-            {
-                int dataIdx = StartIndex + i;
-                if (dataIdx >= values.Length) break;
+        ////    // 計算各數據點座標
+        ////    PointF[] points = new PointF[DisplayCount];
+        ////    float xWidth = xAxisLength / DisplayCount;
+        ////    //float yHeight = yAxisHeight / 100f; // 100 分制轉換比率
+        ////    float yHeight = yAxisHeight / (float) classWidth;
 
-                float xCoord = startX + (i * xWidth);
-                //float yCoord = baseFrameY - (float)(values[dataIdx] * yHeight);
-                float yCoord = baseFrameY - (float)((values[dataIdx] -minValue) * yHeight);
-                points[i] = new PointF(xCoord, yCoord);
-            }
+        ////    float startX = FrameLeftPoints[framePos].frameX + (xWidth / 2f);
+        ////    float baseFrameY = FrameLeftPoints[framePos].frameY;
 
-            // 繪製折線
-            using (Pen pen = new Pen(Color.Green, 1))
-            {
-                g.DrawLines(pen, points);
-            }
-        }
+        ////    for (int i = 0; i < DisplayCount; i++)
+        ////    {
+        ////        int dataIdx = StartIndex + i;
+        ////        if (dataIdx >= values.Length) break;
+
+        ////        float xCoord = startX + (i * xWidth);
+        ////        float yCoord = baseFrameY - (float)((values[dataIdx] -minValue) * yHeight);
+        ////        points[i] = new PointF(xCoord, yCoord);
+        ////    }
+
+        ////    // 繪製折線
+        ////    using (Pen pen = new Pen(Color.Green, 1))
+        ////    {
+        ////        g.DrawLines(pen, points);
+        ////    }
+        ////}
 
         private void Chalk_MAP_DOUBLE_LINE(Graphics g, int framePos, int frameNum, int mapType1, int mapType2)
         {
@@ -1318,7 +1327,104 @@ namespace EarvinStocksPGM
             Debug.WriteLine("Chalk_MAP_VOLUME() END!!!!!");
         }
 
- 
+        private void Chalk_MAP_SINGLE_LINE_2(Graphics g, int framePos, int frameNum, int mapType)
+        {
+            if (framePos <= 0 || framePos > frameNum || DisplayCount <= 0)
+                return;
+
+            float frameLeftX = FrameLeftPoints[framePos].frameX;
+            float frameRightX = FrameMiddlePoints[framePos].frameX;
+            float frameBottomY = FrameLeftPoints[framePos].frameY;
+            float frameTopY = FrameLeftPoints[framePos - 1].frameY;
+
+            float xAxisLength = frameRightX - frameLeftX;
+            float yAxisHeight = frameBottomY - frameTopY;
+
+            HighLowValues range = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType);
+
+            double maxValue = range.highValue;
+            double minValue = range.lowValue;
+
+            double classWidth = maxValue - minValue;
+
+            if (classWidth <= 0)
+                classWidth = 1;
+
+            float valueToPixel = yAxisHeight / (float)classWidth;
+
+            DrawReferenceLines(g, frameLeftX, frameRightX, frameBottomY, yAxisHeight, minValue, maxValue);
+
+            double[] values = mapType switch
+            {
+                GeneralModule.MAP_WMS =>
+                    IdxData.Select(d => d.WMS).ToArray(),
+                GeneralModule.MAP_PSY =>
+                    IdxData.Select(d => d.PSY).ToArray(),
+                GeneralModule.MAP_SRSI =>
+                    IdxData.Select(d => d.SRSI).ToArray(),
+                GeneralModule.MAP_MARGIN_PURCHASE =>
+                    StkData.Select(d => d.MarginPurchase).ToArray(),
+                GeneralModule.MAP_SHORT_SELLING =>
+                    StkData.Select(d => d.ShortSelling).ToArray(),
+                _ => Array.Empty<double>()
+            };
+
+            DrawIndicatorLine(g, values, frameLeftX, frameBottomY, xAxisLength, valueToPixel, minValue);
+        }
+
+        private void DrawReferenceLines(Graphics g, float leftX, float rightX, float bottomY, float height, double minValue, double maxValue)
+        {
+            using Pen pen = new(Color.Black, 1)
+            {
+                DashStyle = DashStyle.Dash,
+                DashPattern = new float[] { 7, 3 }
+            };
+
+            using System.Drawing.Font font = new(this.Font.FontFamily, 6);
+
+            double range = maxValue - minValue;
+
+            for (int i = 0; i <= 4; i++)
+            {
+                float y = bottomY - height * i / 4f;
+                double value = minValue + range * i / 4.0;
+
+                g.DrawString(((int)value).ToString(), font, Brushes.Black, 10, y - 6);
+
+                if (i > 0 && i < 4)
+                {
+                    g.DrawLine(pen, leftX, y, rightX, y);
+                }
+            }
+        }
+
+        private void DrawIndicatorLine(Graphics g, double[] values, float leftX, float bottomY, float width, float valueToPixel, double minValue)
+        {
+            List<PointF> points = new();
+
+            float xStep = width / DisplayCount;
+            float startX = leftX + xStep / 2f;
+
+            for (int i = 0; i < DisplayCount; i++)
+            {
+                int dataIdx = StartIndex + i;
+
+                if (dataIdx >= values.Length)
+                    break;
+
+                float x = startX + i * xStep;
+                float y = bottomY - (float)((values[dataIdx] - minValue) * valueToPixel);
+
+                points.Add(new PointF(x, y));
+            }
+
+            if (points.Count < 2)
+                return;
+
+            using Pen pen = new(Color.Green, 1);
+
+            g.DrawLines(pen, points.ToArray());
+        }
 
 
 
