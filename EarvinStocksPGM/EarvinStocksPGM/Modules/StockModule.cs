@@ -2,6 +2,7 @@ using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Text;
 using static System.ComponentModel.Design.ObjectSelectorEditor;
 
@@ -31,11 +32,12 @@ namespace EarvinStocksPGM.Modules
             {
                 conn.Open();
 
+                // Alter cmd :  ALTER TABLE taiwan_data_polaris_stocks RENAME COLUMN margin_trading TO margin_purchase;
                 // (FROM TAIWAN_DATA_POLARIS) 欄位順序：日期, 開盤, 最高, 最低, 收盤, 成交量 
                 //string sql = "SELECT DATE, START_PRICE, HIGH_PRICE, LOW_PRICE, END_PRICE, VOLUME FROM TAIWAN_DATA_POLARIS WHERE STOCK_NO = @stock_no ORDER BY DATE ";
                 // (FROM TAIWAN_DATA_POLARIS_STOCKS) 欄位順序：日期, 開盤, 最高, 最低, 收盤, 成交量, 融資買進(張數), 融券賣出(張數), 外資庫存, 投信庫存, 自營商庫存, 法人庫存 
                 //--                string sql = "SELECT DATE, START_PRICE, HIGH_PRICE, LOW_PRICE, END_PRICE, VOLUME, MARGIN_PURCHASE, SHORT_SELLING, " +
-                string sql = "SELECT DATE, START_PRICE, HIGH_PRICE, LOW_PRICE, END_PRICE, VOLUME, MARGIN_TRADING as MARGIN_PURCHASE, SHORT_SELLING, " +
+                string sql = "SELECT DATE, START_PRICE, HIGH_PRICE, LOW_PRICE, END_PRICE, VOLUME, MARGIN_PURCHASE, SHORT_SELLING, " +
                     "foreign_stock, sit_and_cb_stock, self_employed_stock, legal_person_stock FROM TAIWAN_DATA_POLARIS_STOCKS " +
                     "WHERE STOCK_NO = @stock_no ORDER BY DATE ";
                 MySqlCommand cmd = new MySqlCommand(sql, conn);
