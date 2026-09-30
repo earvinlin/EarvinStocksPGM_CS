@@ -592,6 +592,12 @@ namespace EarvinStocksPGM
                         case GeneralModule.MAP_SECTORS:
                             g.DrawString("SECTORS : " + $"{IdxData[curIndex].SECTORS.ToString("F0")}", new System.Drawing.Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
                             break;
+                        case GeneralModule.MAP_MARGIN_PURCHASE:
+                            g.DrawString("MARGIN_PURCHASE : " + $"{StkData[curIndex].MarginPurchase.ToString("F0")}", new System.Drawing.Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            break;
+                        case GeneralModule.MAP_SHORT_SELLING:
+                            g.DrawString("SHORT_SELLING : " + $"{StkData[curIndex].ShortSelling.ToString("F0")}", new System.Drawing.Font(this.Font.FontFamily, 6), Brushes.Black, FrameMiddlePoints[i - 1].frameX + 2, FrameMiddlePoints[i - 1].frameY + 2);
+                            break;
                     }
                 }
             }
@@ -1011,7 +1017,7 @@ namespace EarvinStocksPGM
                     g.DrawLine(pen, pl, pr);
 
                     // 固定顯示 25, 50, 75 刻度（因總高為 100）
-                    int labelValue = (int) (maxValue - (theRange / 4) * i);
+                    int labelValue = (int) (maxValue - (theRange / 4) * (4-i));
                     g.DrawString(labelValue.ToString(), font, Brushes.Black, 10, yPos - 6);
                 }
             }
