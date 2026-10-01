@@ -134,6 +134,31 @@ namespace EarvinStocksPGM
             btnBack2.Top = (pnlStocksBar.ClientSize.Height - btnBack2.Height) / 2;
             btnBack3.Top = (pnlStocksBar.ClientSize.Height - btnBack3.Height) / 2;
 
+            // (20261001)
+            //int xPos = lblFrameNum.Width +10;
+            //cboFrameNum.Location = new Point(xPos, cboFrameNum.Location.Y);
+            //xPos += cboFrameNum.Width + 10;
+            //btnZoomIn.Location = new Point(xPos, btnZoomIn.Location.Y);
+
+            /*
+            lblFrameNum
+            cboFrameNum
+            btnZoomIn
+            btnZoomOut
+            btnFore3
+            btnFore2
+            btnFore1
+            btnBack1
+            btnBack2
+            btnBack3
+            btnFocus
+            lblStrocksFrom
+            cboStocksFrom
+            cboStocksType
+            lblSelectStock
+            cboSelectStock
+            */
+
             // 取得要顯示的股票資料
             StkData = StockModule.GetStockData(cboSelectStock.Text);
             IdxData = IndexModule.GetIndexData(StkData);
