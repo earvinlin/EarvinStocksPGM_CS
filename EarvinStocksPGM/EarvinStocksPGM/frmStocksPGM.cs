@@ -50,7 +50,7 @@ namespace EarvinStocksPGM
             this.DoubleBuffered = true;
 
             this.StartPosition = FormStartPosition.CenterScreen;
-            pnlStocksBar.Width = this.Width;
+            flpnlStocksBar.Width = this.Width;
             _initialized = true;
         }
 
@@ -114,25 +114,25 @@ namespace EarvinStocksPGM
 
             this.ContextMenuStrip = cntMenuStrip;
 
-            pnlStocksBar.Width = this.Width;
+            flpnlStocksBar.Width = this.Width;
             FrameNum = int.Parse(cboFrameNum.Text);
 
-            // (20260929) 調整panel上面元件的高度 -- 不確定是否是比較好的做法…因為有時候panel上面的元件高度會跑掉
-            lblFrameNum.Top = (pnlStocksBar.ClientSize.Height - lblFrameNum.Height) / 2;
-            cboFrameNum.Top = (pnlStocksBar.ClientSize.Height - cboFrameNum.Height) / 2;
-            btnFocus.Top = (pnlStocksBar.ClientSize.Height - btnFocus.Height) / 2;
-            cboStocksFrom.Top = (pnlStocksBar.ClientSize.Height - cboStocksFrom.Height) / 2;
-            cboStocksType.Top = (pnlStocksBar.ClientSize.Height - cboStocksType.Height) / 2;
-            lblSelectStock.Top = (pnlStocksBar.ClientSize.Height - lblSelectStock.Height) / 2;
-            cboSelectStock.Top = (pnlStocksBar.ClientSize.Height - cboSelectStock.Height) / 2;
-            btnZoomIn.Top = (pnlStocksBar.ClientSize.Height - btnZoomIn.Height) / 2;
-            btnZoomOut.Top = (pnlStocksBar.ClientSize.Height - btnZoomOut.Height) / 2;
-            btnFore3.Top = (pnlStocksBar.ClientSize.Height - btnFore3.Height) / 2;
-            btnFore2.Top = (pnlStocksBar.ClientSize.Height - btnFore2.Height) / 2;
-            btnFore1.Top = (pnlStocksBar.ClientSize.Height - btnFore1.Height) / 2;
-            btnBack1.Top = (pnlStocksBar.ClientSize.Height - btnBack1.Height) / 2;
-            btnBack2.Top = (pnlStocksBar.ClientSize.Height - btnBack2.Height) / 2;
-            btnBack3.Top = (pnlStocksBar.ClientSize.Height - btnBack3.Height) / 2;
+            //// (20260929) 調整panel上面元件的高度 -- 不確定是否是比較好的做法…因為有時候panel上面的元件高度會跑掉
+            //lblFrameNum.Top = (pnlStocksBar.ClientSize.Height - lblFrameNum.Height) / 2;
+            //cboFrameNum.Top = (pnlStocksBar.ClientSize.Height - cboFrameNum.Height) / 2;
+            //btnFocus.Top = (pnlStocksBar.ClientSize.Height - btnFocus.Height) / 2;
+            //cboStocksFrom.Top = (pnlStocksBar.ClientSize.Height - cboStocksFrom.Height) / 2;
+            //cboStocksType.Top = (pnlStocksBar.ClientSize.Height - cboStocksType.Height) / 2;
+            //lblSelectStock.Top = (pnlStocksBar.ClientSize.Height - lblSelectStock.Height) / 2;
+            //cboSelectStock.Top = (pnlStocksBar.ClientSize.Height - cboSelectStock.Height) / 2;
+            //btnZoomIn.Top = (pnlStocksBar.ClientSize.Height - btnZoomIn.Height) / 2;
+            //btnZoomOut.Top = (pnlStocksBar.ClientSize.Height - btnZoomOut.Height) / 2;
+            //btnFore3.Top = (pnlStocksBar.ClientSize.Height - btnFore3.Height) / 2;
+            //btnFore2.Top = (pnlStocksBar.ClientSize.Height - btnFore2.Height) / 2;
+            //btnFore1.Top = (pnlStocksBar.ClientSize.Height - btnFore1.Height) / 2;
+            //btnBack1.Top = (pnlStocksBar.ClientSize.Height - btnBack1.Height) / 2;
+            //btnBack2.Top = (pnlStocksBar.ClientSize.Height - btnBack2.Height) / 2;
+            //btnBack3.Top = (pnlStocksBar.ClientSize.Height - btnBack3.Height) / 2;
 
             // (20261001)
             //int xPos = lblFrameNum.Width +10;
@@ -169,7 +169,7 @@ namespace EarvinStocksPGM
                 Name = "lblStokInfo",
                 Text = "This is a test message!",
                 AutoSize = true,
-                Location = new Point(10, mnuStocksList.Size.Height + pnlStocksBar.Size.Height)
+                Location = new Point(10, mnuStocksList.Size.Height + flpnlStocksBar.Size.Height)
             };
             this.Controls.Add(lblStokInfo);
         }
@@ -179,7 +179,7 @@ namespace EarvinStocksPGM
             if (!_initialized)
                 return;
 
-            pnlStocksBar.Width = this.Width;
+            flpnlStocksBar.Width = this.Width;
             this.Invalidate();
         }
 
@@ -191,7 +191,7 @@ namespace EarvinStocksPGM
             e.Graphics.Clear(this.BackColor);
 
             // lblStokInfo : 顯示股票資訊
-            float frmYTop = mnuStocksList.Size.Height + pnlStocksBar.Size.Height + lblStokInfo.Size.Height;
+            float frmYTop = mnuStocksList.Size.Height + flpnlStocksBar.Size.Height + lblStokInfo.Size.Height;
             // XWidthBorder : 表示frame左右皆各內縮 (XWidthBorder / 2) 個pixels
             float frmXWidth = this.ClientSize.Width - FrameXTop - (XWidthBorder / 2);
             // YHeightBorder : 表示frame最下面上調YHeightBorder個pixels
@@ -778,6 +778,15 @@ namespace EarvinStocksPGM
             this.Invalidate();
         }
 
+        private void cboStocksType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cboStocksFrom_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
 
 
 
@@ -1374,7 +1383,11 @@ namespace EarvinStocksPGM
             g.DrawLines(pen, points.ToArray());
         }
 
-   
+
+
+
+
+
 
 
 
