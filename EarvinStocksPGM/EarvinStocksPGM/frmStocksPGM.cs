@@ -1334,11 +1334,11 @@ namespace EarvinStocksPGM
 
             float frameLeftX = FrameLeftPoints[framePos].frameX;
             float frameRightX = FrameMiddlePoints[framePos].frameX;
-            float frameBottomY = FrameLeftPoints[framePos].frameY;
             float frameTopY = FrameLeftPoints[framePos - 1].frameY;
+            float frameBottomY = FrameLeftPoints[framePos].frameY;
 
-            float xAxisLength = frameRightX - frameLeftX;
-            float yAxisHeight = frameBottomY - frameTopY;
+            float xAxisLength = frameRightX - frameLeftX;   // X 軸長度
+            float yAxisHeight = frameBottomY - frameTopY;   // Y 軸高度
 
             HighLowValues range = GeneralModule.GetHighLowValue(StkData, IdxData, StartIndex, DisplayCount, mapType);
 
@@ -1350,8 +1350,9 @@ namespace EarvinStocksPGM
             if (classWidth <= 0)
                 classWidth = 1;
 
-            float valueToPixel = yAxisHeight / (float)classWidth;
+            float valueToPixel = yAxisHeight / (float)classWidth;   // 每個像素的高度
 
+            // 畫3條虛線及最左側的值(5個)
             DrawReferenceLines(g, frameLeftX, frameRightX, frameBottomY, yAxisHeight, minValue, maxValue);
 
             double[] values = mapType switch
@@ -1369,6 +1370,7 @@ namespace EarvinStocksPGM
                 _ => Array.Empty<double>()
             };
 
+            // 劃指標線
             DrawIndicatorLine(g, values, frameLeftX, frameBottomY, xAxisLength, valueToPixel, minValue);
         }
 
@@ -1388,8 +1390,10 @@ namespace EarvinStocksPGM
             {
                 float y = bottomY - height * i / 4f;
                 double value = minValue + range * i / 4.0;
-
-                g.DrawString(((int)value).ToString(), font, Brushes.Black, 10, y - 6);
+                if (i == 4)
+                    g.DrawString(((int)value).ToString(), font, Brushes.Black, 10, y + 6);
+                else
+                    g.DrawString(((int)value).ToString(), font, Brushes.Black, 10, y - 6);
 
                 if (i > 0 && i < 4)
                 {
@@ -1426,7 +1430,7 @@ namespace EarvinStocksPGM
             g.DrawLines(pen, points.ToArray());
         }
 
-
+   
 
 
 
