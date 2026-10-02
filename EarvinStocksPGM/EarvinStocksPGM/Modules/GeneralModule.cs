@@ -81,7 +81,7 @@ namespace EarvinStocksPGM.Modules
         public static int OSCDay = 9;
 
         // 記錄每個FRAME選擇顯示的資料(最多只能選9個；第1個一定是MAP_K)
-        public static int[] SelectShowMapOnFrames = new int[9];
+        public static int[] SelectShowMapOnFrames = new int[10];    // 20261002 Start with 1
 
         public class HighLowValues
         {

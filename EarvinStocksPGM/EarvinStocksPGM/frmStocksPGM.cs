@@ -461,7 +461,9 @@ namespace EarvinStocksPGM
             //=== 顯示 Frame START ===// 
             try
             {
+                // 20261002 Quest
                 for (int i = 1; i <= FrameNum; i++)
+                //for (int i = 1; i < FrameNum; i++)
                 {
                     switch (GeneralModule.SelectShowMapOnFrames[i])
                     {
@@ -578,9 +580,11 @@ namespace EarvinStocksPGM
 
             try
             {
+                // 20261002 Quest
                 for (int i = 1; i <= FrameNum; i++)
-                {
-                    switch (GeneralModule.SelectShowMapOnFrames[i])
+                    //for (int i = 1; i < FrameNum; i++)
+                    {
+                        switch (GeneralModule.SelectShowMapOnFrames[i])
                     {
                         case GeneralModule.MAP_UNSELECTED:
                             break;
