@@ -47,7 +47,6 @@ namespace EarvinStocksPGM.Modules
         public const int MAP_MAV60 = 2060;
         public const int MAP_MAV120 = 2120;
         public const int MAP_MAV240 = 2240;
-
         public const int MAP_KBAR = 1;
         public const int MAP_VOLUME = 2;
         public const int MAP_BIAS = 3;
@@ -63,8 +62,8 @@ namespace EarvinStocksPGM.Modules
         public const int MAP_DIF_MACD = 13;
         public const int MAP_MACD = 14;
         public const int MAP_SECTORS = 15;
-        public const int MAP_MARGIN_PURCHASE = 100;
-        public const int MAP_SHORT_SELLING = 101;
+        public const int MAP_MARGIN_PURCHASE = 100; // 融資餘額
+        public const int MAP_SHORT_SELLING = 101;   // 融券餘額
 
         //---------------------------//
         //-- Keep the Index's Days --//
@@ -80,8 +79,12 @@ namespace EarvinStocksPGM.Modules
         public static int MACDDay = 26;
         public static int OSCDay = 9;
 
+
+
         // 記錄每個FRAME選擇顯示的資料(最多只能選9個；第1個一定是MAP_K)
-        public static int[] SelectShowMapOnFrames = new int[10];    // 20261002 Start with 1
+        // 20261002 因為畫面可選的Frame數量最多為9個，數值範圍為1~9，所以陣列是由1開始紀錄，
+        // 最後1個陣列索引值是9，因此陣列的大小是10，索引值0不使用
+        public static int[] SelectShowMapOnFrames = new int[10];    
 
         public class HighLowValues
         {
